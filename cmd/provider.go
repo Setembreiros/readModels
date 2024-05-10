@@ -5,6 +5,7 @@ import (
 	"log"
 	awsClients "readmodels/infrastructure/aws"
 	database "readmodels/infrastructure/db"
+	"readmodels/infrastructure/kafka"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -25,14 +26,30 @@ func NewProvider(infoLog, errorLog *log.Logger, env string) *Provider {
 	}
 }
 
-func (p Provider) ProvideDb() (*database.Database, error) {
+func (p Provider) ProvideKafkaConsumer() (*kafka.KafkaConsumer, error) {
+	var brokers []string
+
+	if p.env == "development" {
+		brokers = []string{
+			"localhost:9093",
+		}
+	} else {
+		brokers = []string{
+			"localhost:9093",
+		}
+	}
+
+	return kafka.NewKafkaConsumer(brokers, p.infoLog, p.errorLog)
+}
+
+func (p Provider) ProvideDb(ctx context.Context) (*database.Database, error) {
 	var cfg aws.Config
 	var err error
 
 	if p.env == "development" {
-		cfg, err = provideDevEnvironmentDbConfig()
+		cfg, err = provideDevEnvironmentDbConfig(ctx)
 	} else {
-		cfg, err = provideAwsConfig()
+		cfg, err = provideAwsConfig(ctx)
 	}
 	if err != nil {
 		p.errorLog.Fatalf("failed to load aws configuration %s", err)
@@ -44,12 +61,12 @@ func (p Provider) ProvideDb() (*database.Database, error) {
 	}, nil
 }
 
-func provideAwsConfig() (aws.Config, error) {
-	return config.LoadDefaultConfig(context.TODO())
+func provideAwsConfig(ctx context.Context) (aws.Config, error) {
+	return config.LoadDefaultConfig(ctx)
 }
 
-func provideDevEnvironmentDbConfig() (aws.Config, error) {
-	return config.LoadDefaultConfig(context.TODO(),
+func provideDevEnvironmentDbConfig(ctx context.Context) (aws.Config, error) {
+	return config.LoadDefaultConfig(ctx,
 		config.WithRegion("localhost"),
 		config.WithEndpointResolverWithOptions(aws.EndpointResolverWithOptionsFunc(
 			func(service, region string, options ...interface{}) (aws.Endpoint, error) {
