@@ -43,7 +43,7 @@ func (dc DynamoDBClient) TableExists(tableName string) bool {
 	return exists
 }
 
-func (dc DynamoDBClient) CreateTable(tableName string, attributes []database.TableAttributes) error {
+func (dc DynamoDBClient) CreateTable(tableName string, attributes []database.TableAttributes, ctx context.Context) error {
 	keySchemas, attributeDefinitions, err := mapTableAttributes(attributes)
 	if err != nil {
 		return err
@@ -59,14 +59,14 @@ func (dc DynamoDBClient) CreateTable(tableName string, attributes []database.Tab
 		TableName: aws.String(tableName),
 	}
 
-	table, err := dc.client.CreateTable(context.TODO(), input)
+	table, err := dc.client.CreateTable(ctx, input)
 
 	var tableDesc *types.TableDescription
 	if err != nil {
 		dc.errorLog.Fatalf("Couldn't create table %v. error: %v\n", tableName, err)
 	} else {
 		waiter := dynamodb.NewTableExistsWaiter(dc.client)
-		err = waiter.Wait(context.TODO(), &dynamodb.DescribeTableInput{
+		err = waiter.Wait(ctx, &dynamodb.DescribeTableInput{
 			TableName: aws.String(tableName)}, 5*time.Minute)
 		if err != nil {
 			log.Printf("Wait for table exists failed. error: %v\n", err)

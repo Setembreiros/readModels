@@ -1,6 +1,8 @@
 package database
 
-func (db Database) ApplyMigrations() error {
+import "context"
+
+func (db Database) ApplyMigrations(ctx context.Context) error {
 	if !db.Client.TableExists("UserProfile") {
 		attributes := []TableAttributes{
 			{
@@ -12,7 +14,7 @@ func (db Database) ApplyMigrations() error {
 				AttributeType: "string",
 			},
 		}
-		err := db.Client.CreateTable("UserProfile", attributes)
+		err := db.Client.CreateTable("UserProfile", attributes, ctx)
 		if err != nil {
 			return err
 		}

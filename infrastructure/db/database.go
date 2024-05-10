@@ -1,5 +1,7 @@
 package database
 
+import "context"
+
 type TableAttributes struct {
 	Name          string
 	AttributeType string
@@ -11,5 +13,5 @@ type Database struct {
 
 type DatabaseClient interface {
 	TableExists(tableName string) bool
-	CreateTable(tableName string, attributes []TableAttributes) error
+	CreateTable(tableName string, attributes []TableAttributes, ctx context.Context) error
 }
