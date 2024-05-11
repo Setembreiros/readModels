@@ -35,9 +35,9 @@ func main() {
 	infoLog.Println("Readmodels service started")
 
 	var wg sync.WaitGroup
-	wg.Add(2)
+	wg.Add(3)
 	go applyMigrations(database, ctx, &wg, infoLog, errorLog)
-	go subcribeEvents(eventBus, ctx, &wg, infoLog) // Always subscribe event befor init Kafka
+	go subcribeEvents(eventBus, ctx, &wg, infoLog) // Always subscribe event before init Kafka
 	go initKafkaConsumption(kafkaConsumer, ctx, &wg, infoLog, errorLog)
 
 	run(infoLog, &wg, cancel)
@@ -60,9 +60,7 @@ func subcribeEvents(eventBus *events.EventBus, ctx context.Context, wg *sync.Wai
 	infoLog.Println("Subscribing events...")
 
 	for _, subscription := range Subscriptions {
-		subscriptionChan := make(chan events.Event)
-		eventBus.Subscribe(subscription.EventType, subscriptionChan)
-		go subscription.Handler(subscriptionChan, ctx)
+		eventBus.Subscribe(subscription, ctx)
 	}
 
 	infoLog.Println("All events subscribed")

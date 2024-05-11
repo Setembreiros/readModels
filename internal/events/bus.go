@@ -1,15 +1,21 @@
 package events
 
-import "time"
+import (
+	"context"
+)
 
 type Event struct {
-	Type      string
-	Timestamp time.Time
-	Data      []byte
+	Type string
+	Data []byte
 }
 
 type EventBus struct {
 	subscribers map[string][]chan<- Event
+}
+
+type EventSubscription struct {
+	EventType string
+	Handler   func(event []byte)
 }
 
 func NewEventBus() *EventBus {
@@ -19,13 +25,26 @@ func NewEventBus() *EventBus {
 }
 
 func (eb *EventBus) Publish(event Event) {
-	subscribers := eb.subscribers[event.Type]
+	subscriberChannels := eb.subscribers[event.Type]
 
-	for _, subscriber := range subscribers {
-		subscriber <- event
+	for _, subscriberChannel := range subscriberChannels {
+		subscriberChannel <- event
 	}
 }
 
-func (eb *EventBus) Subscribe(eventType string, subscriber chan<- Event) {
-	eb.subscribers[eventType] = append(eb.subscribers[eventType], subscriber)
+func (eb *EventBus) Subscribe(subscription EventSubscription, ctx context.Context) {
+	subscriptionChan := make(chan Event)
+	eb.subscribers[subscription.EventType] = append(eb.subscribers[subscription.EventType], subscriptionChan)
+	go subscription.handle(subscriptionChan, ctx)
+}
+
+func (es EventSubscription) handle(busChannel <-chan Event, ctx context.Context) {
+	for {
+		select {
+		case event := <-busChannel:
+			go es.Handler(event.Data)
+		case <-ctx.Done():
+			return
+		}
+	}
 }

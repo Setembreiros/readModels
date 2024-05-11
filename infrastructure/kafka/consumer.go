@@ -3,7 +3,6 @@ package kafka
 import (
 	"log"
 	"readmodels/internal/events"
-	"time"
 
 	"github.com/IBM/sarama"
 )
@@ -41,9 +40,8 @@ func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, clai
 			session.MarkMessage(message, "")
 
 			event := events.Event{
-				Type:      message.Topic,
-				Timestamp: time.Now(),
-				Data:      message.Value,
+				Type: message.Topic,
+				Data: message.Value,
 			}
 			consumer.eventBus.Publish(event)
 		case <-session.Context().Done():
