@@ -6,6 +6,7 @@ import (
 	awsClients "readmodels/infrastructure/aws"
 	database "readmodels/infrastructure/db"
 	"readmodels/infrastructure/kafka"
+	"readmodels/internal/events"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -26,7 +27,13 @@ func NewProvider(infoLog, errorLog *log.Logger, env string) *Provider {
 	}
 }
 
-func (p Provider) ProvideKafkaConsumer() (*kafka.KafkaConsumer, error) {
+func (p Provider) ProvideEventBus() *events.EventBus {
+	eventBus := events.NewEventBus()
+
+	return eventBus
+}
+
+func (p Provider) ProvideKafkaConsumer(eventBus *events.EventBus) (*kafka.KafkaConsumer, error) {
 	var brokers []string
 
 	if p.env == "development" {
@@ -39,7 +46,7 @@ func (p Provider) ProvideKafkaConsumer() (*kafka.KafkaConsumer, error) {
 		}
 	}
 
-	return kafka.NewKafkaConsumer(brokers, p.infoLog, p.errorLog)
+	return kafka.NewKafkaConsumer(brokers, eventBus, p.infoLog, p.errorLog)
 }
 
 func (p Provider) ProvideDb(ctx context.Context) (*database.Database, error) {

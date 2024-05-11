@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	database "readmodels/infrastructure/db"
 	"readmodels/infrastructure/kafka"
+	"readmodels/internal/events"
 	"strings"
 	"sync"
 	"syscall"
@@ -14,7 +15,6 @@ import (
 
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
-
 	env := strings.TrimSpace(os.Getenv("ENVIRONMENT"))
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
@@ -26,7 +26,8 @@ func main() {
 	if err != nil {
 		os.Exit(1)
 	}
-	kafkaConsumer, err := provider.ProvideKafkaConsumer()
+	eventBus := provider.ProvideEventBus()
+	kafkaConsumer, err := provider.ProvideKafkaConsumer(eventBus)
 	if err != nil {
 		os.Exit(1)
 	}
@@ -36,20 +37,10 @@ func main() {
 	var wg sync.WaitGroup
 	wg.Add(2)
 	go applyMigrations(database, ctx, &wg, infoLog, errorLog)
+	go subcribeEvents(eventBus, ctx, &wg, infoLog) // Always subscribe event befor init Kafka
 	go initKafkaConsumption(kafkaConsumer, ctx, &wg, infoLog, errorLog)
 
-	signalCh := make(chan os.Signal, 1)
-	signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM)
-
-	<-signalCh
-
-	cancel()
-
-	infoLog.Println("Shutting down Readmodels Service...")
-
-	wg.Wait()
-
-	infoLog.Println("Readmodels Service stopped")
+	run(infoLog, &wg, cancel)
 }
 
 func applyMigrations(database *database.Database, ctx context.Context, wg *sync.WaitGroup, infoLog, errorLog *log.Logger) {
@@ -63,6 +54,20 @@ func applyMigrations(database *database.Database, ctx context.Context, wg *sync.
 	infoLog.Println("Migrations finished")
 }
 
+func subcribeEvents(eventBus *events.EventBus, ctx context.Context, wg *sync.WaitGroup, infoLog *log.Logger) {
+	defer wg.Done()
+
+	infoLog.Println("Subscribing events...")
+
+	for _, subscription := range Subscriptions {
+		subscriptionChan := make(chan events.Event)
+		eventBus.Subscribe(subscription.EventType, subscriptionChan)
+		go subscription.Handler(subscriptionChan, ctx)
+	}
+
+	infoLog.Println("All events subscribed")
+}
+
 func initKafkaConsumption(kafkaConsumer *kafka.KafkaConsumer, ctx context.Context, wg *sync.WaitGroup, infoLog, errorLog *log.Logger) {
 	defer wg.Done()
 
@@ -72,4 +77,18 @@ func initKafkaConsumption(kafkaConsumer *kafka.KafkaConsumer, ctx context.Contex
 		errorLog.Panicln("Kafka Consumption failed")
 	}
 	infoLog.Println("Kafka Consumer Group stopped")
+}
+
+func run(infoLog *log.Logger, wg *sync.WaitGroup, cancel context.CancelFunc) {
+	signalCh := make(chan os.Signal, 1)
+	signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM)
+
+	<-signalCh
+	cancel()
+
+	infoLog.Println("Shutting down Readmodels Service...")
+
+	wg.Wait()
+
+	infoLog.Println("Readmodels Service stopped")
 }

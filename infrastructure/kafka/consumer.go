@@ -2,6 +2,8 @@ package kafka
 
 import (
 	"log"
+	"readmodels/internal/events"
+	"time"
 
 	"github.com/IBM/sarama"
 )
@@ -10,6 +12,7 @@ type Consumer struct {
 	infoLog  *log.Logger
 	errorLog *log.Logger
 	ready    chan bool
+	eventBus *events.EventBus
 }
 
 func (consumer *Consumer) Setup(sarama.ConsumerGroupSession) error {
@@ -36,6 +39,13 @@ func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, clai
 			}
 			consumer.infoLog.Printf("Message claimed: value = %s, timestamp = %v, topic = %s", string(message.Value), message.Timestamp, message.Topic)
 			session.MarkMessage(message, "")
+
+			event := events.Event{
+				Type:      message.Topic,
+				Timestamp: time.Now(),
+				Data:      message.Value,
+			}
+			consumer.eventBus.Publish(event)
 		case <-session.Context().Done():
 			return nil
 		}
