@@ -15,7 +15,11 @@ type EventBus struct {
 
 type EventSubscription struct {
 	EventType string
-	Handler   func(event []byte)
+	Handler   EventHandler
+}
+
+type EventHandler interface {
+	Handle(event []byte)
 }
 
 func NewEventBus() *EventBus {
@@ -42,7 +46,7 @@ func (es EventSubscription) handle(busChannel <-chan Event, ctx context.Context)
 	for {
 		select {
 		case event := <-busChannel:
-			go es.Handler(event.Data)
+			go es.Handler.Handle(event.Data)
 		case <-ctx.Done():
 			return
 		}

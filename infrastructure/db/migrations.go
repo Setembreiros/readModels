@@ -6,11 +6,11 @@ func (db Database) ApplyMigrations(ctx context.Context) error {
 	if !db.Client.TableExists("UserProfile") {
 		attributes := []TableAttributes{
 			{
-				Name:          "userId",
+				Name:          "UserId",
 				AttributeType: "string",
 			},
 			{
-				Name:          "username",
+				Name:          "Username",
 				AttributeType: "string",
 			},
 		}

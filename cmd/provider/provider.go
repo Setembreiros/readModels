@@ -1,4 +1,4 @@
-package main
+package provider
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 	database "readmodels/infrastructure/db"
 	"readmodels/infrastructure/kafka"
 	"readmodels/internal/events"
+	"readmodels/internal/events/handlers"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -31,6 +32,15 @@ func (p Provider) ProvideEventBus() *events.EventBus {
 	eventBus := events.NewEventBus()
 
 	return eventBus
+}
+
+func (p Provider) ProvideSubscriptions(database *database.Database) []events.EventSubscription {
+	return []events.EventSubscription{
+		{
+			EventType: "UserWasRegisteredEvent",
+			Handler:   handlers.NewUserWasRegisteredEventHandler(p.infoLog, p.errorLog, database),
+		},
+	}
 }
 
 func (p Provider) ProvideKafkaConsumer(eventBus *events.EventBus) (*kafka.KafkaConsumer, error) {

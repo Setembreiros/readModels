@@ -9,6 +9,7 @@ import (
 	database "readmodels/infrastructure/db"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
@@ -27,7 +28,7 @@ func NewDynamodbClient(config aws.Config, infoLog, errorLog *log.Logger) *Dynamo
 	}
 }
 
-func (dc DynamoDBClient) TableExists(tableName string) bool {
+func (dc *DynamoDBClient) TableExists(tableName string) bool {
 	exists := true
 	_, err := dc.client.DescribeTable(
 		context.TODO(), &dynamodb.DescribeTableInput{TableName: aws.String(tableName)},
@@ -43,7 +44,7 @@ func (dc DynamoDBClient) TableExists(tableName string) bool {
 	return exists
 }
 
-func (dc DynamoDBClient) CreateTable(tableName string, attributes []database.TableAttributes, ctx context.Context) error {
+func (dc *DynamoDBClient) CreateTable(tableName string, attributes []database.TableAttributes, ctx context.Context) error {
 	keySchemas, attributeDefinitions, err := mapTableAttributes(attributes)
 	if err != nil {
 		return err
@@ -75,6 +76,23 @@ func (dc DynamoDBClient) CreateTable(tableName string, attributes []database.Tab
 	}
 
 	dc.infoLog.Printf("Created table: %s\n", *tableDesc.TableName)
+	return nil
+}
+
+func (dc *DynamoDBClient) InsertData(tableName string, attributes any) error {
+	item, err := attributevalue.MarshalMap(attributes)
+	if err != nil {
+		return err
+	}
+
+	_, err = dc.client.PutItem(context.TODO(), &dynamodb.PutItemInput{
+		TableName: aws.String(tableName), Item: item,
+	})
+	if err != nil {
+		dc.errorLog.Printf("Couldn't add item to table. error: %v\n", err)
+		return err
+	}
+
 	return nil
 }
 

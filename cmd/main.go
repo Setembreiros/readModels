@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"readmodels/cmd/provider"
 	database "readmodels/infrastructure/db"
 	"readmodels/infrastructure/kafka"
 	"readmodels/internal/events"
@@ -21,30 +22,34 @@ func main() {
 
 	infoLog.Printf("Starting ReadModels service in [%s] enviroment...\n", env)
 
-	provider := NewProvider(infoLog, errorLog, env)
+	provider := provider.NewProvider(infoLog, errorLog, env)
 	database, err := provider.ProvideDb(ctx)
 	if err != nil {
 		os.Exit(1)
 	}
 	eventBus := provider.ProvideEventBus()
+	subscriptions := provider.ProvideSubscriptions(database)
 	kafkaConsumer, err := provider.ProvideKafkaConsumer(eventBus)
 	if err != nil {
 		os.Exit(1)
 	}
 
-	infoLog.Println("Readmodels service started")
+	var configuringTasks sync.WaitGroup
+	var runningTasks sync.WaitGroup
+	configuringTasks.Add(2)
+	go applyMigrations(database, ctx, &configuringTasks, infoLog, errorLog)
+	go subcribeEvents(subscriptions, eventBus, ctx, &configuringTasks, infoLog) // Always subscribe event before init Kafka
+	configuringTasks.Wait()
+	configuringTasks.Add(1)
+	runningTasks.Add(1)
+	go initKafkaConsumption(kafkaConsumer, ctx, &configuringTasks, &runningTasks, infoLog, errorLog)
+	configuringTasks.Wait()
 
-	var wg sync.WaitGroup
-	wg.Add(3)
-	go applyMigrations(database, ctx, &wg, infoLog, errorLog)
-	go subcribeEvents(eventBus, ctx, &wg, infoLog) // Always subscribe event before init Kafka
-	go initKafkaConsumption(kafkaConsumer, ctx, &wg, infoLog, errorLog)
-
-	run(infoLog, &wg, cancel)
+	run(infoLog, &configuringTasks, &runningTasks, cancel)
 }
 
-func applyMigrations(database *database.Database, ctx context.Context, wg *sync.WaitGroup, infoLog, errorLog *log.Logger) {
-	defer wg.Done()
+func applyMigrations(database *database.Database, ctx context.Context, configurationTasks *sync.WaitGroup, infoLog, errorLog *log.Logger) {
+	defer configurationTasks.Done()
 
 	infoLog.Println("Applying migrations...")
 	err := database.ApplyMigrations(ctx)
@@ -54,30 +59,34 @@ func applyMigrations(database *database.Database, ctx context.Context, wg *sync.
 	infoLog.Println("Migrations finished")
 }
 
-func subcribeEvents(eventBus *events.EventBus, ctx context.Context, wg *sync.WaitGroup, infoLog *log.Logger) {
-	defer wg.Done()
+func subcribeEvents(subscriptions []events.EventSubscription, eventBus *events.EventBus, ctx context.Context, configurationTasks *sync.WaitGroup, infoLog *log.Logger) {
+	defer configurationTasks.Done()
 
 	infoLog.Println("Subscribing events...")
 
-	for _, subscription := range Subscriptions {
+	for _, subscription := range subscriptions {
 		eventBus.Subscribe(subscription, ctx)
+		infoLog.Printf("%s subscribed\n", subscription.EventType)
 	}
 
 	infoLog.Println("All events subscribed")
 }
 
-func initKafkaConsumption(kafkaConsumer *kafka.KafkaConsumer, ctx context.Context, wg *sync.WaitGroup, infoLog, errorLog *log.Logger) {
-	defer wg.Done()
+func initKafkaConsumption(kafkaConsumer *kafka.KafkaConsumer, ctx context.Context, configurationTasks, runningTasks *sync.WaitGroup, infoLog, errorLog *log.Logger) {
+	defer runningTasks.Done()
 
 	infoLog.Println("Initiating Kafka Consumer Group...")
-	err := kafkaConsumer.InitConsumption(ctx)
+	err := kafkaConsumer.InitConsumption(configurationTasks, ctx)
 	if err != nil {
 		errorLog.Panicln("Kafka Consumption failed")
 	}
 	infoLog.Println("Kafka Consumer Group stopped")
 }
 
-func run(infoLog *log.Logger, wg *sync.WaitGroup, cancel context.CancelFunc) {
+func run(infoLog *log.Logger, configurationTasks, runningTasks *sync.WaitGroup, cancel context.CancelFunc) {
+	configurationTasks.Wait()
+	infoLog.Println("Readmodels service started")
+
 	signalCh := make(chan os.Signal, 1)
 	signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM)
 
@@ -86,7 +95,7 @@ func run(infoLog *log.Logger, wg *sync.WaitGroup, cancel context.CancelFunc) {
 
 	infoLog.Println("Shutting down Readmodels Service...")
 
-	wg.Wait()
+	runningTasks.Wait()
 
 	infoLog.Println("Readmodels Service stopped")
 }

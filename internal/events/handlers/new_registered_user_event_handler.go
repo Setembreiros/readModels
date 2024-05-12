@@ -3,6 +3,8 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"log"
+	userprofile "readmodels/internal/user_profile"
 )
 
 type UserWasRegisteredEvent struct {
@@ -14,12 +16,17 @@ type UserWasRegisteredEvent struct {
 	FullName string `json:"full_name"`
 }
 
-func service(event UserWasRegisteredEvent) {
-	fmt.Println("New user registered:")
-	fmt.Println("ID:", event.UserId)
+type UserWasRegisteredEventHandler struct {
+	service *userprofile.UserProfileService
 }
 
-func UserWasRegisteredEventHandler(event []byte) {
+func NewUserWasRegisteredEventHandler(infoLog, errorLog *log.Logger, repository userprofile.UserProfileRepository) *UserWasRegisteredEventHandler {
+	return &UserWasRegisteredEventHandler{
+		service: userprofile.NewUserProfileService(infoLog, errorLog, repository),
+	}
+}
+
+func (handler *UserWasRegisteredEventHandler) Handle(event []byte) {
 	var userWasRegisteredEvent UserWasRegisteredEvent
 
 	err := Decode(event, &userWasRegisteredEvent)
@@ -28,7 +35,18 @@ func UserWasRegisteredEventHandler(event []byte) {
 		return
 	}
 
-	service(userWasRegisteredEvent)
+	data := mapData(userWasRegisteredEvent)
+	handler.service.CreateNewUserProfile(data)
+}
+
+func mapData(event UserWasRegisteredEvent) *userprofile.UserProfile {
+	return &userprofile.UserProfile{
+		UserId:   event.UserId,
+		Username: event.Username,
+		Name:     event.FullName,
+		Bio:      "",
+		Link:     "",
+	}
 }
 
 func Decode(datab []byte, data any) error {
