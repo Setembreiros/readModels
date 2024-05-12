@@ -31,23 +31,23 @@ func NewProvider(infoLog, errorLog *log.Logger, env string) *Provider {
 	}
 }
 
-func (p Provider) ProvideApiEndpoint(database *database.Database) *api.Api {
+func (p *Provider) ProvideApiEndpoint(database *database.Database) *api.Api {
 	return api.NewApiEndpoint(p.infoLog, p.errorLog, p.ProvideApiControllers(database))
 }
 
-func (p Provider) ProvideApiControllers(database *database.Database) []api.Controller {
+func (p *Provider) ProvideApiControllers(database *database.Database) []api.Controller {
 	return []api.Controller{
 		controllers.NewUserProfileController(p.infoLog, p.errorLog, userprofile.UserProfileRepository(*database)),
 	}
 }
 
-func (p Provider) ProvideEventBus() *events.EventBus {
+func (p *Provider) ProvideEventBus() *events.EventBus {
 	eventBus := events.NewEventBus()
 
 	return eventBus
 }
 
-func (p Provider) ProvideSubscriptions(database *database.Database) []events.EventSubscription {
+func (p *Provider) ProvideSubscriptions(database *database.Database) []events.EventSubscription {
 	return []events.EventSubscription{
 		{
 			EventType: "UserWasRegisteredEvent",
@@ -56,7 +56,7 @@ func (p Provider) ProvideSubscriptions(database *database.Database) []events.Eve
 	}
 }
 
-func (p Provider) ProvideKafkaConsumer(eventBus *events.EventBus) (*kafka.KafkaConsumer, error) {
+func (p *Provider) ProvideKafkaConsumer(eventBus *events.EventBus) (*kafka.KafkaConsumer, error) {
 	var brokers []string
 
 	if p.env == "development" {
@@ -72,7 +72,7 @@ func (p Provider) ProvideKafkaConsumer(eventBus *events.EventBus) (*kafka.KafkaC
 	return kafka.NewKafkaConsumer(brokers, eventBus, p.infoLog, p.errorLog)
 }
 
-func (p Provider) ProvideDb(ctx context.Context) (*database.Database, error) {
+func (p *Provider) ProvideDb(ctx context.Context) (*database.Database, error) {
 	var cfg aws.Config
 	var err error
 
