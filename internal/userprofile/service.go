@@ -4,7 +4,7 @@ import "log"
 
 type Repository interface {
 	AddNewUserProfile(data *UserProfile) error
-	GetUserProfile(username string) (UserProfile, error)
+	GetUserProfile(username string) (*UserProfile, error)
 }
 
 type UserProfileService struct {
@@ -43,8 +43,8 @@ func (s *UserProfileService) GetUserProfile(username string) (UserProfile, error
 	userprofile, err := s.repository.GetUserProfile(username)
 	if err != nil {
 		s.errorLog.Printf("Error getting userprofile, err: %s\n", err)
-		return userprofile, err
+		return *userprofile, err
 	}
 
-	return userprofile, nil
+	return *userprofile, nil
 }

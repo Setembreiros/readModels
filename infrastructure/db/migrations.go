@@ -6,17 +6,13 @@ func (db Database) ApplyMigrations(ctx context.Context) error {
 	db.infoLog.Println("Applying migrations...")
 
 	if !db.Client.TableExists("UserProfile") {
-		attributes := []TableAttributes{
-			{
-				Name:          "UserId",
-				AttributeType: "string",
-			},
+		keys := []TableAttributes{
 			{
 				Name:          "Username",
 				AttributeType: "string",
 			},
 		}
-		err := db.Client.CreateTable("UserProfile", attributes, ctx)
+		err := db.Client.CreateTable("UserProfile", keys, ctx)
 		if err != nil {
 			return err
 		}

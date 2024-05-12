@@ -17,8 +17,9 @@ type Database struct {
 
 type DatabaseClient interface {
 	TableExists(tableName string) bool
-	CreateTable(tableName string, attributes []TableAttributes, ctx context.Context) error
+	CreateTable(tableName string, keys []TableAttributes, ctx context.Context) error
 	InsertData(tableName string, attributes any) error
+	GetData(tableName string, key any, result any) error
 }
 
 func NewDatabase(client DatabaseClient, infoLog *log.Logger) *Database {

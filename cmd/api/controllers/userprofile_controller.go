@@ -1,8 +1,9 @@
 package controllers
 
 import (
+	"errors"
 	"log"
-	"net/http"
+	database "readmodels/infrastructure/db"
 	"readmodels/internal/userprofile"
 
 	"github.com/gin-gonic/gin"
@@ -27,14 +28,19 @@ func (controller *UserProfileController) Routes(router *gin.Engine) {
 }
 
 func (controller *UserProfileController) getUserProfile(c *gin.Context) {
-	controller.infoLog.Println("Handling Request")
+	controller.infoLog.Println("Handling Request GET UserProfile")
 	id := c.Param("username")
 	username := string(id)
 
 	userProfile, err := controller.service.GetUserProfile(username)
 	if err != nil {
-		controller.errorLog.Println(err)
-		c.IndentedJSON(http.StatusNotFound, gin.H{"message": err.Error()})
+		var notFoundError database.NotFoundError
+		if errors.Is(err, notFoundError) {
+			message := "User Profile not found for username " + username
+			sendNotFound(c, message)
+		} else {
+			sendInternalServerError(c, err.Error())
+		}
 		return
 	}
 

@@ -21,3 +21,20 @@ func sendOKWithResult(c *gin.Context, result interface{}) {
 
 	c.IndentedJSON(http.StatusOK, payload)
 }
+
+func sendFailure(c *gin.Context, httpStatus int, errorMessage string) {
+	var payload response
+
+	payload.Error = true
+	payload.Message = errorMessage
+
+	c.IndentedJSON(httpStatus, payload)
+}
+
+func sendNotFound(c *gin.Context, errorMessage string) {
+	sendFailure(c, http.StatusNotFound, errorMessage)
+}
+
+func sendInternalServerError(c *gin.Context, errorMessage string) {
+	sendFailure(c, http.StatusInternalServerError, errorMessage)
+}

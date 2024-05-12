@@ -44,8 +44,8 @@ func (dc *DynamoDBClient) TableExists(tableName string) bool {
 	return exists
 }
 
-func (dc *DynamoDBClient) CreateTable(tableName string, attributes []database.TableAttributes, ctx context.Context) error {
-	keySchemas, attributeDefinitions, err := mapTableAttributes(attributes)
+func (dc *DynamoDBClient) CreateTable(tableName string, keys []database.TableAttributes, ctx context.Context) error {
+	keySchemas, attributeDefinitions, err := mapTableAttributes(keys)
 	if err != nil {
 		return err
 	}
@@ -96,13 +96,40 @@ func (dc *DynamoDBClient) InsertData(tableName string, attributes any) error {
 	return nil
 }
 
-func mapTableAttributes(attributes []database.TableAttributes) ([]types.KeySchemaElement, []types.AttributeDefinition, error) {
+func (dc *DynamoDBClient) GetData(tableName string, key any, result any) error {
+	k, err := attributevalue.MarshalMap(key)
+	if err != nil {
+		dc.errorLog.Printf("Couldn't map %v key to AttributeValues. error: %v\n", key, err)
+	}
+
+	response, err := dc.client.GetItem(context.TODO(), &dynamodb.GetItemInput{
+		Key: k, TableName: aws.String(tableName),
+	})
+	if err != nil {
+		dc.errorLog.Printf("Couldn't get info about %s. error: %v\n", tableName, err)
+		return err
+	}
+	if response.Item == nil {
+		dc.errorLog.Printf("Data in table %s not found for key %v", tableName, k)
+		return database.NewNotFoundError()
+	}
+
+	err = attributevalue.UnmarshalMap(response.Item, &result)
+	if err != nil {
+		dc.errorLog.Printf("Couldn't unmarshal response. error: %v\n", err)
+		return err
+	}
+
+	return nil
+}
+
+func mapTableAttributes(keys []database.TableAttributes) ([]types.KeySchemaElement, []types.AttributeDefinition, error) {
 	var keySchemas []types.KeySchemaElement
 	var attributeDefinitions []types.AttributeDefinition
 	isPartitionKey := true
 
-	for _, attribute := range attributes {
-		keySchema, attributeDefinition, err := mapTableAttribute(attribute, isPartitionKey)
+	for _, key := range keys {
+		keySchema, attributeDefinition, err := mapTableAttribute(key, isPartitionKey)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -114,8 +141,8 @@ func mapTableAttributes(attributes []database.TableAttributes) ([]types.KeySchem
 	return keySchemas, attributeDefinitions, nil
 }
 
-func mapTableAttribute(attribute database.TableAttributes, isPartitionKey bool) (*types.KeySchemaElement, *types.AttributeDefinition, error) {
-	attributeType, err := mapAttributeType(attribute.AttributeType)
+func mapTableAttribute(key database.TableAttributes, isPartitionKey bool) (*types.KeySchemaElement, *types.AttributeDefinition, error) {
+	attributeType, err := mapAttributeType(key.AttributeType)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -128,11 +155,11 @@ func mapTableAttribute(attribute database.TableAttributes, isPartitionKey bool) 
 	}
 
 	return &types.KeySchemaElement{
-			AttributeName: aws.String(attribute.Name),
+			AttributeName: aws.String(key.Name),
 			KeyType:       keyType,
 		},
 		&types.AttributeDefinition{
-			AttributeName: aws.String(attribute.Name),
+			AttributeName: aws.String(key.Name),
 			AttributeType: attributeType,
 		}, nil
 }
