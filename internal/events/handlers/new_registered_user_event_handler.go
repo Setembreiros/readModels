@@ -3,7 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"log"
-	userprofile "readmodels/internal/user_profile"
+	userprofile "readmodels/internal/userprofile"
 )
 
 type UserWasRegisteredEvent struct {
@@ -21,7 +21,7 @@ type UserWasRegisteredEventHandler struct {
 	errorLog *log.Logger
 }
 
-func NewUserWasRegisteredEventHandler(infoLog, errorLog *log.Logger, repository userprofile.UserProfileRepository) *UserWasRegisteredEventHandler {
+func NewUserWasRegisteredEventHandler(infoLog, errorLog *log.Logger, repository userprofile.Repository) *UserWasRegisteredEventHandler {
 	return &UserWasRegisteredEventHandler{
 		service:  userprofile.NewUserProfileService(infoLog, errorLog, repository),
 		infoLog:  infoLog,

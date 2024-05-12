@@ -8,6 +8,7 @@ import (
 	"readmodels/infrastructure/kafka"
 	"readmodels/internal/events"
 	"readmodels/internal/events/handlers"
+	"readmodels/internal/userprofile"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -38,7 +39,7 @@ func (p Provider) ProvideSubscriptions(database *database.Database) []events.Eve
 	return []events.EventSubscription{
 		{
 			EventType: "UserWasRegisteredEvent",
-			Handler:   handlers.NewUserWasRegisteredEventHandler(p.infoLog, p.errorLog, database),
+			Handler:   handlers.NewUserWasRegisteredEventHandler(p.infoLog, p.errorLog, userprofile.UserProfileRepository(*database)),
 		},
 	}
 }

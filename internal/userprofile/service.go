@@ -2,14 +2,15 @@ package userprofile
 
 import "log"
 
-type UserProfileRepository interface {
+type Repository interface {
+	//AddNewUserProfile(data *UserProfile) error
 	AddNewUserProfile(data *UserProfile) error
 }
 
 type UserProfileService struct {
 	infoLog    *log.Logger
 	errorLog   *log.Logger
-	repository UserProfileRepository
+	repository Repository
 }
 
 type UserProfile struct {
@@ -20,7 +21,7 @@ type UserProfile struct {
 	Link     string `json:"link"`
 }
 
-func NewUserProfileService(infoLog, errorLog *log.Logger, repository UserProfileRepository) *UserProfileService {
+func NewUserProfileService(infoLog, errorLog *log.Logger, repository Repository) *UserProfileService {
 	return &UserProfileService{
 		infoLog:    infoLog,
 		errorLog:   errorLog,
