@@ -40,13 +40,13 @@ func main() {
 	infoLog.Printf("Starting ReadModels service in [%s] enviroment...\n", env)
 
 	provider := provider.NewProvider(infoLog, errorLog, env)
-	apiEnpoint := provider.ProvideApiEndpoint()
 	database, err := provider.ProvideDb(ctx)
 	if err != nil {
 		os.Exit(1)
 	}
 	eventBus := provider.ProvideEventBus()
 	subscriptions := provider.ProvideSubscriptions(database)
+	apiEnpoint := provider.ProvideApiEndpoint(database)
 	kafkaConsumer, err := provider.ProvideKafkaConsumer(eventBus)
 	if err != nil {
 		os.Exit(1)

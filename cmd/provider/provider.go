@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"readmodels/cmd/api"
+	"readmodels/cmd/api/controllers"
 	awsClients "readmodels/infrastructure/aws"
 	database "readmodels/infrastructure/db"
 	"readmodels/infrastructure/kafka"
@@ -30,8 +31,14 @@ func NewProvider(infoLog, errorLog *log.Logger, env string) *Provider {
 	}
 }
 
-func (p Provider) ProvideApiEndpoint() *api.Api {
-	return api.NewApiEndpoint(p.infoLog, p.errorLog)
+func (p Provider) ProvideApiEndpoint(database *database.Database) *api.Api {
+	return api.NewApiEndpoint(p.infoLog, p.errorLog, p.ProvideApiControllers(database))
+}
+
+func (p Provider) ProvideApiControllers(database *database.Database) []api.Controller {
+	return []api.Controller{
+		controllers.NewUserProfileController(p.infoLog, p.errorLog, userprofile.UserProfileRepository(*database)),
+	}
 }
 
 func (p Provider) ProvideEventBus() *events.EventBus {

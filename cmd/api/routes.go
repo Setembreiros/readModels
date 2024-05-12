@@ -20,5 +20,9 @@ func (api *Api) routes() http.Handler {
 		MaxAge:           12 * time.Hour,
 	}))
 
+	for _, controller := range api.controllers {
+		controller.Routes(router)
+	}
+
 	return router
 }

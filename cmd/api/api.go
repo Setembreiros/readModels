@@ -7,19 +7,27 @@ import (
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
-type Api struct {
-	infoLog  *log.Logger
-	errorLog *log.Logger
-	port     int
+type Controller interface {
+	Routes(router *gin.Engine)
 }
 
-func NewApiEndpoint(infoLog, errorLog *log.Logger) *Api {
+type Api struct {
+	infoLog     *log.Logger
+	errorLog    *log.Logger
+	port        int
+	controllers []Controller
+}
+
+func NewApiEndpoint(infoLog, errorLog *log.Logger, controllers []Controller) *Api {
 	return &Api{
-		infoLog:  infoLog,
-		errorLog: errorLog,
-		port:     5555,
+		infoLog:     infoLog,
+		errorLog:    errorLog,
+		port:        5555,
+		controllers: controllers,
 	}
 }
 
