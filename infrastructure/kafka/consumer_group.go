@@ -38,7 +38,7 @@ func NewKafkaConsumer(brokers []string, eventBus *events.EventBus, infoLog, erro
 	}, nil
 }
 
-func (k *KafkaConsumer) InitConsumption(configurationTasks *sync.WaitGroup, ctx context.Context) error {
+func (k *KafkaConsumer) InitConsumption(ctx context.Context) error {
 	consumer := Consumer{
 		infoLog:  k.infoLog,
 		errorLog: k.errorLog,
@@ -46,13 +46,14 @@ func (k *KafkaConsumer) InitConsumption(configurationTasks *sync.WaitGroup, ctx 
 		eventBus: k.eventBus,
 	}
 
+	k.infoLog.Println("Initiating Kafka Consumer Group...")
+
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go k.runConsumerGroup(ctx, &wg, &consumer)
 
 	<-consumer.ready // Await till the consumer has been set up
 	k.infoLog.Println("Kafka Consumer up and running...")
-	configurationTasks.Done()
 
 	<-ctx.Done()
 	k.infoLog.Println("Terminating Kafka Consumer: context cancelled")

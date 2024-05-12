@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"log"
+	"readmodels/cmd/api"
 	awsClients "readmodels/infrastructure/aws"
 	database "readmodels/infrastructure/db"
 	"readmodels/infrastructure/kafka"
@@ -27,6 +28,10 @@ func NewProvider(infoLog, errorLog *log.Logger, env string) *Provider {
 		errorLog: errorLog,
 		env:      env,
 	}
+}
+
+func (p Provider) ProvideApiEndpoint() *api.Api {
+	return api.NewApiEndpoint(p.infoLog, p.errorLog)
 }
 
 func (p Provider) ProvideEventBus() *events.EventBus {
@@ -74,9 +79,7 @@ func (p Provider) ProvideDb(ctx context.Context) (*database.Database, error) {
 		return nil, err
 	}
 
-	return &database.Database{
-		Client: awsClients.NewDynamodbClient(cfg, p.infoLog, p.errorLog),
-	}, nil
+	return database.NewDatabase(awsClients.NewDynamodbClient(cfg, p.infoLog, p.errorLog), p.infoLog), nil
 }
 
 func provideAwsConfig(ctx context.Context) (aws.Config, error) {

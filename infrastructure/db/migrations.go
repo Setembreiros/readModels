@@ -3,6 +3,8 @@ package database
 import "context"
 
 func (db Database) ApplyMigrations(ctx context.Context) error {
+	db.infoLog.Println("Applying migrations...")
+
 	if !db.Client.TableExists("UserProfile") {
 		attributes := []TableAttributes{
 			{
