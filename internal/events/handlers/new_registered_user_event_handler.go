@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	userprofile "readmodels/internal/user_profile"
 )
@@ -17,21 +16,26 @@ type UserWasRegisteredEvent struct {
 }
 
 type UserWasRegisteredEventHandler struct {
-	service *userprofile.UserProfileService
+	service  *userprofile.UserProfileService
+	infoLog  *log.Logger
+	errorLog *log.Logger
 }
 
 func NewUserWasRegisteredEventHandler(infoLog, errorLog *log.Logger, repository userprofile.UserProfileRepository) *UserWasRegisteredEventHandler {
 	return &UserWasRegisteredEventHandler{
-		service: userprofile.NewUserProfileService(infoLog, errorLog, repository),
+		service:  userprofile.NewUserProfileService(infoLog, errorLog, repository),
+		infoLog:  infoLog,
+		errorLog: errorLog,
 	}
 }
 
 func (handler *UserWasRegisteredEventHandler) Handle(event []byte) {
 	var userWasRegisteredEvent UserWasRegisteredEvent
+	handler.infoLog.Printf("Handling UserWasRegisteredEvent\n")
 
 	err := Decode(event, &userWasRegisteredEvent)
 	if err != nil {
-		fmt.Printf("Invalid event data, err: %s\n", err)
+		handler.errorLog.Printf("Invalid event data, err: %s\n", err)
 		return
 	}
 
