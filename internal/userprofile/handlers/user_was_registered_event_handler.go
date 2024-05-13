@@ -1,4 +1,4 @@
-package handlers
+package userprofile_handler
 
 import (
 	"encoding/json"
@@ -15,8 +15,12 @@ type UserWasRegisteredEvent struct {
 	FullName string `json:"full_name"`
 }
 
+type UserWasRegisteredEvenService interface {
+	CreateNewUserProfile(data *userprofile.UserProfile)
+}
+
 type UserWasRegisteredEventHandler struct {
-	service  *userprofile.UserProfileService
+	service  UserWasRegisteredEvenService
 	infoLog  *log.Logger
 	errorLog *log.Logger
 }

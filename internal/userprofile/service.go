@@ -2,6 +2,8 @@ package userprofile
 
 import "log"
 
+//go:generate mockgen -source=service.go -destination=mock/service.go
+
 type Repository interface {
 	AddNewUserProfile(data *UserProfile) error
 	GetUserProfile(username string) (*UserProfile, error)

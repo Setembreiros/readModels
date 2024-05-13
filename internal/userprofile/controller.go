@@ -24,10 +24,10 @@ func NewUserProfileController(infoLog, errorLog *log.Logger, repository Reposito
 }
 
 func (controller *UserProfileController) Routes(router *gin.Engine) {
-	router.GET("/userprofile/:username", controller.getUserProfile)
+	router.GET("/userprofile/:username", controller.GetUserProfile)
 }
 
-func (controller *UserProfileController) getUserProfile(c *gin.Context) {
+func (controller *UserProfileController) GetUserProfile(c *gin.Context) {
 	controller.infoLog.Println("Handling Request GET UserProfile")
 	id := c.Param("username")
 	username := string(id)

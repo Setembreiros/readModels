@@ -9,7 +9,7 @@ import (
 	"readmodels/internal/bus"
 	database "readmodels/internal/db"
 	"readmodels/internal/userprofile"
-	"readmodels/internal/userprofile/handlers"
+	userprofile_handler "readmodels/internal/userprofile/handlers"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -50,7 +50,7 @@ func (p *Provider) ProvideSubscriptions(database *database.Database) *[]bus.Even
 	return &[]bus.EventSubscription{
 		{
 			EventType: "UserWasRegisteredEvent",
-			Handler:   handlers.NewUserWasRegisteredEventHandler(p.infoLog, p.errorLog, userprofile.UserProfileRepository(*database)),
+			Handler:   userprofile_handler.NewUserWasRegisteredEventHandler(p.infoLog, p.errorLog, userprofile.UserProfileRepository(*database)),
 		},
 	}
 }

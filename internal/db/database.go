@@ -5,6 +5,8 @@ import (
 	"log"
 )
 
+//go:generate mockgen -source=database.go -destination=mock/database.go
+
 type TableAttributes struct {
 	Name          string
 	AttributeType string
