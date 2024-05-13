@@ -39,12 +39,12 @@ func (s *UserProfileService) CreateNewUserProfile(data *UserProfile) {
 	s.infoLog.Printf("User Profile for user %s was added", data.Username)
 }
 
-func (s *UserProfileService) GetUserProfile(username string) (UserProfile, error) {
+func (s *UserProfileService) GetUserProfile(username string) (*UserProfile, error) {
 	userprofile, err := s.repository.GetUserProfile(username)
 	if err != nil {
-		s.errorLog.Printf("Error getting userprofile, err: %s\n", err)
-		return *userprofile, err
+		s.errorLog.Printf("Error getting userprofile for username %s, err: %s\n", username, err)
+		return userprofile, err
 	}
 
-	return *userprofile, nil
+	return userprofile, nil
 }

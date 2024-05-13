@@ -12,7 +12,7 @@ func (db *Database) ApplyMigrations(ctx context.Context) error {
 				AttributeType: "string",
 			},
 		}
-		err := db.Client.CreateTable("UserProfile", keys, ctx)
+		err := db.Client.CreateTable("UserProfile", &keys, ctx)
 		if err != nil {
 			return err
 		}

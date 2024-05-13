@@ -7,12 +7,12 @@ import (
 )
 
 type response struct {
-	Error   bool        `json:"error"`
-	Message string      `json:"message"`
-	Content interface{} `json:"content"`
+	Error   bool   `json:"error"`
+	Message string `json:"message"`
+	Content any    `json:"content"`
 }
 
-func sendOKWithResult(c *gin.Context, result interface{}) {
+func sendOKWithResult(c *gin.Context, result any) {
 	var payload response
 
 	payload.Error = false

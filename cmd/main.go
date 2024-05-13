@@ -56,7 +56,7 @@ func main() {
 	app.runServerTasks(kafkaConsumer, apiEnpoint)
 }
 
-func (app *app) runConfigurationTasks(database *database.Database, subscriptions []events.EventSubscription, eventBus *events.EventBus) {
+func (app *app) runConfigurationTasks(database *database.Database, subscriptions *[]events.EventSubscription, eventBus *events.EventBus) {
 	app.configuringTasks.Add(2)
 	go app.applyMigrations(database)
 	go app.subcribeEvents(subscriptions, eventBus) // Always subscribe event before init Kafka
@@ -83,13 +83,13 @@ func (app *app) applyMigrations(database *database.Database) {
 	app.infoLog.Println("Migrations finished")
 }
 
-func (app *app) subcribeEvents(subscriptions []events.EventSubscription, eventBus *events.EventBus) {
+func (app *app) subcribeEvents(subscriptions *[]events.EventSubscription, eventBus *events.EventBus) {
 	defer app.configuringTasks.Done()
 
 	app.infoLog.Println("Subscribing events...")
 
-	for _, subscription := range subscriptions {
-		eventBus.Subscribe(subscription, app.ctx)
+	for _, subscription := range *subscriptions {
+		eventBus.Subscribe(&subscription, app.ctx)
 		app.infoLog.Printf("%s subscribed\n", subscription.EventType)
 	}
 

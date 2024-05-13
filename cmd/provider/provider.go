@@ -47,8 +47,8 @@ func (p *Provider) ProvideEventBus() *events.EventBus {
 	return eventBus
 }
 
-func (p *Provider) ProvideSubscriptions(database *database.Database) []events.EventSubscription {
-	return []events.EventSubscription{
+func (p *Provider) ProvideSubscriptions(database *database.Database) *[]events.EventSubscription {
+	return &[]events.EventSubscription{
 		{
 			EventType: "UserWasRegisteredEvent",
 			Handler:   handlers.NewUserWasRegisteredEventHandler(p.infoLog, p.errorLog, userprofile.UserProfileRepository(*database)),

@@ -34,8 +34,8 @@ func (controller *UserProfileController) getUserProfile(c *gin.Context) {
 
 	userProfile, err := controller.service.GetUserProfile(username)
 	if err != nil {
-		var notFoundError database.NotFoundError
-		if errors.Is(err, notFoundError) {
+		var notFoundError *database.NotFoundError
+		if errors.As(err, &notFoundError) {
 			message := "User Profile not found for username " + username
 			sendNotFound(c, message)
 		} else {
@@ -44,5 +44,5 @@ func (controller *UserProfileController) getUserProfile(c *gin.Context) {
 		return
 	}
 
-	sendOKWithResult(c, userProfile)
+	sendOKWithResult(c, &userProfile)
 }

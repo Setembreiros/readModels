@@ -1,10 +1,20 @@
 package database
 
-import "errors"
+import "fmt"
 
-type NotFoundError error
+type NotFoundError struct {
+	table string
+	key   any
+}
 
-func NewNotFoundError() NotFoundError {
-	err := errors.New("")
-	return NotFoundError(err)
+func (e *NotFoundError) Error() string {
+	errorMessage := fmt.Sprintf("Data in table %s not found for key %v", e.table, e.key)
+	return errorMessage
+}
+
+func NewNotFoundError(table string, key any) *NotFoundError {
+	return &NotFoundError{
+		table: table,
+		key:   key,
+	}
 }

@@ -36,7 +36,7 @@ func (eb *EventBus) Publish(event Event) {
 	}
 }
 
-func (eb *EventBus) Subscribe(subscription EventSubscription, ctx context.Context) {
+func (eb *EventBus) Subscribe(subscription *EventSubscription, ctx context.Context) {
 	subscriptionChan := make(chan Event)
 	eb.subscribers[subscription.EventType] = append(eb.subscribers[subscription.EventType], subscriptionChan)
 	go subscription.handle(subscriptionChan, ctx)
