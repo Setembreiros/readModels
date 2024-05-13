@@ -3,14 +3,13 @@ package provider
 import (
 	"context"
 	"log"
-	"readmodels/cmd/api"
-	"readmodels/cmd/api/controllers"
 	awsClients "readmodels/infrastructure/aws"
-	database "readmodels/infrastructure/db"
 	"readmodels/infrastructure/kafka"
-	"readmodels/internal/events"
-	"readmodels/internal/events/handlers"
+	"readmodels/internal/api"
+	"readmodels/internal/bus"
+	database "readmodels/internal/db"
 	"readmodels/internal/userprofile"
+	"readmodels/internal/userprofile/handlers"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -37,18 +36,18 @@ func (p *Provider) ProvideApiEndpoint(database *database.Database) *api.Api {
 
 func (p *Provider) ProvideApiControllers(database *database.Database) []api.Controller {
 	return []api.Controller{
-		controllers.NewUserProfileController(p.infoLog, p.errorLog, userprofile.UserProfileRepository(*database)),
+		userprofile.NewUserProfileController(p.infoLog, p.errorLog, userprofile.UserProfileRepository(*database)),
 	}
 }
 
-func (p *Provider) ProvideEventBus() *events.EventBus {
-	eventBus := events.NewEventBus()
+func (p *Provider) ProvideEventBus() *bus.EventBus {
+	eventBus := bus.NewEventBus()
 
 	return eventBus
 }
 
-func (p *Provider) ProvideSubscriptions(database *database.Database) *[]events.EventSubscription {
-	return &[]events.EventSubscription{
+func (p *Provider) ProvideSubscriptions(database *database.Database) *[]bus.EventSubscription {
+	return &[]bus.EventSubscription{
 		{
 			EventType: "UserWasRegisteredEvent",
 			Handler:   handlers.NewUserWasRegisteredEventHandler(p.infoLog, p.errorLog, userprofile.UserProfileRepository(*database)),
@@ -56,7 +55,7 @@ func (p *Provider) ProvideSubscriptions(database *database.Database) *[]events.E
 	}
 }
 
-func (p *Provider) ProvideKafkaConsumer(eventBus *events.EventBus) (*kafka.KafkaConsumer, error) {
+func (p *Provider) ProvideKafkaConsumer(eventBus *bus.EventBus) (*kafka.KafkaConsumer, error) {
 	var brokers []string
 
 	if p.env == "development" {

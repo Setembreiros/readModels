@@ -1,4 +1,4 @@
-package controllers
+package api
 
 import (
 	"net/http"
@@ -6,13 +6,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type Controller interface {
+	Routes(router *gin.Engine)
+}
+
 type response struct {
 	Error   bool   `json:"error"`
 	Message string `json:"message"`
 	Content any    `json:"content"`
 }
 
-func sendOKWithResult(c *gin.Context, result any) {
+func SendOKWithResult(c *gin.Context, result any) {
 	var payload response
 
 	payload.Error = false
@@ -22,7 +26,7 @@ func sendOKWithResult(c *gin.Context, result any) {
 	c.IndentedJSON(http.StatusOK, payload)
 }
 
-func sendFailure(c *gin.Context, httpStatus int, errorMessage string) {
+func SendFailure(c *gin.Context, httpStatus int, errorMessage string) {
 	var payload response
 
 	payload.Error = true
@@ -31,10 +35,10 @@ func sendFailure(c *gin.Context, httpStatus int, errorMessage string) {
 	c.IndentedJSON(httpStatus, payload)
 }
 
-func sendNotFound(c *gin.Context, errorMessage string) {
-	sendFailure(c, http.StatusNotFound, errorMessage)
+func SendNotFound(c *gin.Context, errorMessage string) {
+	SendFailure(c, http.StatusNotFound, errorMessage)
 }
 
-func sendInternalServerError(c *gin.Context, errorMessage string) {
-	sendFailure(c, http.StatusInternalServerError, errorMessage)
+func SendInternalServerError(c *gin.Context, errorMessage string) {
+	SendFailure(c, http.StatusInternalServerError, errorMessage)
 }

@@ -5,11 +5,11 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"readmodels/cmd/api"
 	"readmodels/cmd/provider"
-	database "readmodels/infrastructure/db"
 	"readmodels/infrastructure/kafka"
-	"readmodels/internal/events"
+	"readmodels/internal/api"
+	"readmodels/internal/bus"
+	database "readmodels/internal/db"
 	"strings"
 	"sync"
 	"syscall"
@@ -56,7 +56,7 @@ func main() {
 	app.runServerTasks(kafkaConsumer, apiEnpoint)
 }
 
-func (app *app) runConfigurationTasks(database *database.Database, subscriptions *[]events.EventSubscription, eventBus *events.EventBus) {
+func (app *app) runConfigurationTasks(database *database.Database, subscriptions *[]bus.EventSubscription, eventBus *bus.EventBus) {
 	app.configuringTasks.Add(2)
 	go app.applyMigrations(database)
 	go app.subcribeEvents(subscriptions, eventBus) // Always subscribe event before init Kafka
@@ -83,7 +83,7 @@ func (app *app) applyMigrations(database *database.Database) {
 	app.infoLog.Println("Migrations finished")
 }
 
-func (app *app) subcribeEvents(subscriptions *[]events.EventSubscription, eventBus *events.EventBus) {
+func (app *app) subcribeEvents(subscriptions *[]bus.EventSubscription, eventBus *bus.EventBus) {
 	defer app.configuringTasks.Done()
 
 	app.infoLog.Println("Subscribing events...")

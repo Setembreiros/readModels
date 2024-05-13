@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
-	"readmodels/internal/events"
+	"readmodels/internal/bus"
 	"sync"
 
 	"github.com/IBM/sarama"
@@ -14,10 +14,10 @@ type KafkaConsumer struct {
 	infoLog       *log.Logger
 	errorLog      *log.Logger
 	ConsumerGroup sarama.ConsumerGroup
-	eventBus      *events.EventBus
+	eventBus      *bus.EventBus
 }
 
-func NewKafkaConsumer(brokers []string, eventBus *events.EventBus, infoLog, errorLog *log.Logger) (*KafkaConsumer, error) {
+func NewKafkaConsumer(brokers []string, eventBus *bus.EventBus, infoLog, errorLog *log.Logger) (*KafkaConsumer, error) {
 	config := sarama.NewConfig()
 	config.Version = sarama.V2_0_0_0
 	config.Consumer.Group.Rebalance.GroupStrategies = []sarama.BalanceStrategy{sarama.NewBalanceStrategySticky()}

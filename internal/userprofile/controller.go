@@ -1,10 +1,10 @@
-package controllers
+package userprofile
 
 import (
 	"errors"
 	"log"
-	database "readmodels/infrastructure/db"
-	"readmodels/internal/userprofile"
+	"readmodels/internal/api"
+	database "readmodels/internal/db"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,12 +12,12 @@ import (
 type UserProfileController struct {
 	infoLog  *log.Logger
 	errorLog *log.Logger
-	service  *userprofile.UserProfileService
+	service  *UserProfileService
 }
 
-func NewUserProfileController(infoLog, errorLog *log.Logger, repository userprofile.Repository) *UserProfileController {
+func NewUserProfileController(infoLog, errorLog *log.Logger, repository Repository) *UserProfileController {
 	return &UserProfileController{
-		service:  userprofile.NewUserProfileService(infoLog, errorLog, repository),
+		service:  NewUserProfileService(infoLog, errorLog, repository),
 		infoLog:  infoLog,
 		errorLog: errorLog,
 	}
@@ -37,12 +37,12 @@ func (controller *UserProfileController) getUserProfile(c *gin.Context) {
 		var notFoundError *database.NotFoundError
 		if errors.As(err, &notFoundError) {
 			message := "User Profile not found for username " + username
-			sendNotFound(c, message)
+			api.SendNotFound(c, message)
 		} else {
-			sendInternalServerError(c, err.Error())
+			api.SendInternalServerError(c, err.Error())
 		}
 		return
 	}
 
-	sendOKWithResult(c, &userProfile)
+	api.SendOKWithResult(c, &userProfile)
 }

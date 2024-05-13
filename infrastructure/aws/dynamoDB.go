@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	database "readmodels/infrastructure/db"
+	database "readmodels/internal/db"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"

@@ -7,13 +7,7 @@ import (
 	"log"
 	"net/http"
 	"time"
-
-	"github.com/gin-gonic/gin"
 )
-
-type Controller interface {
-	Routes(router *gin.Engine)
-}
 
 type Api struct {
 	infoLog     *log.Logger

@@ -1,6 +1,6 @@
 package userprofile
 
-import database "readmodels/infrastructure/db"
+import database "readmodels/internal/db"
 
 type UserProfileRepository database.Database
 
