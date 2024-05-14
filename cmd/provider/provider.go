@@ -64,7 +64,8 @@ func (p *Provider) ProvideKafkaConsumer(eventBus *bus.EventBus) (*kafka.KafkaCon
 		}
 	} else {
 		brokers = []string{
-			"localhost:9093",
+			"172.31.36.175:9092",
+			"172.31.45.255:9092",
 		}
 	}
 
