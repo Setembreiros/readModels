@@ -7,7 +7,7 @@ import (
 )
 
 type Controller interface {
-	Routes(router *gin.Engine)
+	Routes(routerGroup *gin.RouterGroup)
 }
 
 type response struct {

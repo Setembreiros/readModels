@@ -13,14 +13,16 @@ type Api struct {
 	infoLog     *log.Logger
 	errorLog    *log.Logger
 	port        int
+	env         string
 	controllers []Controller
 }
 
-func NewApiEndpoint(infoLog, errorLog *log.Logger, controllers []Controller) *Api {
+func NewApiEndpoint(env string, infoLog, errorLog *log.Logger, controllers []Controller) *Api {
 	return &Api{
 		infoLog:     infoLog,
 		errorLog:    errorLog,
 		port:        5555,
+		env:         env,
 		controllers: controllers,
 	}
 }

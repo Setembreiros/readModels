@@ -23,8 +23,8 @@ func NewUserProfileController(infoLog, errorLog *log.Logger, repository Reposito
 	}
 }
 
-func (controller *UserProfileController) Routes(router *gin.Engine) {
-	router.GET("/userprofile/:username", controller.GetUserProfile)
+func (controller *UserProfileController) Routes(routerGroup *gin.RouterGroup) {
+	routerGroup.GET("/userprofile/:username", controller.GetUserProfile)
 }
 
 func (controller *UserProfileController) GetUserProfile(c *gin.Context) {

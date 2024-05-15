@@ -31,7 +31,7 @@ func NewProvider(infoLog, errorLog *log.Logger, env string) *Provider {
 }
 
 func (p *Provider) ProvideApiEndpoint(database *database.Database) *api.Api {
-	return api.NewApiEndpoint(p.infoLog, p.errorLog, p.ProvideApiControllers(database))
+	return api.NewApiEndpoint(p.env, p.infoLog, p.errorLog, p.ProvideApiControllers(database))
 }
 
 func (p *Provider) ProvideApiControllers(database *database.Database) []api.Controller {
@@ -90,7 +90,7 @@ func (p *Provider) ProvideDb(ctx context.Context) (*database.Database, error) {
 }
 
 func provideAwsConfig(ctx context.Context) (aws.Config, error) {
-	return config.LoadDefaultConfig(ctx)
+	return config.LoadDefaultConfig(ctx, config.WithRegion("eu-west-3"))
 }
 
 func provideDevEnvironmentDbConfig(ctx context.Context) (aws.Config, error) {
