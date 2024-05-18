@@ -5,7 +5,7 @@ update:
 	go mod tidy
 
 build: update
-	go build -o ./readModels cmd/main.go
+	go build -o ./deployment/${PROD-ENVIRONMENT}/readModels cmd/main.go
 
 run:
 	export ENVIRONMENT="${PROD-ENVIRONMENT}" &&go run cmd/main.go
