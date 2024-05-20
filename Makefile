@@ -1,11 +1,20 @@
+DEV-ENVIRONMENT=development
+PROD-ENVIRONMENT=production
+
 update:
 	go mod tidy
 
-build:
-	go build -o readModels ./cmd
+build: update
+	go build -o ./deployment/${PROD-ENVIRONMENT}/readModels cmd/main.go
 
 run:
-	go run ./cmd/main.go
+	export ENVIRONMENT="${PROD-ENVIRONMENT}" &&go run cmd/main.go
+
+run-dev:
+	export ENVIRONMENT="${DEV-ENVIRONMENT}" && go run ./cmd/main.go
+
+run-dev-windows: 
+	set ENVIRONMENT=${DEV-ENVIRONMENT} && go run ./cmd/main.go
 
 test:
-	go test ./...
+	go generate -v ./internal/... && go test ./internal/...
