@@ -3,7 +3,6 @@ package aws
 import (
 	"context"
 	"errors"
-	"log"
 	"time"
 
 	database "readmodels/internal/db"
@@ -12,19 +11,16 @@ import (
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"github.com/rs/zerolog/log"
 )
 
 type DynamoDBClient struct {
-	infoLog  *log.Logger
-	errorLog *log.Logger
-	client   *dynamodb.Client
+	client *dynamodb.Client
 }
 
-func NewDynamodbClient(config aws.Config, infoLog, errorLog *log.Logger) *DynamoDBClient {
+func NewDynamodbClient(config aws.Config) *DynamoDBClient {
 	return &DynamoDBClient{
-		infoLog:  infoLog,
-		errorLog: errorLog,
-		client:   dynamodb.NewFromConfig(config),
+		client: dynamodb.NewFromConfig(config),
 	}
 }
 
@@ -37,7 +33,7 @@ func (dc *DynamoDBClient) TableExists(tableName string) bool {
 		var notFoundEx *types.ResourceNotFoundException
 		if errors.As(err, &notFoundEx) {
 		} else {
-			dc.errorLog.Printf("Couldn't determine existence of table %v. error: %v\n", tableName, err)
+			log.Error().Stack().Err(err).Msgf("Couldn't determine existence of table %v", tableName)
 		}
 		exists = false
 	}
@@ -64,18 +60,18 @@ func (dc *DynamoDBClient) CreateTable(tableName string, keys *[]database.TableAt
 
 	var tableDesc *types.TableDescription
 	if err != nil {
-		dc.errorLog.Fatalf("Couldn't create table %v. error: %v\n", tableName, err)
+		log.Fatal().Stack().Err(err).Msgf("Couldn't create table %v", tableName)
 	} else {
 		waiter := dynamodb.NewTableExistsWaiter(dc.client)
 		err = waiter.Wait(ctx, &dynamodb.DescribeTableInput{
 			TableName: aws.String(tableName)}, 5*time.Minute)
 		if err != nil {
-			log.Printf("Wait for table exists failed. error: %v\n", err)
+			log.Warn().Err(err).Msgf("Wait for table exists failed")
 		}
 		tableDesc = table.TableDescription
 	}
 
-	dc.infoLog.Printf("Created table: %s\n", *tableDesc.TableName)
+	log.Info().Msgf("Created table: %s\n", *tableDesc.TableName)
 	return nil
 }
 
@@ -89,7 +85,7 @@ func (dc *DynamoDBClient) InsertData(tableName string, attributes any) error {
 		TableName: aws.String(tableName), Item: item,
 	})
 	if err != nil {
-		dc.errorLog.Printf("Couldn't add item to table. error: %v\n", err)
+		log.Error().Stack().Err(err).Msg("Couldn't add item to table")
 		return err
 	}
 
@@ -99,25 +95,25 @@ func (dc *DynamoDBClient) InsertData(tableName string, attributes any) error {
 func (dc *DynamoDBClient) GetData(tableName string, key any, result any) error {
 	k, err := attributevalue.MarshalMap(key)
 	if err != nil {
-		dc.errorLog.Printf("Couldn't map %v key to AttributeValues. error: %v\n", key, err)
+		log.Error().Stack().Err(err).Msgf("Couldn't map %v key to AttributeValues", key)
 	}
 
 	response, err := dc.client.GetItem(context.TODO(), &dynamodb.GetItemInput{
 		Key: k, TableName: aws.String(tableName),
 	})
 	if err != nil {
-		dc.errorLog.Printf("Couldn't get info about %s. error: %v\n", tableName, err)
+		log.Error().Stack().Err(err).Msgf("Couldn't get info about %s", tableName)
 		return err
 	}
 	if response.Item == nil {
 		err = database.NewNotFoundError(tableName, key)
-		dc.errorLog.Printf(err.Error())
+		log.Error().Stack().Err(err).Msg("Item was not found")
 		return err
 	}
 
 	err = attributevalue.UnmarshalMap(response.Item, &result)
 	if err != nil {
-		dc.errorLog.Printf("Couldn't unmarshal response. error: %v\n", err)
+		log.Error().Stack().Err(err).Msg("Couldn't unmarshal response")
 		return err
 	}
 

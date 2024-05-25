@@ -3,12 +3,12 @@ package userprofile_test
 import (
 	"bytes"
 	"errors"
-	"log"
 	"readmodels/internal/userprofile"
 	mock_userprofile "readmodels/internal/userprofile/mock"
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -19,8 +19,8 @@ var userProfileService *userprofile.UserProfileService
 func setUpService(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	serviceRepository = mock_userprofile.NewMockRepository(ctrl)
-	mockLogger := log.New(&serviceLoggerOutput, "", log.LstdFlags)
-	userProfileService = userprofile.NewUserProfileService(mockLogger, mockLogger, serviceRepository)
+	log.Logger = log.Output(&serviceLoggerOutput)
+	userProfileService = userprofile.NewUserProfileService(serviceRepository)
 }
 
 func TestCreateNewUserProfileWithService(t *testing.T) {
@@ -48,12 +48,11 @@ func TestErrorOnCreateNewUserProfileWithService(t *testing.T) {
 		Bio:      "",
 		Link:     "",
 	}
-	expectedError := errors.New("some error")
-	serviceRepository.EXPECT().AddNewUserProfile(data).Return(expectedError)
+	serviceRepository.EXPECT().AddNewUserProfile(data).Return(errors.New("some error"))
 
 	userProfileService.CreateNewUserProfile(data)
 
-	assert.Contains(t, serviceLoggerOutput.String(), "Error adding user, err: "+expectedError.Error()+"\n")
+	assert.Contains(t, serviceLoggerOutput.String(), "Error adding user")
 }
 
 func TestGetUserProfileWithService(t *testing.T) {
@@ -75,10 +74,9 @@ func TestErrorOnGetUserProfileWithService(t *testing.T) {
 	setUpService(t)
 	username := "username1"
 	expectedData := &userprofile.UserProfile{}
-	expectedError := errors.New("some error")
-	serviceRepository.EXPECT().GetUserProfile(username).Return(expectedData, expectedError)
+	serviceRepository.EXPECT().GetUserProfile(username).Return(expectedData, errors.New("some error"))
 
 	userProfileService.GetUserProfile(username)
 
-	assert.Contains(t, serviceLoggerOutput.String(), "Error getting userprofile for username "+username+", err: "+expectedError.Error()+"\n")
+	assert.Contains(t, serviceLoggerOutput.String(), "Error getting userprofile for username "+username)
 }

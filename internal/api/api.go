@@ -4,23 +4,20 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
+
+	"github.com/rs/zerolog/log"
 )
 
 type Api struct {
-	infoLog     *log.Logger
-	errorLog    *log.Logger
 	port        int
 	env         string
 	controllers []Controller
 }
 
-func NewApiEndpoint(env string, infoLog, errorLog *log.Logger, controllers []Controller) *Api {
+func NewApiEndpoint(env string, controllers []Controller) *Api {
 	return &Api{
-		infoLog:     infoLog,
-		errorLog:    errorLog,
 		port:        5555,
 		env:         env,
 		controllers: controllers,
@@ -39,11 +36,11 @@ func (api *Api) Run(ctx context.Context) error {
 		WriteTimeout:      5 * time.Second,
 	}
 
-	api.infoLog.Printf("Starting Readmodels Api Server on port %d", api.port)
+	log.Info().Msgf("Starting Readmodels Api Server on port %d", api.port)
 
 	go func() {
 		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			api.errorLog.Printf("Readmodels Api Server failed, error: %s\n", err)
+			log.Error().Err(err).Msg("Readmodels Api Server failed")
 		}
 	}()
 

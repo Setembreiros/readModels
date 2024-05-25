@@ -2,7 +2,6 @@ package provider
 
 import (
 	"context"
-	"log"
 	awsClients "readmodels/infrastructure/aws"
 	"readmodels/infrastructure/kafka"
 	"readmodels/internal/api"
@@ -14,29 +13,26 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
+	"github.com/rs/zerolog/log"
 )
 
 type Provider struct {
-	infoLog  *log.Logger
-	errorLog *log.Logger
-	env      string
+	env string
 }
 
-func NewProvider(infoLog, errorLog *log.Logger, env string) *Provider {
+func NewProvider(env string) *Provider {
 	return &Provider{
-		infoLog:  infoLog,
-		errorLog: errorLog,
-		env:      env,
+		env: env,
 	}
 }
 
 func (p *Provider) ProvideApiEndpoint(database *database.Database) *api.Api {
-	return api.NewApiEndpoint(p.env, p.infoLog, p.errorLog, p.ProvideApiControllers(database))
+	return api.NewApiEndpoint(p.env, p.ProvideApiControllers(database))
 }
 
 func (p *Provider) ProvideApiControllers(database *database.Database) []api.Controller {
 	return []api.Controller{
-		userprofile.NewUserProfileController(p.infoLog, p.errorLog, userprofile.UserProfileRepository(*database)),
+		userprofile.NewUserProfileController(userprofile.UserProfileRepository(*database)),
 	}
 }
 
@@ -50,7 +46,7 @@ func (p *Provider) ProvideSubscriptions(database *database.Database) *[]bus.Even
 	return &[]bus.EventSubscription{
 		{
 			EventType: "UserWasRegisteredEvent",
-			Handler:   userprofile_handler.NewUserWasRegisteredEventHandler(p.infoLog, p.errorLog, userprofile.UserProfileRepository(*database)),
+			Handler:   userprofile_handler.NewUserWasRegisteredEventHandler(userprofile.UserProfileRepository(*database)),
 		},
 	}
 }
@@ -69,7 +65,7 @@ func (p *Provider) ProvideKafkaConsumer(eventBus *bus.EventBus) (*kafka.KafkaCon
 		}
 	}
 
-	return kafka.NewKafkaConsumer(brokers, eventBus, p.infoLog, p.errorLog)
+	return kafka.NewKafkaConsumer(brokers, eventBus)
 }
 
 func (p *Provider) ProvideDb(ctx context.Context) (*database.Database, error) {
@@ -82,11 +78,11 @@ func (p *Provider) ProvideDb(ctx context.Context) (*database.Database, error) {
 		cfg, err = provideAwsConfig(ctx)
 	}
 	if err != nil {
-		p.errorLog.Fatalf("failed to load aws configuration %s", err)
+		log.Fatal().Err(err).Msg("failed to load aws configuration")
 		return nil, err
 	}
 
-	return database.NewDatabase(awsClients.NewDynamodbClient(cfg, p.infoLog, p.errorLog), p.infoLog), nil
+	return database.NewDatabase(awsClients.NewDynamodbClient(cfg)), nil
 }
 
 func provideAwsConfig(ctx context.Context) (aws.Config, error) {

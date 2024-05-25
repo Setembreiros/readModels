@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"log"
 )
 
 //go:generate mockgen -source=database.go -destination=mock/database.go
@@ -13,8 +12,7 @@ type TableAttributes struct {
 }
 
 type Database struct {
-	infoLog *log.Logger
-	Client  DatabaseClient
+	Client DatabaseClient
 }
 
 type DatabaseClient interface {
@@ -24,9 +22,8 @@ type DatabaseClient interface {
 	GetData(tableName string, key any, result any) error
 }
 
-func NewDatabase(client DatabaseClient, infoLog *log.Logger) *Database {
+func NewDatabase(client DatabaseClient) *Database {
 	return &Database{
-		Client:  client,
-		infoLog: infoLog,
+		Client: client,
 	}
 }

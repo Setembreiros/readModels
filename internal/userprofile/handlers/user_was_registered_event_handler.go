@@ -2,8 +2,9 @@ package userprofile_handler
 
 import (
 	"encoding/json"
-	"log"
 	userprofile "readmodels/internal/userprofile"
+
+	"github.com/rs/zerolog/log"
 )
 
 type UserWasRegisteredEvent struct {
@@ -20,26 +21,22 @@ type UserWasRegisteredEvenService interface {
 }
 
 type UserWasRegisteredEventHandler struct {
-	service  UserWasRegisteredEvenService
-	infoLog  *log.Logger
-	errorLog *log.Logger
+	service UserWasRegisteredEvenService
 }
 
-func NewUserWasRegisteredEventHandler(infoLog, errorLog *log.Logger, repository userprofile.Repository) *UserWasRegisteredEventHandler {
+func NewUserWasRegisteredEventHandler(repository userprofile.Repository) *UserWasRegisteredEventHandler {
 	return &UserWasRegisteredEventHandler{
-		service:  userprofile.NewUserProfileService(infoLog, errorLog, repository),
-		infoLog:  infoLog,
-		errorLog: errorLog,
+		service: userprofile.NewUserProfileService(repository),
 	}
 }
 
 func (handler *UserWasRegisteredEventHandler) Handle(event []byte) {
 	var userWasRegisteredEvent UserWasRegisteredEvent
-	handler.infoLog.Printf("Handling UserWasRegisteredEvent\n")
+	log.Info().Msg("Handling UserWasRegisteredEvent")
 
 	err := Decode(event, &userWasRegisteredEvent)
 	if err != nil {
-		handler.errorLog.Printf("Invalid event data, err: %s\n", err)
+		log.Error().Stack().Err(err).Msg("Invalid event data")
 		return
 	}
 
