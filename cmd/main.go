@@ -13,6 +13,7 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
@@ -30,6 +31,13 @@ func main() {
 	app := &app{
 		ctx:    ctx,
 		cancel: cancel,
+	}
+
+	if env == "development" {
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+
+	} else {
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	}
 
 	log.Info().Msgf("Starting ReadModels service in [%s] enviroment...\n", env)
