@@ -22,6 +22,7 @@ type app struct {
 	cancel           context.CancelFunc
 	configuringTasks sync.WaitGroup
 	runningTasks     sync.WaitGroup
+	env              string
 }
 
 func main() {
@@ -31,14 +32,10 @@ func main() {
 	app := &app{
 		ctx:    ctx,
 		cancel: cancel,
+		env:    env,
 	}
 
-	if env == "development" {
-		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-
-	} else {
-		zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	}
+	app.configuringLog()
 
 	log.Info().Msgf("Starting ReadModels service in [%s] enviroment...\n", env)
 
@@ -57,6 +54,17 @@ func main() {
 
 	app.runConfigurationTasks(database, subscriptions, eventBus)
 	app.runServerTasks(kafkaConsumer, apiEnpoint)
+}
+
+func (app *app) configuringLog() {
+	if app.env == "development" {
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+
+	} else {
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	}
+
+	log.Logger = log.With().Caller().Logger()
 }
 
 func (app *app) runConfigurationTasks(database *database.Database, subscriptions *[]bus.EventSubscription, eventBus *bus.EventBus) {
