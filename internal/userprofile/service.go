@@ -1,6 +1,6 @@
 package userprofile
 
-import "log"
+import "github.com/rs/zerolog/log"
 
 //go:generate mockgen -source=service.go -destination=mock/service.go
 
@@ -10,8 +10,6 @@ type Repository interface {
 }
 
 type UserProfileService struct {
-	infoLog    *log.Logger
-	errorLog   *log.Logger
 	repository Repository
 }
 
@@ -23,10 +21,8 @@ type UserProfile struct {
 	Link     string `json:"link"`
 }
 
-func NewUserProfileService(infoLog, errorLog *log.Logger, repository Repository) *UserProfileService {
+func NewUserProfileService(repository Repository) *UserProfileService {
 	return &UserProfileService{
-		infoLog:    infoLog,
-		errorLog:   errorLog,
 		repository: repository,
 	}
 }
@@ -34,17 +30,17 @@ func NewUserProfileService(infoLog, errorLog *log.Logger, repository Repository)
 func (s *UserProfileService) CreateNewUserProfile(data *UserProfile) {
 	err := s.repository.AddNewUserProfile(data)
 	if err != nil {
-		s.errorLog.Printf("Error adding user, err: %s\n", err)
+		log.Error().Stack().Err(err).Msg("Error adding user")
 		return
 	}
 
-	s.infoLog.Printf("User Profile for user %s was added", data.Username)
+	log.Info().Msgf("User Profile for user %s was added", data.Username)
 }
 
 func (s *UserProfileService) GetUserProfile(username string) (*UserProfile, error) {
 	userprofile, err := s.repository.GetUserProfile(username)
 	if err != nil {
-		s.errorLog.Printf("Error getting userprofile for username %s, err: %s\n", username, err)
+		log.Error().Stack().Err(err).Msgf("Error getting userprofile for username %s", username)
 		return userprofile, err
 	}
 

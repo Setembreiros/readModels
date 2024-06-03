@@ -1,9 +1,13 @@
 package database
 
-import "context"
+import (
+	"context"
+
+	"github.com/rs/zerolog/log"
+)
 
 func (db *Database) ApplyMigrations(ctx context.Context) error {
-	db.infoLog.Println("Applying migrations...")
+	log.Info().Msg("Applying migrations...")
 
 	if !db.Client.TableExists("UserProfile") {
 		keys := []TableAttributes{

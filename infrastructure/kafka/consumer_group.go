@@ -3,21 +3,19 @@ package kafka
 import (
 	"context"
 	"errors"
-	"log"
 	"readmodels/internal/bus"
 	"sync"
 
 	"github.com/IBM/sarama"
+	"github.com/rs/zerolog/log"
 )
 
 type KafkaConsumer struct {
-	infoLog       *log.Logger
-	errorLog      *log.Logger
 	ConsumerGroup sarama.ConsumerGroup
 	eventBus      *bus.EventBus
 }
 
-func NewKafkaConsumer(brokers []string, eventBus *bus.EventBus, infoLog, errorLog *log.Logger) (*KafkaConsumer, error) {
+func NewKafkaConsumer(brokers []string, eventBus *bus.EventBus) (*KafkaConsumer, error) {
 	config := sarama.NewConfig()
 	config.Version = sarama.V2_0_0_0
 	config.Consumer.Group.Rebalance.GroupStrategies = []sarama.BalanceStrategy{sarama.NewBalanceStrategySticky()}
@@ -26,13 +24,11 @@ func NewKafkaConsumer(brokers []string, eventBus *bus.EventBus, infoLog, errorLo
 
 	consumerGroup, err := sarama.NewConsumerGroup(brokers, groupId, config)
 	if err != nil {
-		errorLog.Printf("Error creating consumer group client: %v", err)
+		log.Error().Stack().Err(err).Msg("Error creating consumer group client")
 		return nil, err
 	}
 
 	return &KafkaConsumer{
-		infoLog:       infoLog,
-		errorLog:      errorLog,
 		ConsumerGroup: consumerGroup,
 		eventBus:      eventBus,
 	}, nil
@@ -40,27 +36,25 @@ func NewKafkaConsumer(brokers []string, eventBus *bus.EventBus, infoLog, errorLo
 
 func (k *KafkaConsumer) InitConsumption(ctx context.Context) error {
 	consumer := Consumer{
-		infoLog:  k.infoLog,
-		errorLog: k.errorLog,
 		ready:    make(chan bool),
 		eventBus: k.eventBus,
 	}
 
-	k.infoLog.Println("Initiating Kafka Consumer Group...")
+	log.Info().Msg("Initiating Kafka Consumer Group...")
 
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go k.runConsumerGroup(ctx, &wg, &consumer)
 
 	<-consumer.ready // Await till the consumer has been set up
-	k.infoLog.Println("Kafka Consumer up and running...")
+	log.Info().Msg("Kafka Consumer up and running...")
 
 	<-ctx.Done()
-	k.infoLog.Println("Terminating Kafka Consumer: context cancelled")
+	log.Info().Msg("Terminating Kafka Consumer: context cancelled")
 
 	wg.Wait()
 	if err := k.ConsumerGroup.Close(); err != nil {
-		k.errorLog.Printf("Error closing Kafka Consumer Group: %v\n", err)
+		log.Error().Stack().Err(err).Msg("Error closing Kafka Consumer Group")
 		return err
 	}
 
@@ -75,10 +69,10 @@ func (k *KafkaConsumer) runConsumerGroup(ctx context.Context, wg *sync.WaitGroup
 		// recreated to get the new claims
 		if err := k.ConsumerGroup.Consume(ctx, getTopics(), consumer); err != nil {
 			if errors.Is(err, sarama.ErrClosedConsumerGroup) {
-				k.errorLog.Printf("Consumer Group was closed, error: %v", err)
+				log.Error().Stack().Err(err).Msg("Consumer Group was closed")
 				return
 			}
-			k.errorLog.Panicf("Error from consumer: %v", err)
+			log.Panic().Stack().Err(err).Msg("Error from consumer")
 		}
 		// check if context was cancelled, signaling that the consumer should stop
 		err := ctx.Err()

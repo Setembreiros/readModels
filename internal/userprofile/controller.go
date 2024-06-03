@@ -2,24 +2,20 @@ package userprofile
 
 import (
 	"errors"
-	"log"
 	"readmodels/internal/api"
 	database "readmodels/internal/db"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 )
 
 type UserProfileController struct {
-	infoLog  *log.Logger
-	errorLog *log.Logger
-	service  *UserProfileService
+	service *UserProfileService
 }
 
-func NewUserProfileController(infoLog, errorLog *log.Logger, repository Repository) *UserProfileController {
+func NewUserProfileController(repository Repository) *UserProfileController {
 	return &UserProfileController{
-		service:  NewUserProfileService(infoLog, errorLog, repository),
-		infoLog:  infoLog,
-		errorLog: errorLog,
+		service: NewUserProfileService(repository),
 	}
 }
 
@@ -28,7 +24,7 @@ func (controller *UserProfileController) Routes(routerGroup *gin.RouterGroup) {
 }
 
 func (controller *UserProfileController) GetUserProfile(c *gin.Context) {
-	controller.infoLog.Println("Handling Request GET UserProfile")
+	log.Info().Msg("Handling Request GET UserProfile")
 	id := c.Param("username")
 	username := string(id)
 

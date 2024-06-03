@@ -3,7 +3,6 @@ package userprofile_test
 import (
 	"bytes"
 	"errors"
-	"log"
 	"net/http/httptest"
 	database "readmodels/internal/db"
 	"readmodels/internal/userprofile"
@@ -14,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/assert/v2"
 	"github.com/golang/mock/gomock"
+	"github.com/rs/zerolog/log"
 )
 
 var controllerLoggerOutput bytes.Buffer
@@ -25,8 +25,8 @@ var ginContext *gin.Context
 func setUpHandler(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	controllerRepository = mock_userprofile.NewMockRepository(ctrl)
-	mockLogger := log.New(&controllerLoggerOutput, "", log.LstdFlags)
-	controller = userprofile.NewUserProfileController(mockLogger, mockLogger, controllerRepository)
+	log.Logger = log.Output(&controllerLoggerOutput)
+	controller = userprofile.NewUserProfileController(controllerRepository)
 	gin.SetMode(gin.TestMode)
 	apiResponse = httptest.NewRecorder()
 	ginContext, _ = gin.CreateTestContext(apiResponse)

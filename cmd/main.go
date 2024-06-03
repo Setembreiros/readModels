@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"os"
 	"os/signal"
 	"readmodels/cmd/provider"
@@ -13,33 +12,34 @@ import (
 	"strings"
 	"sync"
 	"syscall"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 type app struct {
-	infoLog          *log.Logger
-	errorLog         *log.Logger
 	ctx              context.Context
 	cancel           context.CancelFunc
 	configuringTasks sync.WaitGroup
 	runningTasks     sync.WaitGroup
+	env              string
 }
 
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	env := strings.TrimSpace(os.Getenv("ENVIRONMENT"))
-	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
-	errorLog := log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
 	app := &app{
-		infoLog:  infoLog,
-		errorLog: errorLog,
-		ctx:      ctx,
-		cancel:   cancel,
+		ctx:    ctx,
+		cancel: cancel,
+		env:    env,
 	}
 
-	infoLog.Printf("Starting ReadModels service in [%s] enviroment...\n", env)
+	app.configuringLog()
 
-	provider := provider.NewProvider(infoLog, errorLog, env)
+	log.Info().Msgf("Starting ReadModels service in [%s] enviroment...\n", env)
+
+	provider := provider.NewProvider(env)
 	database, err := provider.ProvideDb(ctx)
 	if err != nil {
 		os.Exit(1)
@@ -54,6 +54,18 @@ func main() {
 
 	app.runConfigurationTasks(database, subscriptions, eventBus)
 	app.runServerTasks(kafkaConsumer, apiEnpoint)
+}
+
+func (app *app) configuringLog() {
+	if app.env == "development" {
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+
+	} else {
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	}
+
+	log.Logger = log.With().Caller().Logger()
 }
 
 func (app *app) runConfigurationTasks(database *database.Database, subscriptions *[]bus.EventSubscription, eventBus *bus.EventBus) {
@@ -78,22 +90,22 @@ func (app *app) applyMigrations(database *database.Database) {
 
 	err := database.ApplyMigrations(app.ctx)
 	if err != nil {
-		app.errorLog.Panicln("Migrations failed")
+		log.Panic().Err(err).Msg("Migrations failed")
 	}
-	app.infoLog.Println("Migrations finished")
+	log.Info().Msg("Migrations finished")
 }
 
 func (app *app) subcribeEvents(subscriptions *[]bus.EventSubscription, eventBus *bus.EventBus) {
 	defer app.configuringTasks.Done()
 
-	app.infoLog.Println("Subscribing events...")
+	log.Info().Msg("Subscribing events...")
 
 	for _, subscription := range *subscriptions {
 		eventBus.Subscribe(&subscription, app.ctx)
-		app.infoLog.Printf("%s subscribed\n", subscription.EventType)
+		log.Info().Msgf("%s subscribed\n", subscription.EventType)
 	}
 
-	app.infoLog.Println("All events subscribed")
+	log.Info().Msg("All events subscribed")
 }
 
 func (app *app) initKafkaConsumption(kafkaConsumer *kafka.KafkaConsumer) {
@@ -101,9 +113,9 @@ func (app *app) initKafkaConsumption(kafkaConsumer *kafka.KafkaConsumer) {
 
 	err := kafkaConsumer.InitConsumption(app.ctx)
 	if err != nil {
-		app.errorLog.Panicln("Kafka Consumption failed")
+		log.Panic().Err(err).Msg("Kafka Consumption failed")
 	}
-	app.infoLog.Println("Kafka Consumer Group stopped")
+	log.Info().Msg("Kafka Consumer Group stopped")
 }
 
 func (app *app) runApiEndpoint(apiEnpoint *api.Api) {
@@ -111,9 +123,9 @@ func (app *app) runApiEndpoint(apiEnpoint *api.Api) {
 
 	err := apiEnpoint.Run(app.ctx)
 	if err != nil {
-		app.errorLog.Panicln("Closing Readmodels Api failed")
+		log.Panic().Err(err).Msg("Closing Readmodels Api failed")
 	}
-	app.infoLog.Println("Readmodels Api stopped")
+	log.Info().Msg("Readmodels Api stopped")
 }
 
 func blockForever() {
@@ -124,7 +136,7 @@ func blockForever() {
 
 func (app *app) shutdown() {
 	app.cancel()
-	app.infoLog.Println("Shutting down Readmodels Service...")
+	log.Info().Msg("Shutting down Readmodels Service...")
 	app.runningTasks.Wait()
-	app.infoLog.Println("Readmodels Service stopped")
+	log.Info().Msg("Readmodels Service stopped")
 }

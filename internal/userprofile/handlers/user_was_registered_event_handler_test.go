@@ -3,13 +3,14 @@ package userprofile_handler_test
 import (
 	"bytes"
 	"encoding/json"
-	"log"
+	"fmt"
 	userprofile "readmodels/internal/userprofile"
 	userprofile_handler "readmodels/internal/userprofile/handlers"
 	mock_userprofile "readmodels/internal/userprofile/mock"
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -20,8 +21,8 @@ var handler *userprofile_handler.UserWasRegisteredEventHandler
 func setUpHandler(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	repository = mock_userprofile.NewMockRepository(ctrl)
-	mockLogger := log.New(&loggerOutput, "", log.LstdFlags)
-	handler = userprofile_handler.NewUserWasRegisteredEventHandler(mockLogger, mockLogger, repository)
+	log.Logger = log.Output(&loggerOutput)
+	handler = userprofile_handler.NewUserWasRegisteredEventHandler(repository)
 }
 
 func TestHandleUserWasRegisteredEventHandler(t *testing.T) {
@@ -54,5 +55,6 @@ func TestInvalidDataInUserWasRegisteredEventHandler(t *testing.T) {
 
 	handler.Handle(event)
 
-	assert.Contains(t, loggerOutput.String(), "Invalid event data, err: ")
+	fmt.Println(loggerOutput.String())
+	assert.Contains(t, loggerOutput.String(), "Invalid event data")
 }
