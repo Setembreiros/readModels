@@ -37,7 +37,6 @@ func TestGetUserProfile(t *testing.T) {
 	username := "username1"
 	ginContext.Params = []gin.Param{{Key: "username", Value: username}}
 	data := &userprofile.UserProfile{
-		UserId:   "user1",
 		Username: "username1",
 		Name:     "user name",
 		Bio:      "",

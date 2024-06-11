@@ -85,7 +85,7 @@ func (dc *DynamoDBClient) InsertData(tableName string, attributes any) error {
 		TableName: aws.String(tableName), Item: item,
 	})
 	if err != nil {
-		log.Error().Stack().Err(err).Msg("Couldn't add item to table")
+		log.Error().Stack().Err(err).Msg("Couldn't put item to table")
 		return err
 	}
 

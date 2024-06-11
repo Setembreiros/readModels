@@ -8,10 +8,6 @@ type UserProfileKey struct {
 	Username string
 }
 
-func (r UserProfileRepository) AddNewUserProfile(data *UserProfile) error {
-	return r.Client.InsertData("UserProfile", data)
-}
-
 func (r UserProfileRepository) GetUserProfile(username string) (*UserProfile, error) {
 	userProfileKey := &UserProfileKey{
 		Username: username,
@@ -23,4 +19,12 @@ func (r UserProfileRepository) GetUserProfile(username string) (*UserProfile, er
 	}
 
 	return &userProfile, nil
+}
+
+func (r UserProfileRepository) AddNewUserProfile(data *UserProfile) error {
+	return r.Client.InsertData("UserProfile", data)
+}
+
+func (r UserProfileRepository) UpdateUserProfile(data *UserProfile) error {
+	return r.Client.InsertData("UserProfile", data)
 }

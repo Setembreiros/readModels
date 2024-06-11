@@ -28,7 +28,6 @@ func setUpHandler(t *testing.T) {
 func TestHandleUserWasRegisteredEventHandler(t *testing.T) {
 	setUpHandler(t)
 	data := &userprofile_handler.UserWasRegisteredEvent{
-		UserId:   "user1",
 		Username: "username1",
 		Email:    "email1",
 		UserType: "UA",
@@ -37,7 +36,6 @@ func TestHandleUserWasRegisteredEventHandler(t *testing.T) {
 	}
 	event, _ := json.Marshal(data)
 	expectedUserprofile := &userprofile.UserProfile{
-		UserId:   "user1",
 		Username: "username1",
 		Name:     "user lastname",
 		Bio:      "",

@@ -21,7 +21,6 @@ func setUp(t *testing.T) {
 func TestAddNewUserProfileInRepository(t *testing.T) {
 	setUp(t)
 	data := &userprofile.UserProfile{
-		UserId:   "user1",
 		Username: "username1",
 		Name:     "user name",
 		Bio:      "",
