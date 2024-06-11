@@ -26,7 +26,6 @@ func setUpService(t *testing.T) {
 func TestCreateNewUserProfileWithService(t *testing.T) {
 	setUpService(t)
 	data := &userprofile.UserProfile{
-		UserId:   "user1",
 		Username: "username1",
 		Name:     "user name",
 		Bio:      "",
@@ -42,7 +41,6 @@ func TestCreateNewUserProfileWithService(t *testing.T) {
 func TestErrorOnCreateNewUserProfileWithService(t *testing.T) {
 	setUpService(t)
 	data := &userprofile.UserProfile{
-		UserId:   "user1",
 		Username: "username1",
 		Name:     "user name",
 		Bio:      "",
@@ -59,7 +57,6 @@ func TestGetUserProfileWithService(t *testing.T) {
 	setUpService(t)
 	username := "username1"
 	expectedData := &userprofile.UserProfile{
-		UserId:   "user1",
 		Username: "username1",
 		Name:     "user name",
 		Bio:      "",

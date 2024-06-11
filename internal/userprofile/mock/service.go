@@ -62,3 +62,17 @@ func (mr *MockRepositoryMockRecorder) GetUserProfile(username interface{}) *gomo
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserProfile", reflect.TypeOf((*MockRepository)(nil).GetUserProfile), username)
 }
+
+// UpdateUserProfile mocks base method.
+func (m *MockRepository) UpdateUserProfile(data *userprofile.UserProfile) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateUserProfile", data)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateUserProfile indicates an expected call of UpdateUserProfile.
+func (mr *MockRepositoryMockRecorder) UpdateUserProfile(data interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserProfile", reflect.TypeOf((*MockRepository)(nil).UpdateUserProfile), data)
+}
