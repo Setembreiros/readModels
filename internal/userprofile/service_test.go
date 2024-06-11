@@ -53,6 +53,36 @@ func TestErrorOnCreateNewUserProfileWithService(t *testing.T) {
 	assert.Contains(t, serviceLoggerOutput.String(), "Error adding user")
 }
 
+func TestUpdateUserProfileWithService(t *testing.T) {
+	setUpService(t)
+	data := &userprofile.UserProfile{
+		Username: "username1",
+		Name:     "user name",
+		Bio:      "O mellor usuario do mundo",
+		Link:     "www.exemplo.com",
+	}
+	serviceRepository.EXPECT().UpdateUserProfile(data)
+
+	userProfileService.UpdateUserProfile(data)
+
+	assert.Contains(t, serviceLoggerOutput.String(), "User Profile for user username1 was updated")
+}
+
+func TestErrorOnUpdateUserProfileWithService(t *testing.T) {
+	setUpService(t)
+	data := &userprofile.UserProfile{
+		Username: "username1",
+		Name:     "user name",
+		Bio:      "O mellor usuario do mundo",
+		Link:     "www.exemplo.com",
+	}
+	serviceRepository.EXPECT().UpdateUserProfile(data).Return(errors.New("some error"))
+
+	userProfileService.UpdateUserProfile(data)
+
+	assert.Contains(t, serviceLoggerOutput.String(), "Error updating user")
+}
+
 func TestGetUserProfileWithService(t *testing.T) {
 	setUpService(t)
 	username := "username1"

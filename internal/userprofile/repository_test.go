@@ -31,6 +31,19 @@ func TestAddNewUserProfileInRepository(t *testing.T) {
 	userProfileRepository.AddNewUserProfile(data)
 }
 
+func TestUpdateUserProfileInRepository(t *testing.T) {
+	setUp(t)
+	data := &userprofile.UserProfile{
+		Username: "username1",
+		Name:     "user name",
+		Bio:      "O mellor usuario do mundo",
+		Link:     "www.exemplo.com",
+	}
+	client.EXPECT().InsertData("UserProfile", data)
+
+	userProfileRepository.UpdateUserProfile(data)
+}
+
 func TestGetUserProfileFromRepository(t *testing.T) {
 	setUp(t)
 	username := "username1"
