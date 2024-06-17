@@ -8,7 +8,6 @@ import (
 )
 
 type UserWasRegisteredEvent struct {
-	UserId   string `json:"user_id"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
 	UserType string `json:"user_type"`
@@ -16,12 +15,12 @@ type UserWasRegisteredEvent struct {
 	FullName string `json:"full_name"`
 }
 
-type UserWasRegisteredEvenService interface {
+type UserWasRegisteredEventService interface {
 	CreateNewUserProfile(data *userprofile.UserProfile)
 }
 
 type UserWasRegisteredEventHandler struct {
-	service UserWasRegisteredEvenService
+	service UserWasRegisteredEventService
 }
 
 func NewUserWasRegisteredEventHandler(repository userprofile.Repository) *UserWasRegisteredEventHandler {
@@ -46,7 +45,6 @@ func (handler *UserWasRegisteredEventHandler) Handle(event []byte) {
 
 func mapData(event UserWasRegisteredEvent) *userprofile.UserProfile {
 	return &userprofile.UserProfile{
-		UserId:   event.UserId,
 		Username: event.Username,
 		Name:     event.FullName,
 		Bio:      "",

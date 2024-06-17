@@ -48,6 +48,10 @@ func (p *Provider) ProvideSubscriptions(database *database.Database) *[]bus.Even
 			EventType: "UserWasRegisteredEvent",
 			Handler:   userprofile_handler.NewUserWasRegisteredEventHandler(userprofile.UserProfileRepository(*database)),
 		},
+		{
+			EventType: "UserProfileUpdatedEvent",
+			Handler:   userprofile_handler.NewUserProfileUpdatedEventHandler(userprofile.UserProfileRepository(*database)),
+		},
 	}
 }
 

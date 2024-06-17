@@ -6,6 +6,7 @@ import "github.com/rs/zerolog/log"
 
 type Repository interface {
 	AddNewUserProfile(data *UserProfile) error
+	UpdateUserProfile(data *UserProfile) error
 	GetUserProfile(username string) (*UserProfile, error)
 }
 
@@ -14,7 +15,6 @@ type UserProfileService struct {
 }
 
 type UserProfile struct {
-	UserId   string `json:"user_id"`
 	Username string `json:"username"`
 	Name     string `json:"name"`
 	Bio      string `json:"bio"`
@@ -35,6 +35,16 @@ func (s *UserProfileService) CreateNewUserProfile(data *UserProfile) {
 	}
 
 	log.Info().Msgf("User Profile for user %s was added", data.Username)
+}
+
+func (s *UserProfileService) UpdateUserProfile(data *UserProfile) {
+	err := s.repository.UpdateUserProfile(data)
+	if err != nil {
+		log.Error().Stack().Err(err).Msg("Error updating user")
+		return
+	}
+
+	log.Info().Msgf("User Profile for user %s was updated", data.Username)
 }
 
 func (s *UserProfileService) GetUserProfile(username string) (*UserProfile, error) {

@@ -37,7 +37,6 @@ func TestGetUserProfile(t *testing.T) {
 	username := "username1"
 	ginContext.Params = []gin.Param{{Key: "username", Value: username}}
 	data := &userprofile.UserProfile{
-		UserId:   "user1",
 		Username: "username1",
 		Name:     "user name",
 		Bio:      "",
@@ -48,7 +47,6 @@ func TestGetUserProfile(t *testing.T) {
 		"error": false,
 		"message": "200 OK",
 		"content": {
-			"user_id": "user1",
 			"username": "username1",
 			"name": "user name",
 			"bio": "",
@@ -67,7 +65,6 @@ func TestUserNotFoundOnGetUserProfile(t *testing.T) {
 	noExistingUsername := "noExistingUsername"
 	ginContext.Params = []gin.Param{{Key: "username", Value: noExistingUsername}}
 	expectedData := &userprofile.UserProfile{
-		UserId:   "",
 		Username: "",
 		Name:     "",
 		Bio:      "",
@@ -92,7 +89,6 @@ func TestInternalServerOnGetUserProfile(t *testing.T) {
 	username := "username1"
 	ginContext.Params = []gin.Param{{Key: "username", Value: username}}
 	expectedData := &userprofile.UserProfile{
-		UserId:   "",
 		Username: "",
 		Name:     "",
 		Bio:      "",
