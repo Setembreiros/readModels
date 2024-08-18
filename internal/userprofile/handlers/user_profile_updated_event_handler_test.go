@@ -3,7 +3,6 @@ package userprofile_handler_test
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	userprofile "readmodels/internal/userprofile"
 	userprofile_handler "readmodels/internal/userprofile/handlers"
 	mock_userprofile "readmodels/internal/userprofile/mock"
@@ -52,6 +51,5 @@ func TestInvalidDataInUserProfileUpdatedEventHandler(t *testing.T) {
 
 	userProfileUpdatedEventHandler.Handle(event)
 
-	fmt.Println(userProfileUpdatedEventLoggerOutput.String())
 	assert.Contains(t, userProfileUpdatedEventLoggerOutput.String(), "Invalid event data")
 }

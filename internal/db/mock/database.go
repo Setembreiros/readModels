@@ -77,20 +77,6 @@ func (mr *MockDatabaseClientMockRecorder) GetData(tableName, key, result interfa
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetData", reflect.TypeOf((*MockDatabaseClient)(nil).GetData), tableName, key, result)
 }
 
-// IndexExists mocks base method.
-func (m *MockDatabaseClient) IndexExists(tableName, indexName string) bool {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IndexExists", tableName, indexName)
-	ret0, _ := ret[0].(bool)
-	return ret0
-}
-
-// IndexExists indicates an expected call of IndexExists.
-func (mr *MockDatabaseClientMockRecorder) IndexExists(tableName, indexName interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IndexExists", reflect.TypeOf((*MockDatabaseClient)(nil).IndexExists), tableName, indexName)
-}
-
 // InsertData mocks base method.
 func (m *MockDatabaseClient) InsertData(tableName string, attributes any) error {
 	m.ctrl.T.Helper()
