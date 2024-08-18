@@ -25,7 +25,7 @@ func (db *Database) ApplyMigrations(ctx context.Context) error {
 	if !db.Client.TableExists("PostMetadata") {
 		keys := []TableAttributes{
 			{
-				Name:          "Username",
+				Name:          "PostId",
 				AttributeType: "string",
 			},
 		}
@@ -35,7 +35,7 @@ func (db *Database) ApplyMigrations(ctx context.Context) error {
 		}
 		indexes := []TableAttributes{
 			{
-				Name:          "User",
+				Name:          "Username",
 				AttributeType: "string",
 			},
 			{
