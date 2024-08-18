@@ -18,6 +18,7 @@ type Database struct {
 type DatabaseClient interface {
 	TableExists(tableName string) bool
 	CreateTable(tableName string, keys *[]TableAttributes, ctx context.Context) error
+	CreateIndexesOnTable(tableName, indexName string, inndexes *[]TableAttributes, ctx context.Context) error
 	InsertData(tableName string, attributes any) error
 	GetData(tableName string, key any, result any) error
 }
