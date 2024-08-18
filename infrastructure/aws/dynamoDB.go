@@ -61,6 +61,7 @@ func (dc *DynamoDBClient) CreateTable(tableName string, keys *[]database.TableAt
 	var tableDesc *types.TableDescription
 	if err != nil {
 		log.Fatal().Stack().Err(err).Msgf("Couldn't create table %v", tableName)
+		return err
 	} else {
 		waiter := dynamodb.NewTableExistsWaiter(dc.client)
 		err = waiter.Wait(ctx, &dynamodb.DescribeTableInput{
@@ -71,7 +72,7 @@ func (dc *DynamoDBClient) CreateTable(tableName string, keys *[]database.TableAt
 		tableDesc = table.TableDescription
 	}
 
-	log.Info().Msgf("Created table: %s\n", *tableDesc.TableName)
+	log.Info().Msgf("Created table: %s", *tableDesc.TableName)
 	return nil
 }
 
@@ -107,7 +108,7 @@ func (dc *DynamoDBClient) CreateIndexesOnTable(tableName, indexName string, inde
 		log.Fatal().Stack().Err(err).Msg("Failed to update table")
 	}
 
-	log.Info().Msgf("GSI %s created on table %s\n", indexName, tableName)
+	log.Info().Msgf("GSI %s created on table %s", indexName, tableName)
 	return nil
 }
 
@@ -121,7 +122,7 @@ func (dc *DynamoDBClient) InsertData(tableName string, attributes any) error {
 		TableName: aws.String(tableName), Item: item,
 	})
 	if err != nil {
-		log.Error().Stack().Err(err).Msg("Couldn't put item to table")
+		log.Error().Stack().Err(err).Msgf("Couldn't put item to table %s", tableName)
 		return err
 	}
 
