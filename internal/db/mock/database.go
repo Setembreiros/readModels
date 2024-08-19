@@ -77,6 +77,21 @@ func (mr *MockDatabaseClientMockRecorder) GetData(tableName, key, result interfa
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetData", reflect.TypeOf((*MockDatabaseClient)(nil).GetData), tableName, key, result)
 }
 
+// GetPostsByIndexUser mocks base method.
+func (m *MockDatabaseClient) GetPostsByIndexUser(username string) ([]*database.PostMetadata, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPostsByIndexUser", username)
+	ret0, _ := ret[0].([]*database.PostMetadata)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPostsByIndexUser indicates an expected call of GetPostsByIndexUser.
+func (mr *MockDatabaseClientMockRecorder) GetPostsByIndexUser(username interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPostsByIndexUser", reflect.TypeOf((*MockDatabaseClient)(nil).GetPostsByIndexUser), username)
+}
+
 // InsertData mocks base method.
 func (m *MockDatabaseClient) InsertData(tableName string, attributes any) error {
 	m.ctrl.T.Helper()

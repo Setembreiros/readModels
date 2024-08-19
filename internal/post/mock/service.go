@@ -47,3 +47,18 @@ func (mr *MockRepositoryMockRecorder) AddNewPostMetadata(data interface{}) *gomo
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddNewPostMetadata", reflect.TypeOf((*MockRepository)(nil).AddNewPostMetadata), data)
 }
+
+// GetPostMetadatasByUser mocks base method.
+func (m *MockRepository) GetPostMetadatasByUser(username string) ([]*post.PostMetadata, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPostMetadatasByUser", username)
+	ret0, _ := ret[0].([]*post.PostMetadata)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPostMetadatasByUser indicates an expected call of GetPostMetadatasByUser.
+func (mr *MockRepositoryMockRecorder) GetPostMetadatasByUser(username interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPostMetadatasByUser", reflect.TypeOf((*MockRepository)(nil).GetPostMetadatasByUser), username)
+}

@@ -157,6 +157,41 @@ func (dc *DynamoDBClient) GetData(tableName string, key any, result any) error {
 	return nil
 }
 
+func (dc *DynamoDBClient) GetPostsByIndexUser(username string) ([]*database.PostMetadata, error) {
+	input := &dynamodb.QueryInput{
+		TableName:              aws.String("PostMetadata"),
+		IndexName:              aws.String("UserIndex"),
+		KeyConditionExpression: aws.String("#user = :user"),
+		ExpressionAttributeNames: map[string]string{
+			"#user": "Username",
+		},
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":user": &types.AttributeValueMemberS{Value: username},
+		},
+	}
+
+	response, err := dc.client.Query(context.TODO(), input)
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Couldn't get info about Posts")
+		return nil, err
+	}
+
+	var results []*database.PostMetadata
+	for _, item := range response.Items {
+
+		var result database.PostMetadata
+		err = attributevalue.UnmarshalMap(item, &result)
+		if err != nil {
+			log.Error().Stack().Err(err).Msg("Couldn't unmarshal response")
+			return nil, err
+		}
+
+		results = append(results, &result)
+	}
+
+	return results, nil
+}
+
 func mapTableKeys(keys *[]database.TableAttributes) (*[]types.KeySchemaElement, *[]types.AttributeDefinition, error) {
 	var keySchemas []types.KeySchemaElement
 	var attributeDefinitions []types.AttributeDefinition

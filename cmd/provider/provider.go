@@ -35,6 +35,7 @@ func (p *Provider) ProvideApiEndpoint(database *database.Database) *api.Api {
 func (p *Provider) ProvideApiControllers(database *database.Database) []api.Controller {
 	return []api.Controller{
 		userprofile.NewUserProfileController(userprofile.UserProfileRepository(*database)),
+		post.NewPostController(post.PostRepository(*database)),
 	}
 }
 

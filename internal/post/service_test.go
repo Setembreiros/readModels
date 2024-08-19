@@ -63,3 +63,45 @@ func TestErrorOnCreateNewPostMetadataWithService(t *testing.T) {
 
 	assert.Contains(t, serviceLoggerOutput.String(), "Error adding post metadata for id 123456")
 }
+
+func TestGetPostMetadatasByUserWithService(t *testing.T) {
+	setUpService(t)
+	username := "username1"
+	timeNow := time.Now().UTC()
+	expectedData := []*post.PostMetadata{
+		{
+			PostId:      "123456",
+			Username:    username,
+			Type:        "TEXT",
+			FileType:    "txt",
+			Title:       "Exemplo de Título",
+			Description: "Exemplo de Descrição",
+			CreatedAt:   timeNow,
+			LastUpdated: timeNow,
+		},
+		{
+			PostId:      "abcdef",
+			Username:    username,
+			Type:        "IMAGE",
+			FileType:    "png",
+			Title:       "Exemplo de Título 2",
+			Description: "Exemplo de Descrição 2",
+			CreatedAt:   timeNow,
+			LastUpdated: timeNow,
+		},
+	}
+	serviceRepository.EXPECT().GetPostMetadatasByUser(username).Return(expectedData, nil)
+
+	postService.GetPostMetadatasByUser(username)
+}
+
+func TestErrorOnGetPostMetadatasByUserWithService(t *testing.T) {
+	setUpService(t)
+	username := "username1"
+	expectedData := []*post.PostMetadata{}
+	serviceRepository.EXPECT().GetPostMetadatasByUser(username).Return(expectedData, errors.New("some error"))
+
+	postService.GetPostMetadatasByUser(username)
+
+	assert.Contains(t, serviceLoggerOutput.String(), "Error getting post metadatas for username "+username)
+}
