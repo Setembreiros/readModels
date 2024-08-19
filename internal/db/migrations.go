@@ -22,5 +22,46 @@ func (db *Database) ApplyMigrations(ctx context.Context) error {
 		}
 	}
 
+	if !db.Client.TableExists("PostMetadata") {
+		keys := []TableAttributes{
+			{
+				Name:          "PostId",
+				AttributeType: "string",
+			},
+		}
+		err := db.Client.CreateTable("PostMetadata", &keys, ctx)
+		if err != nil {
+			return err
+		}
+		indexes := []TableAttributes{
+			{
+				Name:          "Username",
+				AttributeType: "string",
+			},
+			{
+				Name:          "CreatedAt",
+				AttributeType: "string",
+			},
+		}
+		err = db.Client.CreateIndexesOnTable("PostMetadata", "UserIndex", &indexes, ctx)
+		if err != nil {
+			return err
+		}
+		indexes = []TableAttributes{
+			{
+				Name:          "Type",
+				AttributeType: "string",
+			},
+			{
+				Name:          "CreatedAt",
+				AttributeType: "string",
+			},
+		}
+		err = db.Client.CreateIndexesOnTable("PostMetadata", "TypeIndex", &indexes, ctx)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }

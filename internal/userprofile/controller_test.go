@@ -84,7 +84,7 @@ func TestUserNotFoundOnGetUserProfile(t *testing.T) {
 	assert.Equal(t, removeSpace(apiResponse.Body.String()), removeSpace(expectedBodyResponse))
 }
 
-func TestInternalServerOnGetUserProfile(t *testing.T) {
+func TestInternalServerErrorOnGetUserProfile(t *testing.T) {
 	setUpHandler(t)
 	username := "username1"
 	ginContext.Params = []gin.Param{{Key: "username", Value: username}}

@@ -41,7 +41,7 @@ func (dc *DynamoDBClient) TableExists(tableName string) bool {
 }
 
 func (dc *DynamoDBClient) CreateTable(tableName string, keys *[]database.TableAttributes, ctx context.Context) error {
-	keySchemas, attributeDefinitions, err := mapTableAttributes(keys)
+	keySchemas, attributeDefinitions, err := mapTableKeys(keys)
 	if err != nil {
 		return err
 	}
@@ -61,6 +61,7 @@ func (dc *DynamoDBClient) CreateTable(tableName string, keys *[]database.TableAt
 	var tableDesc *types.TableDescription
 	if err != nil {
 		log.Fatal().Stack().Err(err).Msgf("Couldn't create table %v", tableName)
+		return err
 	} else {
 		waiter := dynamodb.NewTableExistsWaiter(dc.client)
 		err = waiter.Wait(ctx, &dynamodb.DescribeTableInput{
@@ -71,7 +72,43 @@ func (dc *DynamoDBClient) CreateTable(tableName string, keys *[]database.TableAt
 		tableDesc = table.TableDescription
 	}
 
-	log.Info().Msgf("Created table: %s\n", *tableDesc.TableName)
+	log.Info().Msgf("Created table: %s", *tableDesc.TableName)
+	return nil
+}
+
+func (dc *DynamoDBClient) CreateIndexesOnTable(tableName, indexName string, indexes *[]database.TableAttributes, ctx context.Context) error {
+	keySchemas, attributeDefinitions, err := mapTableKeys(indexes)
+	if err != nil {
+		return err
+	}
+
+	gsi := types.GlobalSecondaryIndexUpdate{
+		Create: &types.CreateGlobalSecondaryIndexAction{
+			IndexName: aws.String(indexName),
+			KeySchema: *keySchemas,
+			Projection: &types.Projection{
+				ProjectionType: types.ProjectionTypeAll,
+			},
+			ProvisionedThroughput: &types.ProvisionedThroughput{
+				ReadCapacityUnits:  aws.Int64(1),
+				WriteCapacityUnits: aws.Int64(1),
+			},
+		},
+	}
+
+	input := &dynamodb.UpdateTableInput{
+		TableName:                   aws.String(tableName),
+		AttributeDefinitions:        *attributeDefinitions,
+		GlobalSecondaryIndexUpdates: []types.GlobalSecondaryIndexUpdate{gsi},
+	}
+
+	_, err = dc.client.UpdateTable(ctx, input)
+
+	if err != nil {
+		log.Fatal().Stack().Err(err).Msg("Failed to update table")
+	}
+
+	log.Info().Msgf("GSI %s created on table %s", indexName, tableName)
 	return nil
 }
 
@@ -85,7 +122,7 @@ func (dc *DynamoDBClient) InsertData(tableName string, attributes any) error {
 		TableName: aws.String(tableName), Item: item,
 	})
 	if err != nil {
-		log.Error().Stack().Err(err).Msg("Couldn't put item to table")
+		log.Error().Stack().Err(err).Msgf("Couldn't put item to table %s", tableName)
 		return err
 	}
 
@@ -120,13 +157,48 @@ func (dc *DynamoDBClient) GetData(tableName string, key any, result any) error {
 	return nil
 }
 
-func mapTableAttributes(keys *[]database.TableAttributes) (*[]types.KeySchemaElement, *[]types.AttributeDefinition, error) {
+func (dc *DynamoDBClient) GetPostsByIndexUser(username string) ([]*database.PostMetadata, error) {
+	input := &dynamodb.QueryInput{
+		TableName:              aws.String("PostMetadata"),
+		IndexName:              aws.String("UserIndex"),
+		KeyConditionExpression: aws.String("#user = :user"),
+		ExpressionAttributeNames: map[string]string{
+			"#user": "Username",
+		},
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":user": &types.AttributeValueMemberS{Value: username},
+		},
+	}
+
+	response, err := dc.client.Query(context.TODO(), input)
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Couldn't get info about Posts")
+		return nil, err
+	}
+
+	var results []*database.PostMetadata
+	for _, item := range response.Items {
+
+		var result database.PostMetadata
+		err = attributevalue.UnmarshalMap(item, &result)
+		if err != nil {
+			log.Error().Stack().Err(err).Msg("Couldn't unmarshal response")
+			return nil, err
+		}
+
+		results = append(results, &result)
+	}
+
+	return results, nil
+}
+
+func mapTableKeys(keys *[]database.TableAttributes) (*[]types.KeySchemaElement, *[]types.AttributeDefinition, error) {
 	var keySchemas []types.KeySchemaElement
 	var attributeDefinitions []types.AttributeDefinition
 	isPartitionKey := true
 
 	for _, key := range *keys {
-		keySchema, attributeDefinition, err := mapTableAttribute(key, isPartitionKey)
+		keySchema, attributeDefinition, err := mapTableKey(key, isPartitionKey)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -138,7 +210,7 @@ func mapTableAttributes(keys *[]database.TableAttributes) (*[]types.KeySchemaEle
 	return &keySchemas, &attributeDefinitions, nil
 }
 
-func mapTableAttribute(key database.TableAttributes, isPartitionKey bool) (*types.KeySchemaElement, *types.AttributeDefinition, error) {
+func mapTableKey(key database.TableAttributes, isPartitionKey bool) (*types.KeySchemaElement, *types.AttributeDefinition, error) {
 	attributeType, err := mapAttributeType(key.AttributeType)
 	if err != nil {
 		return nil, nil, err

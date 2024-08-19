@@ -14,11 +14,8 @@ func (r UserProfileRepository) GetUserProfile(username string) (*UserProfile, er
 	}
 	var userProfile UserProfile
 	err := r.Client.GetData("UserProfile", userProfileKey, &userProfile)
-	if err != nil {
-		return &userProfile, err
-	}
 
-	return &userProfile, nil
+	return &userProfile, err
 }
 
 func (r UserProfileRepository) AddNewUserProfile(data *UserProfile) error {

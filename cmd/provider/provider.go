@@ -7,6 +7,8 @@ import (
 	"readmodels/internal/api"
 	"readmodels/internal/bus"
 	database "readmodels/internal/db"
+	"readmodels/internal/post"
+	post_handler "readmodels/internal/post/handler"
 	"readmodels/internal/userprofile"
 	userprofile_handler "readmodels/internal/userprofile/handlers"
 
@@ -33,6 +35,7 @@ func (p *Provider) ProvideApiEndpoint(database *database.Database) *api.Api {
 func (p *Provider) ProvideApiControllers(database *database.Database) []api.Controller {
 	return []api.Controller{
 		userprofile.NewUserProfileController(userprofile.UserProfileRepository(*database)),
+		post.NewPostController(post.PostRepository(*database)),
 	}
 }
 
@@ -51,6 +54,10 @@ func (p *Provider) ProvideSubscriptions(database *database.Database) *[]bus.Even
 		{
 			EventType: "UserProfileUpdatedEvent",
 			Handler:   userprofile_handler.NewUserProfileUpdatedEventHandler(userprofile.UserProfileRepository(*database)),
+		},
+		{
+			EventType: "PostWasCreatedEvent",
+			Handler:   post_handler.NewPostWasCreatedEventHandler(post.PostRepository(*database)),
 		},
 	}
 }
