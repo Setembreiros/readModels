@@ -22,6 +22,17 @@ func (r PostRepository) GetPostMetadatasByUser(username string) ([]*PostMetadata
 	return posts, nil
 }
 
+func (r PostRepository) RemovePostMetadata(postIds []string) error {
+	anySlice := make([]any, len(postIds))
+	for i, v := range postIds {
+		anySlice[i] = v
+	}
+
+	err := r.Client.RemoveMultipleData("Posts", anySlice)
+
+	return err
+}
+
 func mapToDomain(data *database.PostMetadata) *PostMetadata {
 	return &PostMetadata{
 		PostId:      data.PostId,

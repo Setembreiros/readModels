@@ -92,3 +92,12 @@ func TestGetPostMetadatasByUserInRepository(t *testing.T) {
 
 	assert.Equal(t, expectedResult, result)
 }
+
+func TestRemovePostMetadataInRepository(t *testing.T) {
+	setUp(t)
+	postIds := []string{"123456", "abcdef", "1a2b3e"}
+	expectedSlice := []any{"123456", "abcdef", "1a2b3e"}
+	client.EXPECT().RemoveMultipleData("Posts", expectedSlice)
+
+	postRepository.RemovePostMetadata(postIds)
+}
