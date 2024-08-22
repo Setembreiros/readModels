@@ -5,5 +5,6 @@ func getTopics() []string {
 		"UserWasRegisteredEvent",
 		"UserProfileUpdatedEvent",
 		"PostWasCreatedEvent",
+		"PostsWereDeletedEvent",
 	}
 }
