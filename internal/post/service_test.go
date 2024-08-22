@@ -3,6 +3,7 @@ package post_test
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"readmodels/internal/post"
 	mock_post "readmodels/internal/post/mock"
 	"testing"
@@ -104,4 +105,24 @@ func TestErrorOnGetPostMetadatasByUserWithService(t *testing.T) {
 	postService.GetPostMetadatasByUser(username)
 
 	assert.Contains(t, serviceLoggerOutput.String(), "Error getting post metadatas for username "+username)
+}
+
+func TestRemovePostMetadataWithService(t *testing.T) {
+	setUpService(t)
+	postIds := []string{"123456", "abcdef", "1a2b3e"}
+	serviceRepository.EXPECT().RemovePostMetadata(postIds)
+
+	postService.RemovePostMetadata(postIds)
+
+	assert.Contains(t, serviceLoggerOutput.String(), fmt.Sprintf("Post metadatas for ids %v were removed", postIds))
+}
+
+func TestRemovePostMetadataWithService_Error(t *testing.T) {
+	setUpService(t)
+	postIds := []string{"123456", "abcdef", "1a2b3e"}
+	serviceRepository.EXPECT().RemovePostMetadata(postIds).Return(errors.New("some error"))
+
+	postService.RemovePostMetadata(postIds)
+
+	assert.Contains(t, serviceLoggerOutput.String(), fmt.Sprintf("Error removing post metadatas for id %v", postIds))
 }
