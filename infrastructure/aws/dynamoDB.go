@@ -157,6 +157,35 @@ func (dc *DynamoDBClient) GetData(tableName string, key any, result any) error {
 	return nil
 }
 
+func (dc *DynamoDBClient) RemoveMultipleData(tableName string, keys []any) error {
+	writeRequests := make([]types.WriteRequest, len(keys))
+	for i, key := range keys {
+		k, err := attributevalue.MarshalMap(key)
+		if err != nil {
+			log.Error().Stack().Err(err).Msgf("Couldn't map %v key to AttributeValues", key)
+		}
+		writeRequests[i] = types.WriteRequest{
+			DeleteRequest: &types.DeleteRequest{
+				Key: k,
+			},
+		}
+	}
+
+	input := &dynamodb.BatchWriteItemInput{
+		RequestItems: map[string][]types.WriteRequest{
+			tableName: writeRequests,
+		},
+	}
+
+	_, err := dc.client.BatchWriteItem(context.TODO(), input)
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Failed to batch delete items %v from table %s", keys, tableName)
+		return err
+	}
+
+	return nil
+}
+
 func (dc *DynamoDBClient) GetPostsByIndexUser(username string) ([]*database.PostMetadata, error) {
 	input := &dynamodb.QueryInput{
 		TableName:              aws.String("PostMetadata"),

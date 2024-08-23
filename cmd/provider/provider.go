@@ -59,6 +59,10 @@ func (p *Provider) ProvideSubscriptions(database *database.Database) *[]bus.Even
 			EventType: "PostWasCreatedEvent",
 			Handler:   post_handler.NewPostWasCreatedEventHandler(post.PostRepository(*database)),
 		},
+		{
+			EventType: "PostsWereDeletedEvent",
+			Handler:   post_handler.NewPostsWereDeletedEventHandler(post.PostRepository(*database)),
+		},
 	}
 }
 

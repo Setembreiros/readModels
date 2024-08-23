@@ -8,6 +8,10 @@ func (r PostRepository) AddNewPostMetadata(data *PostMetadata) error {
 	return r.Client.InsertData("PostMetadata", data)
 }
 
+type PostMetadataKey struct {
+	PostId string
+}
+
 func (r PostRepository) GetPostMetadatasByUser(username string) ([]*PostMetadata, error) {
 	data, err := r.Client.GetPostsByIndexUser(username)
 	if err != nil {
@@ -20,6 +24,19 @@ func (r PostRepository) GetPostMetadatasByUser(username string) ([]*PostMetadata
 	}
 
 	return posts, nil
+}
+
+func (r PostRepository) RemovePostMetadata(postIds []string) error {
+	postKeys := make([]any, len(postIds))
+	for i, v := range postIds {
+		postKeys[i] = &PostMetadataKey{
+			PostId: v,
+		}
+	}
+
+	err := r.Client.RemoveMultipleData("PostMetadata", postKeys)
+
+	return err
 }
 
 func mapToDomain(data *database.PostMetadata) *PostMetadata {
