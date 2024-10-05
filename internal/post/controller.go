@@ -11,6 +11,10 @@ type PostController struct {
 	service *PostService
 }
 
+type GetPostMetadatasResponse struct {
+	Posts []*PostMetadata `json:"posts"`
+}
+
 func NewPostController(repository Repository) *PostController {
 	return &PostController{
 		service: NewPostService(repository),
@@ -32,5 +36,7 @@ func (controller *PostController) GetPostMetadatasByUser(c *gin.Context) {
 		return
 	}
 
-	api.SendOKWithResult(c, &postMetadatas)
+	api.SendOKWithResult(c, &GetPostMetadatasResponse{
+		Posts: postMetadatas,
+	})
 }
