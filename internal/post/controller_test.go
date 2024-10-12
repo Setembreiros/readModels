@@ -63,7 +63,7 @@ func TestGetPostMetadatasByUser(t *testing.T) {
 	expectedBodyResponse := `{
 		"error": false,
 		"message": "200 OK",
-		"content": [
+		"content": {"posts":[
 		{
 			"post_id":      "123456",
 			"username":   "username1",
@@ -84,7 +84,7 @@ func TestGetPostMetadatasByUser(t *testing.T) {
 			"created_at":   "` + timeNow.Format("2006-01-02T15:04:05.0000000Z") + `",
 			"last_updated": "` + timeNow.Format("2006-01-02T15:04:05.0000000Z") + `"
 		}
-		]
+		]}
 	}`
 
 	controller.GetPostMetadatasByUser(ginContext)
