@@ -44,7 +44,6 @@ func mapToDomain(data *database.PostMetadata) *PostMetadata {
 		PostId:      data.PostId,
 		Username:    data.Username,
 		Type:        data.Type,
-		FileType:    data.FileType,
 		Title:       data.Title,
 		Description: data.Description,
 		CreatedAt:   data.CreatedAt,

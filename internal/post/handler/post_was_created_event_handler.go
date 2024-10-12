@@ -11,7 +11,6 @@ import (
 type Metadata struct {
 	Username    string    `json:"username"`
 	Type        string    `json:"type"`
-	FileType    string    `json:"file_type"`
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
 	CreatedAt   time.Time `json:"created_at"`
@@ -60,7 +59,6 @@ func mapData(event PostWasCreatedEvent) *post.PostMetadata {
 		PostId:      event.PostId,
 		Username:    event.Metadata.Username,
 		Type:        event.Metadata.Type,
-		FileType:    event.Metadata.FileType,
 		Title:       event.Metadata.Title,
 		Description: event.Metadata.Description,
 		CreatedAt:   event.Metadata.CreatedAt,

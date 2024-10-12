@@ -33,7 +33,6 @@ func TestHandlePostWasCreatedEvent(t *testing.T) {
 		Metadata: post_handler.Metadata{
 			Username:    "user123",
 			Type:        "TEXT",
-			FileType:    "txt",
 			Title:       "Exemplo de Título",
 			Description: "Exemplo de Descrição",
 			CreatedAt:   timeNow,
@@ -45,7 +44,6 @@ func TestHandlePostWasCreatedEvent(t *testing.T) {
 		PostId:      "123456",
 		Username:    "user123",
 		Type:        "TEXT",
-		FileType:    "txt",
 		Title:       "Exemplo de Título",
 		Description: "Exemplo de Descrição",
 		CreatedAt:   timeNow,
