@@ -23,6 +23,7 @@ var controllerRepository *mock_post.MockRepository
 var controller *post.PostController
 var apiResponse *httptest.ResponseRecorder
 var ginContext *gin.Context
+var timeLayout string = "2006-01-02T15:04:05.000000000Z"
 
 func setUpHandler(t *testing.T) {
 	ctrl := gomock.NewController(t)
@@ -84,8 +85,8 @@ func TestGetPostMetadatasByUser(t *testing.T) {
 			"type":        "TEXT",
 			"title":       "Exemplo de Título",
 			"description": "Exemplo de Descrição",
-			"created_at":   "` + timeNow.Format("2006-01-02T15:04:05.0000000Z") + `",
-			"last_updated": "` + timeNow.Format("2006-01-02T15:04:05.0000000Z") + `"
+			"created_at":   "` + timeNow.Format(timeLayout) + `",
+			"last_updated": "` + timeNow.Format(timeLayout) + `"
 		},
 		{
 			"post_id":      "abcdef",
@@ -93,8 +94,8 @@ func TestGetPostMetadatasByUser(t *testing.T) {
 			"type":        "IMAGE",
 			"title":       "Exemplo de Título 2",
 			"description": "Exemplo de Descrição 2",
-			"created_at":   "` + timeNow.Format("2006-01-02T15:04:05.0000000Z") + `",
-			"last_updated": "` + timeNow.Format("2006-01-02T15:04:05.0000000Z") + `"
+			"created_at":   "` + timeNow.Format(timeLayout) + `",
+			"last_updated": "` + timeNow.Format(timeLayout) + `"
 		}
 		],"limit":4,"lastPostId":"post7","lastPostCreatedAt":"0001-01-06T00:00:00Z"}
 	}`
@@ -144,8 +145,8 @@ func TestGetPostMetadatasByUserWithDefaultPaginationParameters(t *testing.T) {
 			"type":        "TEXT",
 			"title":       "Exemplo de Título",
 			"description": "Exemplo de Descrição",
-			"created_at":   "` + timeNow.Format("2006-01-02T15:04:05.0000000Z") + `",
-			"last_updated": "` + timeNow.Format("2006-01-02T15:04:05.0000000Z") + `"
+			"created_at":   "` + timeNow.Format(timeLayout) + `",
+			"last_updated": "` + timeNow.Format(timeLayout) + `"
 		},
 		{
 			"post_id":      "abcdef",
@@ -153,8 +154,8 @@ func TestGetPostMetadatasByUserWithDefaultPaginationParameters(t *testing.T) {
 			"type":        "IMAGE",
 			"title":       "Exemplo de Título 2",
 			"description": "Exemplo de Descrição 2",
-			"created_at":   "` + timeNow.Format("2006-01-02T15:04:05.0000000Z") + `",
-			"last_updated": "` + timeNow.Format("2006-01-02T15:04:05.0000000Z") + `"
+			"created_at":   "` + timeNow.Format(timeLayout) + `",
+			"last_updated": "` + timeNow.Format(timeLayout) + `"
 		}
 		],"limit":6,"lastPostId":"post7","lastPostCreatedAt":"0001-01-06T00:00:00Z"}
 	}`

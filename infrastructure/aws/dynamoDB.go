@@ -202,7 +202,7 @@ func (dc *DynamoDBClient) GetPostsByIndexUser(username string, lastPostId, lastP
 
 	if lastPostId != "" {
 		input.ExclusiveStartKey = map[string]types.AttributeValue{
-			"User":      &types.AttributeValueMemberS{Value: username},
+			"Username":  &types.AttributeValueMemberS{Value: username},
 			"PostId":    &types.AttributeValueMemberS{Value: lastPostId},
 			"CreatedAt": &types.AttributeValueMemberS{Value: lastPostCreatedAt},
 		}
