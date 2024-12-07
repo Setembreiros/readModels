@@ -12,10 +12,10 @@ type PostMetadataKey struct {
 	PostId string
 }
 
-func (r PostRepository) GetPostMetadatasByUser(username string) ([]*PostMetadata, error) {
-	data, err := r.Client.GetPostsByIndexUser(username)
+func (r PostRepository) GetPostMetadatasByUser(username string, lastPostId, lastPostCreatedAt string, limit int) ([]*PostMetadata, string, string, error) {
+	data, lastPostId, lastPostCreatedAt, err := r.Client.GetPostsByIndexUser(username, lastPostId, lastPostCreatedAt, limit)
 	if err != nil {
-		return []*PostMetadata{}, err
+		return []*PostMetadata{}, "", "", err
 	}
 
 	var posts []*PostMetadata
@@ -23,7 +23,7 @@ func (r PostRepository) GetPostMetadatasByUser(username string) ([]*PostMetadata
 		posts = append(posts, mapToDomain(post))
 	}
 
-	return posts, nil
+	return posts, lastPostId, lastPostCreatedAt, nil
 }
 
 func (r PostRepository) RemovePostMetadata(postIds []string) error {

@@ -10,7 +10,7 @@ import (
 
 type Repository interface {
 	AddNewPostMetadata(data *PostMetadata) error
-	GetPostMetadatasByUser(username string) ([]*PostMetadata, error)
+	GetPostMetadatasByUser(username string, lastPostId, lastPostCreatedAt string, limit int) ([]*PostMetadata, string, string, error)
 	RemovePostMetadata(postIds []string) error
 }
 
@@ -44,14 +44,14 @@ func (s *PostService) CreateNewPostMetadata(data *PostMetadata) {
 	log.Info().Msgf("Post metadata for id %s was added", data.PostId)
 }
 
-func (s *PostService) GetPostMetadatasByUser(username string) ([]*PostMetadata, error) {
-	postMetadatas, err := s.repository.GetPostMetadatasByUser(username)
+func (s *PostService) GetPostMetadatasByUser(username string, lastPostId, lastPostCreatedAt string, limit int) ([]*PostMetadata, string, string, error) {
+	postMetadatas, lastPostId, lastPostCreatedAt, err := s.repository.GetPostMetadatasByUser(username, lastPostId, lastPostCreatedAt, limit)
 	if err != nil {
 		log.Error().Stack().Err(err).Msgf("Error getting post metadatas for username %s", username)
-		return postMetadatas, err
+		return postMetadatas, lastPostId, lastPostCreatedAt, err
 	}
 
-	return postMetadatas, nil
+	return postMetadatas, lastPostId, lastPostCreatedAt, nil
 }
 
 func (s *PostService) RemovePostMetadata(postIds []string) {

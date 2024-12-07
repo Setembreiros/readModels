@@ -22,7 +22,7 @@ type DatabaseClient interface {
 	InsertData(tableName string, attributes any) error
 	GetData(tableName string, key any, result any) error
 	RemoveMultipleData(tableName string, keys []any) error
-	GetPostsByIndexUser(username string) ([]*PostMetadata, error)
+	GetPostsByIndexUser(username string, lastPostId, lastPostCreatedAt string, limit int) ([]*PostMetadata, string, string, error)
 }
 
 func NewDatabase(client DatabaseClient) *Database {
