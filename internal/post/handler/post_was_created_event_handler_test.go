@@ -27,7 +27,8 @@ func setUpHandler(t *testing.T) {
 
 func TestHandlePostWasCreatedEvent(t *testing.T) {
 	setUpHandler(t)
-	timeNow := time.Now().UTC()
+	timeLayout := "2006-01-02T15:04:05.000000000Z"
+	timeNow := time.Now().UTC().Format(timeLayout)
 	data := &post_handler.PostWasCreatedEvent{
 		PostId: "123456",
 		Metadata: post_handler.Metadata{
@@ -40,14 +41,15 @@ func TestHandlePostWasCreatedEvent(t *testing.T) {
 		},
 	}
 	event, _ := json.Marshal(data)
+	expectedTime, _ := time.Parse(timeLayout, timeNow)
 	expectedPostMetadata := &post.PostMetadata{
 		PostId:      "123456",
 		Username:    "user123",
 		Type:        "TEXT",
 		Title:       "Exemplo de Título",
 		Description: "Exemplo de Descrição",
-		CreatedAt:   timeNow,
-		LastUpdated: timeNow,
+		CreatedAt:   expectedTime,
+		LastUpdated: expectedTime,
 	}
 	repository.EXPECT().AddNewPostMetadata(expectedPostMetadata)
 

@@ -66,6 +66,9 @@ func TestErrorOnCreateNewPostMetadataWithService(t *testing.T) {
 func TestGetPostMetadatasByUserWithService(t *testing.T) {
 	setUpService(t)
 	username := "username1"
+	lastPostId := "post4"
+	lastPostCreatedAt := "0001-01-03T00:00:00Z"
+	limit := 3
 	timeNow := time.Now().UTC()
 	expectedData := []*post.PostMetadata{
 		{
@@ -87,18 +90,21 @@ func TestGetPostMetadatasByUserWithService(t *testing.T) {
 			LastUpdated: timeNow,
 		},
 	}
-	serviceRepository.EXPECT().GetPostMetadatasByUser(username).Return(expectedData, nil)
+	serviceRepository.EXPECT().GetPostMetadatasByUser(username, lastPostId, lastPostCreatedAt, limit).Return(expectedData, "post7", "0001-01-06T00:00:00Z", nil)
 
-	postService.GetPostMetadatasByUser(username)
+	postService.GetPostMetadatasByUser(username, lastPostId, lastPostCreatedAt, limit)
 }
 
 func TestErrorOnGetPostMetadatasByUserWithService(t *testing.T) {
 	setUpService(t)
 	username := "username1"
+	lastPostId := "post4"
+	lastPostCreatedAt := "0001-01-03T00:00:00Z"
+	limit := 2
 	expectedData := []*post.PostMetadata{}
-	serviceRepository.EXPECT().GetPostMetadatasByUser(username).Return(expectedData, errors.New("some error"))
+	serviceRepository.EXPECT().GetPostMetadatasByUser(username, lastPostId, lastPostCreatedAt, limit).Return(expectedData, "", "", errors.New("some error"))
 
-	postService.GetPostMetadatasByUser(username)
+	postService.GetPostMetadatasByUser(username, lastPostId, lastPostCreatedAt, limit)
 
 	assert.Contains(t, serviceLoggerOutput.String(), "Error getting post metadatas for username "+username)
 }

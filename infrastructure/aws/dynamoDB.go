@@ -186,7 +186,7 @@ func (dc *DynamoDBClient) RemoveMultipleData(tableName string, keys []any) error
 	return nil
 }
 
-func (dc *DynamoDBClient) GetPostsByIndexUser(username string) ([]*database.PostMetadata, error) {
+func (dc *DynamoDBClient) GetPostsByIndexUser(username string, lastPostId, lastPostCreatedAt string, limit int) ([]*database.PostMetadata, string, string, error) {
 	input := &dynamodb.QueryInput{
 		TableName:              aws.String("PostMetadata"),
 		IndexName:              aws.String("UserIndex"),
@@ -197,12 +197,21 @@ func (dc *DynamoDBClient) GetPostsByIndexUser(username string) ([]*database.Post
 		ExpressionAttributeValues: map[string]types.AttributeValue{
 			":user": &types.AttributeValueMemberS{Value: username},
 		},
+		Limit: aws.Int32(int32(limit)),
+	}
+
+	if lastPostId != "" {
+		input.ExclusiveStartKey = map[string]types.AttributeValue{
+			"Username":  &types.AttributeValueMemberS{Value: username},
+			"PostId":    &types.AttributeValueMemberS{Value: lastPostId},
+			"CreatedAt": &types.AttributeValueMemberS{Value: lastPostCreatedAt},
+		}
 	}
 
 	response, err := dc.client.Query(context.TODO(), input)
 	if err != nil {
 		log.Error().Stack().Err(err).Msgf("Couldn't get info about Posts")
-		return nil, err
+		return nil, "", "", err
 	}
 
 	var results []*database.PostMetadata
@@ -212,13 +221,28 @@ func (dc *DynamoDBClient) GetPostsByIndexUser(username string) ([]*database.Post
 		err = attributevalue.UnmarshalMap(item, &result)
 		if err != nil {
 			log.Error().Stack().Err(err).Msg("Couldn't unmarshal response")
-			return nil, err
+			return nil, "", "", err
 		}
 
 		results = append(results, &result)
 	}
 
-	return results, nil
+	lastPostId = ""
+	lastPostCreatedAt = ""
+	if response.LastEvaluatedKey != nil {
+		if val, ok := response.LastEvaluatedKey["PostId"]; ok {
+			if postId, ok := val.(*types.AttributeValueMemberS); ok {
+				lastPostId = postId.Value
+			}
+		}
+		if val, ok := response.LastEvaluatedKey["CreatedAt"]; ok {
+			if postCreatedAt, ok := val.(*types.AttributeValueMemberS); ok {
+				lastPostCreatedAt = postCreatedAt.Value
+			}
+		}
+	}
+
+	return results, lastPostId, lastPostCreatedAt, nil
 }
 
 func mapTableKeys(keys *[]database.TableAttributes) (*[]types.KeySchemaElement, *[]types.AttributeDefinition, error) {
