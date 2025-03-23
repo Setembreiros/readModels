@@ -2,12 +2,14 @@ package userprofile
 
 import "github.com/rs/zerolog/log"
 
-//go:generate mockgen -source=service.go -destination=mock/service.go
+//go:generate mockgen -source=service.go -destination=test/mock/service.go
 
 type Repository interface {
 	AddNewUserProfile(data *UserProfile) error
 	UpdateUserProfile(data *UserProfile) error
 	GetUserProfile(username string) (*UserProfile, error)
+	IncreaseFollowers(username string) error
+	IncreaseFollowees(username string) error
 }
 
 type UserProfileService struct {
@@ -15,10 +17,12 @@ type UserProfileService struct {
 }
 
 type UserProfile struct {
-	Username string `json:"username"`
-	Name     string `json:"name"`
-	Bio      string `json:"bio"`
-	Link     string `json:"link"`
+	Username  string `json:"username"`
+	Name      string `json:"name"`
+	Bio       string `json:"bio"`
+	Link      string `json:"link"`
+	Followers int    `json:"followers"`
+	Followees int    `json:"followees"`
 }
 
 func NewUserProfileService(repository Repository) *UserProfileService {
@@ -55,4 +59,18 @@ func (s *UserProfileService) GetUserProfile(username string) (*UserProfile, erro
 	}
 
 	return userprofile, nil
+}
+
+func (s *UserProfileService) IncreaseFollowers(username string) {
+	err := s.repository.IncreaseFollowers(username)
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Error increasing %s's followers", username)
+	}
+}
+
+func (s *UserProfileService) IncreaseFollowees(username string) {
+	err := s.repository.IncreaseFollowees(username)
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Error increasing %s's followees", username)
+	}
 }

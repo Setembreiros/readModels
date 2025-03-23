@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"readmodels/internal/userprofile"
-	mock_userprofile "readmodels/internal/userprofile/mock"
+	mock_userprofile "readmodels/internal/userprofile/test/mock"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -26,10 +26,12 @@ func setUpService(t *testing.T) {
 func TestCreateNewUserProfileWithService(t *testing.T) {
 	setUpService(t)
 	data := &userprofile.UserProfile{
-		Username: "username1",
-		Name:     "user name",
-		Bio:      "",
-		Link:     "",
+		Username:  "username1",
+		Name:      "user name",
+		Bio:       "",
+		Link:      "",
+		Followers: 0,
+		Followees: 0,
 	}
 	serviceRepository.EXPECT().AddNewUserProfile(data)
 
@@ -41,10 +43,12 @@ func TestCreateNewUserProfileWithService(t *testing.T) {
 func TestErrorOnCreateNewUserProfileWithService(t *testing.T) {
 	setUpService(t)
 	data := &userprofile.UserProfile{
-		Username: "username1",
-		Name:     "user name",
-		Bio:      "",
-		Link:     "",
+		Username:  "username1",
+		Name:      "user name",
+		Bio:       "",
+		Link:      "",
+		Followers: 0,
+		Followees: 0,
 	}
 	serviceRepository.EXPECT().AddNewUserProfile(data).Return(errors.New("some error"))
 
@@ -56,10 +60,12 @@ func TestErrorOnCreateNewUserProfileWithService(t *testing.T) {
 func TestUpdateUserProfileWithService(t *testing.T) {
 	setUpService(t)
 	data := &userprofile.UserProfile{
-		Username: "username1",
-		Name:     "user name",
-		Bio:      "O mellor usuario do mundo",
-		Link:     "www.exemplo.com",
+		Username:  "username1",
+		Name:      "user name",
+		Bio:       "O mellor usuario do mundo",
+		Link:      "www.exemplo.com",
+		Followers: 10,
+		Followees: 20,
 	}
 	serviceRepository.EXPECT().UpdateUserProfile(data)
 
@@ -71,10 +77,12 @@ func TestUpdateUserProfileWithService(t *testing.T) {
 func TestErrorOnUpdateUserProfileWithService(t *testing.T) {
 	setUpService(t)
 	data := &userprofile.UserProfile{
-		Username: "username1",
-		Name:     "user name",
-		Bio:      "O mellor usuario do mundo",
-		Link:     "www.exemplo.com",
+		Username:  "username1",
+		Name:      "user name",
+		Bio:       "O mellor usuario do mundo",
+		Link:      "www.exemplo.com",
+		Followers: 10,
+		Followees: 20,
 	}
 	serviceRepository.EXPECT().UpdateUserProfile(data).Return(errors.New("some error"))
 
@@ -87,10 +95,12 @@ func TestGetUserProfileWithService(t *testing.T) {
 	setUpService(t)
 	username := "username1"
 	expectedData := &userprofile.UserProfile{
-		Username: "username1",
-		Name:     "user name",
-		Bio:      "",
-		Link:     "",
+		Username:  "username1",
+		Name:      "user name",
+		Bio:       "",
+		Link:      "",
+		Followers: 10,
+		Followees: 20,
 	}
 	serviceRepository.EXPECT().GetUserProfile(username).Return(expectedData, nil)
 
@@ -106,4 +116,40 @@ func TestErrorOnGetUserProfileWithService(t *testing.T) {
 	userProfileService.GetUserProfile(username)
 
 	assert.Contains(t, serviceLoggerOutput.String(), "Error getting userprofile for username "+username)
+}
+
+func TestIncreaseFollowersWithService(t *testing.T) {
+	setUpService(t)
+	username := "username1"
+	serviceRepository.EXPECT().IncreaseFollowers(username).Return(nil)
+
+	userProfileService.IncreaseFollowers(username)
+}
+
+func TestErrorOnIncreaseFollowersWithService(t *testing.T) {
+	setUpService(t)
+	username := "username1"
+	serviceRepository.EXPECT().IncreaseFollowers(username).Return(errors.New("some error"))
+
+	userProfileService.IncreaseFollowers(username)
+
+	assert.Contains(t, serviceLoggerOutput.String(), "Error increasing "+username+"'s followers")
+}
+
+func TestIncreaseFolloweesWithService(t *testing.T) {
+	setUpService(t)
+	username := "username1"
+	serviceRepository.EXPECT().IncreaseFollowees(username).Return(nil)
+
+	userProfileService.IncreaseFollowees(username)
+}
+
+func TestErrorOnIncreaseFolloweesWithService(t *testing.T) {
+	setUpService(t)
+	username := "username1"
+	serviceRepository.EXPECT().IncreaseFollowees(username).Return(errors.New("some error"))
+
+	userProfileService.IncreaseFollowees(username)
+
+	assert.Contains(t, serviceLoggerOutput.String(), "Error increasing "+username+"'s followees")
 }

@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	database "readmodels/internal/db"
 	"readmodels/internal/userprofile"
-	mock_userprofile "readmodels/internal/userprofile/mock"
+	mock_userprofile "readmodels/internal/userprofile/test/mock"
 	"strings"
 	"testing"
 
@@ -37,10 +37,12 @@ func TestGetUserProfile(t *testing.T) {
 	username := "username1"
 	ginContext.Params = []gin.Param{{Key: "username", Value: username}}
 	data := &userprofile.UserProfile{
-		Username: "username1",
-		Name:     "user name",
-		Bio:      "",
-		Link:     "",
+		Username:  "username1",
+		Name:      "user name",
+		Bio:       "",
+		Link:      "",
+		Followers: 10,
+		Followees: 20,
 	}
 	controllerRepository.EXPECT().GetUserProfile(username).Return(data, nil)
 	expectedBodyResponse := `{
@@ -50,7 +52,9 @@ func TestGetUserProfile(t *testing.T) {
 			"username": "username1",
 			"name": "user name",
 			"bio": "",
-			"link": ""
+			"link": "",
+			"followers": 10,
+			"followees": 20
 		}
 	}`
 
@@ -65,10 +69,12 @@ func TestUserNotFoundOnGetUserProfile(t *testing.T) {
 	noExistingUsername := "noExistingUsername"
 	ginContext.Params = []gin.Param{{Key: "username", Value: noExistingUsername}}
 	expectedData := &userprofile.UserProfile{
-		Username: "",
-		Name:     "",
-		Bio:      "",
-		Link:     "",
+		Username:  "",
+		Name:      "",
+		Bio:       "",
+		Link:      "",
+		Followers: 10,
+		Followees: 20,
 	}
 	expectedNotFoundError := &database.NotFoundError{}
 	controllerRepository.EXPECT().GetUserProfile(noExistingUsername).Return(expectedData, expectedNotFoundError)
@@ -89,10 +95,12 @@ func TestInternalServerErrorOnGetUserProfile(t *testing.T) {
 	username := "username1"
 	ginContext.Params = []gin.Param{{Key: "username", Value: username}}
 	expectedData := &userprofile.UserProfile{
-		Username: "",
-		Name:     "",
-		Bio:      "",
-		Link:     "",
+		Username:  "",
+		Name:      "",
+		Bio:       "",
+		Link:      "",
+		Followers: 10,
+		Followees: 20,
 	}
 	expectedError := errors.New("some error")
 	controllerRepository.EXPECT().GetUserProfile(username).Return(expectedData, expectedError)
