@@ -153,3 +153,39 @@ func TestErrorOnIncreaseFolloweesWithService(t *testing.T) {
 
 	assert.Contains(t, serviceLoggerOutput.String(), "Error increasing "+username+"'s followees")
 }
+
+func TestDecreaseFollowersWithService(t *testing.T) {
+	setUpService(t)
+	username := "username1"
+	serviceRepository.EXPECT().DecreaseFollowers(username).Return(nil)
+
+	userProfileService.DecreaseFollowers(username)
+}
+
+func TestErrorOnDecreaseFollowersWithService(t *testing.T) {
+	setUpService(t)
+	username := "username1"
+	serviceRepository.EXPECT().DecreaseFollowers(username).Return(errors.New("some error"))
+
+	userProfileService.DecreaseFollowers(username)
+
+	assert.Contains(t, serviceLoggerOutput.String(), "Error decreasing "+username+"'s followers")
+}
+
+func TestDecreaseFolloweesWithService(t *testing.T) {
+	setUpService(t)
+	username := "username1"
+	serviceRepository.EXPECT().DecreaseFollowees(username).Return(nil)
+
+	userProfileService.DecreaseFollowees(username)
+}
+
+func TestErrorOnDecreaseFolloweesWithService(t *testing.T) {
+	setUpService(t)
+	username := "username1"
+	serviceRepository.EXPECT().DecreaseFollowees(username).Return(errors.New("some error"))
+
+	userProfileService.DecreaseFollowees(username)
+
+	assert.Contains(t, serviceLoggerOutput.String(), "Error decreasing "+username+"'s followees")
+}

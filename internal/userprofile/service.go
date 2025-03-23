@@ -10,6 +10,8 @@ type Repository interface {
 	GetUserProfile(username string) (*UserProfile, error)
 	IncreaseFollowers(username string) error
 	IncreaseFollowees(username string) error
+	DecreaseFollowers(username string) error
+	DecreaseFollowees(username string) error
 }
 
 type UserProfileService struct {
@@ -72,5 +74,19 @@ func (s *UserProfileService) IncreaseFollowees(username string) {
 	err := s.repository.IncreaseFollowees(username)
 	if err != nil {
 		log.Error().Stack().Err(err).Msgf("Error increasing %s's followees", username)
+	}
+}
+
+func (s *UserProfileService) DecreaseFollowers(username string) {
+	err := s.repository.DecreaseFollowers(username)
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Error decreasing %s's followers", username)
+	}
+}
+
+func (s *UserProfileService) DecreaseFollowees(username string) {
+	err := s.repository.DecreaseFollowees(username)
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Error decreasing %s's followees", username)
 	}
 }

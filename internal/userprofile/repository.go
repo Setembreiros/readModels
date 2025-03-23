@@ -51,3 +51,19 @@ func (r UserProfileRepository) IncreaseFollowees(username string) error {
 
 	return r.Client.IncrementCounter("UserProfile", userProfileKey, "Followees", 1)
 }
+
+func (r UserProfileRepository) DecreaseFollowers(username string) error {
+	userProfileKey := &UserProfileKey{
+		Username: username,
+	}
+
+	return r.Client.IncrementCounter("UserProfile", userProfileKey, "Followers", -1)
+}
+
+func (r UserProfileRepository) DecreaseFollowees(username string) error {
+	userProfileKey := &UserProfileKey{
+		Username: username,
+	}
+
+	return r.Client.IncrementCounter("UserProfile", userProfileKey, "Followees", -1)
+}

@@ -60,6 +60,10 @@ func (p *Provider) ProvideSubscriptions(database *database.Database) *[]bus.Even
 			Handler:   userprofile_handler.NewUserAFollowedUserBEventHandler(userprofile.UserProfileRepository(*database)),
 		},
 		{
+			EventType: "UserAUnfollowedUserBEvent",
+			Handler:   userprofile_handler.NewUserAUnfollowedUserBEventHandler(userprofile.UserProfileRepository(*database)),
+		},
+		{
 			EventType: "PostWasCreatedEvent",
 			Handler:   post_handler.NewPostWasCreatedEventHandler(post.PostRepository(*database)),
 		},
