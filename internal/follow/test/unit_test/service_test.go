@@ -19,18 +19,18 @@ func setUpService(t *testing.T) {
 func TestGetFollowerMetadatasWithService(t *testing.T) {
 	setUpService(t)
 	followerIds := []string{"USERA", "USERB", "USERC"}
-	expectedData := []*follow.FollowerMetadata{
+	expectedData := &[]follow.FollowerMetadata{
 		{
 			Username: followerIds[0],
-			Fullname: "fullname1",
+			Name:     "fullname1",
 		},
 		{
 			Username: followerIds[1],
-			Fullname: "fullname2",
+			Name:     "fullname2",
 		},
 		{
 			Username: followerIds[2],
-			Fullname: "fullname3",
+			Name:     "fullname3",
 		},
 	}
 	repository.EXPECT().GetFollowerMetadatas(followerIds).Return(expectedData, nil)
@@ -41,7 +41,7 @@ func TestGetFollowerMetadatasWithService(t *testing.T) {
 func TestErrorOnGetFollowerMetadatasWithService(t *testing.T) {
 	setUpService(t)
 	followerIds := []string{"USERA", "USERB", "USERC"}
-	expectedData := []*follow.FollowerMetadata{}
+	expectedData := &[]follow.FollowerMetadata{}
 	repository.EXPECT().GetFollowerMetadatas(followerIds).Return(expectedData, errors.New("some error"))
 
 	followService.GetFollowerMetadatas(followerIds)

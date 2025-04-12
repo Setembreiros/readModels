@@ -87,7 +87,7 @@ func (p *Provider) ProvideDb(ctx context.Context) (*database.Database, error) {
 	var cfg aws.Config
 	var err error
 
-	if p.env == "development" {
+	if p.env == "development" || p.env == "test" {
 		cfg, err = provideDevEnvironmentDbConfig(ctx)
 	} else {
 		cfg, err = provideAwsConfig(ctx)

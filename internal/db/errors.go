@@ -18,3 +18,23 @@ func NewNotFoundError(table string, key any) *NotFoundError {
 		key:   key,
 	}
 }
+
+type InvalidResultsError struct {
+	expected string
+	got      string
+}
+
+func (e *InvalidResultsError) Error() string {
+	return fmt.Sprintf("Invalid results parameter: expected %s, got %s", e.expected, e.got)
+}
+
+func NewInvalidResultsError(expected, got string) *InvalidResultsError {
+	return &InvalidResultsError{
+		expected: expected,
+		got:      got,
+	}
+}
+
+func NewInvalidSlicePointerError(gotType string) *InvalidResultsError {
+	return NewInvalidResultsError("pointer to slice", gotType)
+}

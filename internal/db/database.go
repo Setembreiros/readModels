@@ -16,11 +16,13 @@ type Database struct {
 }
 
 type DatabaseClient interface {
+	Clean()
 	TableExists(tableName string) bool
 	CreateTable(tableName string, keys *[]TableAttributes, ctx context.Context) error
 	CreateIndexesOnTable(tableName, indexName string, inndexes *[]TableAttributes, ctx context.Context) error
 	InsertData(tableName string, attributes any) error
 	GetData(tableName string, key any, result any) error
+	GetMultipleData(tableName string, keys []any, results any) error
 	RemoveMultipleData(tableName string, keys []any) error
 	GetPostsByIndexUser(username string, lastPostId, lastPostCreatedAt string, limit int) ([]*PostMetadata, string, string, error)
 }

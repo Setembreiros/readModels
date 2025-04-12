@@ -5,7 +5,7 @@ import "github.com/rs/zerolog/log"
 //go:generate mockgen -source=service.go -destination=test/mock/service.go
 
 type Repository interface {
-	GetFollowerMetadatas(followerIds []string) ([]*FollowerMetadata, error)
+	GetFollowerMetadatas(followerIds []string) (*[]FollowerMetadata, error)
 }
 
 type FollowService struct {
@@ -14,7 +14,7 @@ type FollowService struct {
 
 type FollowerMetadata struct {
 	Username string `json:"username"`
-	Fullname string `json:"fullname"`
+	Name     string `json:"fullname"`
 }
 
 func NewFollowService(repository Repository) *FollowService {
@@ -22,11 +22,11 @@ func NewFollowService(repository Repository) *FollowService {
 		repository: repository,
 	}
 }
-func (s *FollowService) GetFollowerMetadatas(followerIds []string) ([]*FollowerMetadata, error) {
+func (s *FollowService) GetFollowerMetadatas(followerIds []string) (*[]FollowerMetadata, error) {
 	followerMetadatas, err := s.repository.GetFollowerMetadatas(followerIds)
 	if err != nil {
 		log.Error().Stack().Err(err).Msgf("Error retrieving metadata for followerIds %v", followerIds)
-		return []*FollowerMetadata{}, err
+		return &[]FollowerMetadata{}, err
 	}
 
 	return followerMetadatas, nil

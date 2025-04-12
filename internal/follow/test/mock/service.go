@@ -35,10 +35,10 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 }
 
 // GetFollowerMetadatas mocks base method.
-func (m *MockRepository) GetFollowerMetadatas(followerIds []string) ([]*follow.FollowerMetadata, error) {
+func (m *MockRepository) GetFollowerMetadatas(followerIds []string) (*[]follow.FollowerMetadata, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetFollowerMetadatas", followerIds)
-	ret0, _ := ret[0].([]*follow.FollowerMetadata)
+	ret0, _ := ret[0].(*[]follow.FollowerMetadata)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

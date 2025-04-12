@@ -48,7 +48,7 @@ func TestGetUserProfileFromRepository(t *testing.T) {
 	setUp(t)
 	username := "username1"
 	var userProfile userprofile.UserProfile
-	expectedUserProfileKey := &userprofile.UserProfileKey{
+	expectedUserProfileKey := &database.UserProfileKey{
 		Username: username,
 	}
 	client.EXPECT().GetData("UserProfile", expectedUserProfileKey, &userProfile)

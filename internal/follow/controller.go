@@ -12,7 +12,7 @@ type FollowController struct {
 }
 
 type GetFollowerMetadatasResponse struct {
-	Followers []*FollowerMetadata `json:"followers"`
+	Followers *[]FollowerMetadata `json:"followers"`
 }
 
 func NewFollowController(repository Repository) *FollowController {

@@ -35,18 +35,18 @@ func TestGetFollowersMetadata(t *testing.T) {
 	u.Add("followerId", followerId2)
 	u.Add("followerId", followerId3)
 	ginContext.Request.URL.RawQuery = u.Encode()
-	expectedData := []*follow.FollowerMetadata{
+	expectedData := &[]follow.FollowerMetadata{
 		{
 			Username: followerId1,
-			Fullname: "fullname1",
+			Name:     "fullname1",
 		},
 		{
 			Username: followerId2,
-			Fullname: "fullname2",
+			Name:     "fullname2",
 		},
 		{
 			Username: followerId3,
-			Fullname: "fullname3",
+			Name:     "fullname3",
 		},
 	}
 	repository.EXPECT().GetFollowerMetadatas([]string{followerId1, followerId2, followerId3}).Return(expectedData, nil)
@@ -56,15 +56,15 @@ func TestGetFollowersMetadata(t *testing.T) {
 		"content": {"followers":[
 		{
 			"username":      "` + followerId1 + `",
-			"fullname":   "` + expectedData[0].Fullname + `"
+			"fullname":   "` + (*expectedData)[0].Name + `"
 		},
 		{
 			"username":      "` + followerId2 + `",
-			"fullname":   "` + expectedData[1].Fullname + `"
+			"fullname":   "` + (*expectedData)[1].Name + `"
 		},
 		{
 			"username":      "` + followerId3 + `",
-			"fullname":   "` + expectedData[2].Fullname + `"
+			"fullname":   "` + (*expectedData)[2].Name + `"
 		}
 		]}
 	}`
@@ -86,7 +86,7 @@ func TestInternalServerErrorOnGetFollowersMetadata(t *testing.T) {
 	u.Add("followerId", followerId2)
 	u.Add("followerId", followerId3)
 	ginContext.Request.URL.RawQuery = u.Encode()
-	expectedData := []*follow.FollowerMetadata{}
+	expectedData := &[]follow.FollowerMetadata{}
 	expectedError := errors.New("some error")
 	repository.EXPECT().GetFollowerMetadatas([]string{followerId1, followerId2, followerId3}).Return(expectedData, expectedError)
 	expectedBodyResponse := `{
