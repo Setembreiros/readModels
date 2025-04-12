@@ -23,7 +23,7 @@ var controllerRepository *mock_post.MockRepository
 var controller *post.PostController
 var apiResponse *httptest.ResponseRecorder
 var ginContext *gin.Context
-var timeLayout string = "2006-01-02T15:04:05.000000000Z"
+var timeLayout string = "2006-01-02T15:04:05.00Z"
 
 func setUpHandler(t *testing.T) {
 	ctrl := gomock.NewController(t)
@@ -53,7 +53,7 @@ func TestGetPostMetadatasByUser(t *testing.T) {
 	u.Add("lastPostCreatedAt", lastPostCreatedAt)
 	u.Add("limit", limit)
 	ginContext.Request.URL.RawQuery = u.Encode()
-	timeNow := time.Now().UTC()
+	timeNow, _ := time.Parse(timeLayout, time.Now().UTC().Format(timeLayout))
 	data := []*post.PostMetadata{
 		{
 			PostId:      "123456",
@@ -110,7 +110,7 @@ func TestGetPostMetadatasByUserWithDefaultPaginationParameters(t *testing.T) {
 	setUpHandler(t)
 	username := "username1"
 	ginContext.Params = []gin.Param{{Key: "username", Value: username}}
-	timeNow := time.Now().UTC()
+	timeNow, _ := time.Parse(timeLayout, time.Now().UTC().Format(timeLayout))
 	data := []*post.PostMetadata{
 		{
 			PostId:      "123456",
