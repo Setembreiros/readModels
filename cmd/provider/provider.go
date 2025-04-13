@@ -7,6 +7,7 @@ import (
 	"readmodels/internal/api"
 	"readmodels/internal/bus"
 	database "readmodels/internal/db"
+	"readmodels/internal/follow"
 	"readmodels/internal/post"
 	post_handler "readmodels/internal/post/handler"
 	"readmodels/internal/userprofile"
@@ -36,6 +37,7 @@ func (p *Provider) ProvideApiControllers(database *database.Database) []api.Cont
 	return []api.Controller{
 		userprofile.NewUserProfileController(userprofile.UserProfileRepository(*database)),
 		post.NewPostController(post.PostRepository(*database)),
+		follow.NewFollowController(follow.FollowRepository(*database)),
 	}
 }
 

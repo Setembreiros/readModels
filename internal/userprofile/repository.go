@@ -4,12 +4,8 @@ import database "readmodels/internal/db"
 
 type UserProfileRepository database.Database
 
-type UserProfileKey struct {
-	Username string
-}
-
 func (r UserProfileRepository) GetUserProfile(username string) (*UserProfile, error) {
-	userProfileKey := &UserProfileKey{
+	userProfileKey := &database.UserProfileKey{
 		Username: username,
 	}
 	var userProfile UserProfile
