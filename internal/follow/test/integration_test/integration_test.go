@@ -88,6 +88,58 @@ func TestGetFollowersMetadata_WhenDatabaseReturnsSuccess(t *testing.T) {
 	integration_test_assert.AssertSuccessResult(t, apiResponse, expectedBodyResponse)
 }
 
+func TestGetFolloweesMetadata_WhenDatabaseReturnsSuccess(t *testing.T) {
+	setUp(t)
+	defer tearDown()
+	ginContext.Request, _ = http.NewRequest("GET", "/followees", nil)
+	followeeId1 := "USERA"
+	followeeId2 := "USERB"
+	followeeId3 := "USERC"
+	u := url.Values{}
+	u.Add("followeeId", followeeId1)
+	u.Add("followeeId", followeeId2)
+	u.Add("followeeId", followeeId3)
+	ginContext.Request.URL.RawQuery = u.Encode()
+	expectedData := []follow.FollowerMetadata{
+		{
+			Username: followeeId1,
+			Name:     "fullname1",
+		},
+		{
+			Username: followeeId2,
+			Name:     "fullname2",
+		},
+		{
+			Username: followeeId3,
+			Name:     "fullname3",
+		},
+	}
+	populateDb(t, expectedData)
+	expectedBodyResponse := `{
+		"error": false,
+		"message": "200 OK",
+		"content": {"followees":[
+		{
+			"username":      "` + followeeId1 + `",
+			"fullname":   "` + expectedData[0].Name + `"
+		},
+		{
+			"username":      "` + followeeId2 + `",
+			"fullname":   "` + expectedData[1].Name + `"
+		},
+		{
+			"username":      "` + followeeId3 + `",
+			"fullname":   "` + expectedData[2].Name + `"
+		}
+		]
+		}
+	}`
+
+	controller.GetFolloweesMetadata(ginContext)
+
+	integration_test_assert.AssertSuccessResult(t, apiResponse, expectedBodyResponse)
+}
+
 func populateDb(t *testing.T, data []follow.FollowerMetadata) {
 	for _, follower := range data {
 		integration_test_arrange.AddUserProfileToDatabase(t, db, &userprofile.UserProfile{

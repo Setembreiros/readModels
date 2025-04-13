@@ -22,3 +22,20 @@ func (r FollowRepository) GetFollowersMetadata(followerIds []string) (*[]Followe
 
 	return followersMetadata, nil
 }
+
+func (r FollowRepository) GetFolloweesMetadata(followeeIds []string) (*[]FolloweeMetadata, error) {
+	followeeKeys := make([]any, len(followeeIds))
+	for i, v := range followeeIds {
+		followeeKeys[i] = database.UserProfileKey{
+			Username: v,
+		}
+	}
+
+	followeesMetadata := &[]FolloweeMetadata{} // mandatory inizialiting like this otherwise it will failed
+	err := r.Client.GetMultipleData("UserProfile", followeeKeys, followeesMetadata)
+	if err != nil {
+		return followeesMetadata, err
+	}
+
+	return followeesMetadata, nil
+}
