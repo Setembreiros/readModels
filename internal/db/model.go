@@ -4,6 +4,14 @@ import (
 	"time"
 )
 
+type UserProfileKey struct {
+	Username string
+}
+
+type PostMetadataKey struct {
+	PostId string
+}
+
 type PostMetadata struct {
 	PostId      string    `json:"post_id"`
 	Username    string    `json:"username"`

@@ -1,3 +1,5 @@
+# Os obxectivos .PHONY son aqueles que non xeran ficheiros co mesmo nome.
+# Sen esta declaración, 'make' pode omitir a execución dalgúns comandos se
 # existe un ficheiro co mesmo nome do obxectivo ou se considera que o 
 # obxectivo está actualizado ao non ter dependencias que cambiaran.
 # Neste caso dado que existe un cartafol chamado test no noso proxecto

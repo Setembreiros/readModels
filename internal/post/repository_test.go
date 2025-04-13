@@ -99,13 +99,13 @@ func TestRemovePostMetadataInRepository(t *testing.T) {
 	setUp(t)
 	postIds := []string{"123456", "abcdef", "1a2b3e"}
 	expectedKeys := []any{
-		&post.PostMetadataKey{
+		&database.PostMetadataKey{
 			PostId: "123456",
 		},
-		&post.PostMetadataKey{
+		&database.PostMetadataKey{
 			PostId: "abcdef",
 		},
-		&post.PostMetadataKey{
+		&database.PostMetadataKey{
 			PostId: "1a2b3e",
 		},
 	}
