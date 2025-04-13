@@ -34,6 +34,21 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 	return m.recorder
 }
 
+// GetFolloweesMetadata mocks base method.
+func (m *MockRepository) GetFolloweesMetadata(followeeIds []string) (*[]follow.FolloweeMetadata, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFolloweesMetadata", followeeIds)
+	ret0, _ := ret[0].(*[]follow.FolloweeMetadata)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetFolloweesMetadata indicates an expected call of GetFolloweesMetadata.
+func (mr *MockRepositoryMockRecorder) GetFolloweesMetadata(followeeIds interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFolloweesMetadata", reflect.TypeOf((*MockRepository)(nil).GetFolloweesMetadata), followeeIds)
+}
+
 // GetFollowersMetadata mocks base method.
 func (m *MockRepository) GetFollowersMetadata(followerIds []string) (*[]follow.FollowerMetadata, error) {
 	m.ctrl.T.Helper()
