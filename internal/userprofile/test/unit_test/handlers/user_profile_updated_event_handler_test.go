@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	userprofile "readmodels/internal/userprofile"
 	userprofile_handler "readmodels/internal/userprofile/handlers"
-	mock_userprofile "readmodels/internal/userprofile/mock"
+	mock_userprofile "readmodels/internal/userprofile/test/mock"
 	"testing"
 
 	"github.com/golang/mock/gomock"

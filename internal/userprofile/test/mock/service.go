@@ -48,6 +48,34 @@ func (mr *MockRepositoryMockRecorder) AddNewUserProfile(data interface{}) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddNewUserProfile", reflect.TypeOf((*MockRepository)(nil).AddNewUserProfile), data)
 }
 
+// DecreaseFollowees mocks base method.
+func (m *MockRepository) DecreaseFollowees(username string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DecreaseFollowees", username)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DecreaseFollowees indicates an expected call of DecreaseFollowees.
+func (mr *MockRepositoryMockRecorder) DecreaseFollowees(username interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DecreaseFollowees", reflect.TypeOf((*MockRepository)(nil).DecreaseFollowees), username)
+}
+
+// DecreaseFollowers mocks base method.
+func (m *MockRepository) DecreaseFollowers(username string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DecreaseFollowers", username)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DecreaseFollowers indicates an expected call of DecreaseFollowers.
+func (mr *MockRepositoryMockRecorder) DecreaseFollowers(username interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DecreaseFollowers", reflect.TypeOf((*MockRepository)(nil).DecreaseFollowers), username)
+}
+
 // GetUserProfile mocks base method.
 func (m *MockRepository) GetUserProfile(username string) (*userprofile.UserProfile, error) {
 	m.ctrl.T.Helper()
@@ -61,6 +89,34 @@ func (m *MockRepository) GetUserProfile(username string) (*userprofile.UserProfi
 func (mr *MockRepositoryMockRecorder) GetUserProfile(username interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserProfile", reflect.TypeOf((*MockRepository)(nil).GetUserProfile), username)
+}
+
+// IncreaseFollowees mocks base method.
+func (m *MockRepository) IncreaseFollowees(username string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IncreaseFollowees", username)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// IncreaseFollowees indicates an expected call of IncreaseFollowees.
+func (mr *MockRepositoryMockRecorder) IncreaseFollowees(username interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IncreaseFollowees", reflect.TypeOf((*MockRepository)(nil).IncreaseFollowees), username)
+}
+
+// IncreaseFollowers mocks base method.
+func (m *MockRepository) IncreaseFollowers(username string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IncreaseFollowers", username)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// IncreaseFollowers indicates an expected call of IncreaseFollowers.
+func (mr *MockRepositoryMockRecorder) IncreaseFollowers(username interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IncreaseFollowers", reflect.TypeOf((*MockRepository)(nil).IncreaseFollowers), username)
 }
 
 // UpdateUserProfile mocks base method.

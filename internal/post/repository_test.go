@@ -2,7 +2,7 @@ package post_test
 
 import (
 	database "readmodels/internal/db"
-	mock_database "readmodels/internal/db/mock"
+	mock_database "readmodels/internal/db/test/mock"
 	"readmodels/internal/post"
 	"testing"
 	"time"
