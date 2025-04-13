@@ -3,6 +3,8 @@ package aws
 import (
 	"context"
 	"errors"
+	"fmt"
+	"strconv"
 	"time"
 
 	database "readmodels/internal/db"
@@ -22,6 +24,128 @@ func NewDynamodbClient(config aws.Config) *DynamoDBClient {
 	return &DynamoDBClient{
 		client: dynamodb.NewFromConfig(config),
 	}
+}
+
+func (dc *DynamoDBClient) Clean() {
+	// Step 1: Get the list of all tables
+	var tableNames []string
+	var lastEvaluatedTableName *string
+
+	for {
+		input := &dynamodb.ListTablesInput{
+			ExclusiveStartTableName: lastEvaluatedTableName,
+			Limit:                   aws.Int32(100),
+		}
+
+		result, err := dc.client.ListTables(context.TODO(), input)
+		if err != nil {
+			log.Error().Stack().Err(err).Msg("Error listing DynamoDB tables")
+			return
+		}
+
+		tableNames = append(tableNames, result.TableNames...)
+
+		lastEvaluatedTableName = result.LastEvaluatedTableName
+		if lastEvaluatedTableName == nil {
+			break
+		}
+	}
+
+	// Step 2: For each table, delete all items
+	for _, tableName := range tableNames {
+		log.Info().Msgf("Clearing table: %s", tableName)
+
+		// Get table information to know the primary key
+		describeInput := &dynamodb.DescribeTableInput{
+			TableName: aws.String(tableName),
+		}
+
+		tableInfo, err := dc.client.DescribeTable(context.TODO(), describeInput)
+		if err != nil {
+			log.Error().Stack().Err(err).Msgf("Error getting table info for %s", tableName)
+			continue
+		}
+
+		// Get primary key attribute name
+		if len(tableInfo.Table.KeySchema) == 0 {
+			log.Error().Msgf("No key schema found for table %s", tableName)
+			continue
+		}
+
+		hashKeyName := *tableInfo.Table.KeySchema[0].AttributeName
+
+		// Scan to get all items
+		scanInput := &dynamodb.ScanInput{
+			TableName: aws.String(tableName),
+		}
+
+		var scanResult *dynamodb.ScanOutput
+		scanResult, err = dc.client.Scan(context.TODO(), scanInput)
+		if err != nil {
+			log.Error().Stack().Err(err).Msgf("Error scanning table %s", tableName)
+			continue
+		}
+
+		if len(scanResult.Items) == 0 {
+			log.Info().Msgf("No items to delete in table %s", tableName)
+			continue
+		}
+
+		// Prepare items to delete in batches of 25 (BatchWriteItem limit)
+		var writeRequests []types.WriteRequest
+		for _, item := range scanResult.Items {
+			key := map[string]types.AttributeValue{
+				hashKeyName: item[hashKeyName],
+			}
+
+			// If table has a sort key, add it to the key
+			if len(tableInfo.Table.KeySchema) > 1 {
+				rangeKeyName := *tableInfo.Table.KeySchema[1].AttributeName
+				key[rangeKeyName] = item[rangeKeyName]
+			}
+
+			writeRequests = append(writeRequests, types.WriteRequest{
+				DeleteRequest: &types.DeleteRequest{
+					Key: key,
+				},
+			})
+
+			// Process in batches of 25
+			if len(writeRequests) >= 25 {
+				batchInput := &dynamodb.BatchWriteItemInput{
+					RequestItems: map[string][]types.WriteRequest{
+						tableName: writeRequests,
+					},
+				}
+
+				_, err = dc.client.BatchWriteItem(context.TODO(), batchInput)
+				if err != nil {
+					log.Error().Stack().Err(err).Msgf("Error deleting items from table %s", tableName)
+				}
+
+				writeRequests = []types.WriteRequest{}
+			}
+		}
+
+		// Process remaining items
+		if len(writeRequests) > 0 {
+			batchInput := &dynamodb.BatchWriteItemInput{
+				RequestItems: map[string][]types.WriteRequest{
+					tableName: writeRequests,
+				},
+			}
+
+			_, err = dc.client.BatchWriteItem(context.TODO(), batchInput)
+			if err != nil {
+				log.Error().Stack().Err(err).Msgf("Error deleting remaining items from table %s", tableName)
+			}
+		}
+
+		log.Info().Msgf("Table %s cleared successfully", tableName)
+	}
+
+	log.Info().Msg("All tables have been cleared successfully")
+	return
 }
 
 func (dc *DynamoDBClient) TableExists(tableName string) bool {
@@ -180,6 +304,91 @@ func (dc *DynamoDBClient) RemoveMultipleData(tableName string, keys []any) error
 	_, err := dc.client.BatchWriteItem(context.TODO(), input)
 	if err != nil {
 		log.Error().Stack().Err(err).Msgf("Failed to batch delete items %v from table %s", keys, tableName)
+		return err
+	}
+
+	return nil
+}
+
+func (dc *DynamoDBClient) UpdateData(tableName string, key any, updateAttributes map[string]any) error {
+	k, err := attributevalue.MarshalMap(key)
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Couldn't map %v key to AttributeValues", key)
+		return err
+	}
+
+	updateExp := "set "
+	expAttrNames := make(map[string]string)
+	expAttrValues := make(map[string]types.AttributeValue)
+
+	i := 0
+	for attrName, attrValue := range updateAttributes {
+		placeholder := ":val" + string(rune(97+i)) // :vala, :valb, :valc, etc.
+		nameHolder := "#n" + string(rune(97+i))    // #na, #nb, #nc, etc.
+
+		// Engadir o atributo á expresión
+		if i > 0 {
+			updateExp += ", "
+		}
+		updateExp += nameHolder + " = " + placeholder
+
+		// Engadir o nome e valor do atributo ás expresións
+		expAttrNames[nameHolder] = attrName
+
+		// Convertir o valor a tipo DynamoDB
+		av, err := attributevalue.Marshal(attrValue)
+		if err != nil {
+			log.Error().Stack().Err(err).Msgf("Couldn't map %v key to AttributeValues", attrValue)
+			return err
+		}
+		expAttrValues[placeholder] = av
+
+		i++
+	}
+
+	input := &dynamodb.UpdateItemInput{
+		TableName:                 aws.String(tableName),
+		Key:                       k,
+		UpdateExpression:          aws.String(updateExp),
+		ExpressionAttributeNames:  expAttrNames,
+		ExpressionAttributeValues: expAttrValues,
+		ReturnValues:              types.ReturnValueUpdatedNew,
+	}
+
+	// Executar a operación
+	result, err := dc.client.UpdateItem(context.TODO(), input)
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Couldn't update the element in the table %s", tableName)
+		return err
+	}
+
+	log.Info().Msgf("Element correctly updated: %v", result.Attributes)
+	return nil
+}
+
+func (dc *DynamoDBClient) IncrementCounter(tableName string, key any, counterFieldName string, incrementValue int) error {
+	k, err := attributevalue.MarshalMap(key)
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Non se puido converter a clave %v a AttributeValues", key)
+		return err
+	}
+
+	input := &dynamodb.UpdateItemInput{
+		TableName:        aws.String(tableName),
+		Key:              k,
+		UpdateExpression: aws.String(fmt.Sprintf("set #field = #field + :val")),
+		ExpressionAttributeNames: map[string]string{
+			"#field": counterFieldName,
+		},
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":val": &types.AttributeValueMemberN{Value: strconv.Itoa(incrementValue)},
+		},
+		ReturnValues: types.ReturnValueUpdatedNew,
+	}
+
+	_, err = dc.client.UpdateItem(context.TODO(), input)
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Non se puido actualizar o contador na táboa %s", tableName)
 		return err
 	}
 

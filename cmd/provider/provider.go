@@ -56,6 +56,14 @@ func (p *Provider) ProvideSubscriptions(database *database.Database) *[]bus.Even
 			Handler:   userprofile_handler.NewUserProfileUpdatedEventHandler(userprofile.UserProfileRepository(*database)),
 		},
 		{
+			EventType: "UserAFollowedUserBEvent",
+			Handler:   userprofile_handler.NewUserAFollowedUserBEventHandler(userprofile.UserProfileRepository(*database)),
+		},
+		{
+			EventType: "UserAUnfollowedUserBEvent",
+			Handler:   userprofile_handler.NewUserAUnfollowedUserBEventHandler(userprofile.UserProfileRepository(*database)),
+		},
+		{
 			EventType: "PostWasCreatedEvent",
 			Handler:   post_handler.NewPostWasCreatedEventHandler(post.PostRepository(*database)),
 		},
@@ -87,7 +95,7 @@ func (p *Provider) ProvideDb(ctx context.Context) (*database.Database, error) {
 	var cfg aws.Config
 	var err error
 
-	if p.env == "development" {
+	if p.env == "development" || p.env == "test" {
 		cfg, err = provideDevEnvironmentDbConfig(ctx)
 	} else {
 		cfg, err = provideAwsConfig(ctx)

@@ -23,7 +23,7 @@ var controllerRepository *mock_post.MockRepository
 var controller *post.PostController
 var apiResponse *httptest.ResponseRecorder
 var ginContext *gin.Context
-var timeLayout string = "2006-01-02T15:04:05.000000000Z"
+var timeLayout string = "2006-01-02T15:04:05.0000000Z"
 
 func setUpHandler(t *testing.T) {
 	ctrl := gomock.NewController(t)

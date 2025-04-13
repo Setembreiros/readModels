@@ -35,6 +35,18 @@ func (m *MockDatabaseClient) EXPECT() *MockDatabaseClientMockRecorder {
 	return m.recorder
 }
 
+// Clean mocks base method.
+func (m *MockDatabaseClient) Clean() {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "Clean")
+}
+
+// Clean indicates an expected call of Clean.
+func (mr *MockDatabaseClientMockRecorder) Clean() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Clean", reflect.TypeOf((*MockDatabaseClient)(nil).Clean))
+}
+
 // CreateIndexesOnTable mocks base method.
 func (m *MockDatabaseClient) CreateIndexesOnTable(tableName, indexName string, inndexes *[]database.TableAttributes, ctx context.Context) error {
 	m.ctrl.T.Helper()
@@ -94,6 +106,20 @@ func (mr *MockDatabaseClientMockRecorder) GetPostsByIndexUser(username, lastPost
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPostsByIndexUser", reflect.TypeOf((*MockDatabaseClient)(nil).GetPostsByIndexUser), username, lastPostId, lastPostCreatedAt, limit)
 }
 
+// IncrementCounter mocks base method.
+func (m *MockDatabaseClient) IncrementCounter(tableName string, key any, counterFieldName string, incrementValue int) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IncrementCounter", tableName, key, counterFieldName, incrementValue)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// IncrementCounter indicates an expected call of IncrementCounter.
+func (mr *MockDatabaseClientMockRecorder) IncrementCounter(tableName, key, counterFieldName, incrementValue interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IncrementCounter", reflect.TypeOf((*MockDatabaseClient)(nil).IncrementCounter), tableName, key, counterFieldName, incrementValue)
+}
+
 // InsertData mocks base method.
 func (m *MockDatabaseClient) InsertData(tableName string, attributes any) error {
 	m.ctrl.T.Helper()
@@ -134,4 +160,18 @@ func (m *MockDatabaseClient) TableExists(tableName string) bool {
 func (mr *MockDatabaseClientMockRecorder) TableExists(tableName interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TableExists", reflect.TypeOf((*MockDatabaseClient)(nil).TableExists), tableName)
+}
+
+// UpdateData mocks base method.
+func (m *MockDatabaseClient) UpdateData(tableName string, key any, updateAttributes map[string]any) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateData", tableName, key, updateAttributes)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateData indicates an expected call of UpdateData.
+func (mr *MockDatabaseClientMockRecorder) UpdateData(tableName, key, updateAttributes interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateData", reflect.TypeOf((*MockDatabaseClient)(nil).UpdateData), tableName, key, updateAttributes)
 }
