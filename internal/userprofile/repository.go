@@ -19,7 +19,7 @@ func (r UserProfileRepository) AddNewUserProfile(data *UserProfile) error {
 }
 
 func (r UserProfileRepository) UpdateUserProfile(data *UserProfile) error {
-	userProfileKey := &UserProfileKey{
+	userProfileKey := &database.UserProfileKey{
 		Username: data.Username,
 	}
 
@@ -33,7 +33,7 @@ func (r UserProfileRepository) UpdateUserProfile(data *UserProfile) error {
 }
 
 func (r UserProfileRepository) IncreaseFollowers(username string) error {
-	userProfileKey := &UserProfileKey{
+	userProfileKey := &database.UserProfileKey{
 		Username: username,
 	}
 
@@ -41,7 +41,7 @@ func (r UserProfileRepository) IncreaseFollowers(username string) error {
 }
 
 func (r UserProfileRepository) IncreaseFollowees(username string) error {
-	userProfileKey := &UserProfileKey{
+	userProfileKey := &database.UserProfileKey{
 		Username: username,
 	}
 
@@ -49,7 +49,7 @@ func (r UserProfileRepository) IncreaseFollowees(username string) error {
 }
 
 func (r UserProfileRepository) DecreaseFollowers(username string) error {
-	userProfileKey := &UserProfileKey{
+	userProfileKey := &database.UserProfileKey{
 		Username: username,
 	}
 
@@ -57,7 +57,7 @@ func (r UserProfileRepository) DecreaseFollowers(username string) error {
 }
 
 func (r UserProfileRepository) DecreaseFollowees(username string) error {
-	userProfileKey := &UserProfileKey{
+	userProfileKey := &database.UserProfileKey{
 		Username: username,
 	}
 

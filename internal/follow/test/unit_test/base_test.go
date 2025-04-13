@@ -2,7 +2,7 @@ package unit_test_follow
 
 import (
 	"bytes"
-	mock_database "readmodels/internal/db/mock"
+	mock_database "readmodels/internal/db/test/mock"
 	mock_follow "readmodels/internal/follow/test/mock"
 	"strings"
 	"testing"

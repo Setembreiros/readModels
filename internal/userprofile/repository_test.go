@@ -2,7 +2,7 @@ package userprofile_test
 
 import (
 	database "readmodels/internal/db"
-	mock_database "readmodels/internal/db/mock"
+	mock_database "readmodels/internal/db/test/mock"
 	"readmodels/internal/userprofile"
 	"testing"
 
@@ -39,7 +39,15 @@ func TestUpdateUserProfileInRepository(t *testing.T) {
 		Bio:      "O mellor usuario do mundo",
 		Link:     "www.exemplo.com",
 	}
-	client.EXPECT().InsertData("UserProfile", data)
+	expectedUserProfileKey := &database.UserProfileKey{
+		Username: data.Username,
+	}
+	expectedUpdateAttributes := map[string]interface{}{
+		"Name": data.Name,
+		"Bio":  data.Bio,
+		"Link": data.Link,
+	}
+	client.EXPECT().UpdateData("UserProfile", expectedUserProfileKey, expectedUpdateAttributes)
 
 	userProfileRepository.UpdateUserProfile(data)
 }
