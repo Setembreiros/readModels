@@ -83,7 +83,7 @@ func TestGetFollowersMetadata_WhenDatabaseReturnsSuccess(t *testing.T) {
 		}
 	}`
 
-	controller.GetFollowerMetadatas(ginContext)
+	controller.GetFollowersMetadata(ginContext)
 
 	integration_test_assert.AssertSuccessResult(t, apiResponse, expectedBodyResponse)
 }

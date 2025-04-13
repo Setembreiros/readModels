@@ -11,7 +11,7 @@ type FollowController struct {
 	service *FollowService
 }
 
-type GetFollowerMetadatasResponse struct {
+type GetFollowersMetadataResponse struct {
 	Followers *[]FollowerMetadata `json:"followers"`
 }
 
@@ -22,20 +22,20 @@ func NewFollowController(repository Repository) *FollowController {
 }
 
 func (controller *FollowController) Routes(routerGroup *gin.RouterGroup) {
-	routerGroup.GET("/followers", controller.GetFollowerMetadatas)
+	routerGroup.GET("/followers", controller.GetFollowersMetadata)
 }
 
-func (controller *FollowController) GetFollowerMetadatas(c *gin.Context) {
+func (controller *FollowController) GetFollowersMetadata(c *gin.Context) {
 	log.Info().Msg("Handling Request GET Followers")
 	followerIds := c.QueryArray("followerId")
 
-	followerMetadatas, err := controller.service.GetFollowerMetadatas(followerIds)
+	followersMetadata, err := controller.service.GetFollowersMetadata(followerIds)
 	if err != nil {
 		api.SendInternalServerError(c, err.Error())
 		return
 	}
 
-	api.SendOKWithResult(c, &GetFollowerMetadatasResponse{
-		Followers: followerMetadatas,
+	api.SendOKWithResult(c, &GetFollowersMetadataResponse{
+		Followers: followersMetadata,
 	})
 }

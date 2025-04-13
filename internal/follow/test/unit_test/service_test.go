@@ -16,7 +16,7 @@ func setUpService(t *testing.T) {
 	followService = follow.NewFollowService(repository)
 }
 
-func TestGetFollowerMetadatasWithService(t *testing.T) {
+func TestGetFollowersMetadataWithService(t *testing.T) {
 	setUpService(t)
 	followerIds := []string{"USERA", "USERB", "USERC"}
 	expectedData := &[]follow.FollowerMetadata{
@@ -33,18 +33,18 @@ func TestGetFollowerMetadatasWithService(t *testing.T) {
 			Name:     "fullname3",
 		},
 	}
-	repository.EXPECT().GetFollowerMetadatas(followerIds).Return(expectedData, nil)
+	repository.EXPECT().GetFollowersMetadata(followerIds).Return(expectedData, nil)
 
-	followService.GetFollowerMetadatas(followerIds)
+	followService.GetFollowersMetadata(followerIds)
 }
 
-func TestErrorOnGetFollowerMetadatasWithService(t *testing.T) {
+func TestErrorOnGetFollowersMetadataWithService(t *testing.T) {
 	setUpService(t)
 	followerIds := []string{"USERA", "USERB", "USERC"}
 	expectedData := &[]follow.FollowerMetadata{}
-	repository.EXPECT().GetFollowerMetadatas(followerIds).Return(expectedData, errors.New("some error"))
+	repository.EXPECT().GetFollowersMetadata(followerIds).Return(expectedData, errors.New("some error"))
 
-	followService.GetFollowerMetadatas(followerIds)
+	followService.GetFollowersMetadata(followerIds)
 
 	assert.Contains(t, loggerOutput.String(), fmt.Sprintf("Error retrieving metadata for followerIds %v", followerIds))
 }

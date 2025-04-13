@@ -6,7 +6,7 @@ import (
 
 type FollowRepository database.Database
 
-func (r FollowRepository) GetFollowerMetadatas(followerIds []string) (*[]FollowerMetadata, error) {
+func (r FollowRepository) GetFollowersMetadata(followerIds []string) (*[]FollowerMetadata, error) {
 	followerKeys := make([]any, len(followerIds))
 	for i, v := range followerIds {
 		followerKeys[i] = database.UserProfileKey{
@@ -14,11 +14,11 @@ func (r FollowRepository) GetFollowerMetadatas(followerIds []string) (*[]Followe
 		}
 	}
 
-	followerMetadatas := &[]FollowerMetadata{} // mandatory inizialiting like this otherwise it will failed
-	err := r.Client.GetMultipleData("UserProfile", followerKeys, followerMetadatas)
+	followersMetadata := &[]FollowerMetadata{} // mandatory inizialiting like this otherwise it will failed
+	err := r.Client.GetMultipleData("UserProfile", followerKeys, followersMetadata)
 	if err != nil {
-		return followerMetadatas, err
+		return followersMetadata, err
 	}
 
-	return followerMetadatas, nil
+	return followersMetadata, nil
 }

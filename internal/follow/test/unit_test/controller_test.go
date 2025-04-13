@@ -49,7 +49,7 @@ func TestGetFollowersMetadata(t *testing.T) {
 			Name:     "fullname3",
 		},
 	}
-	repository.EXPECT().GetFollowerMetadatas([]string{followerId1, followerId2, followerId3}).Return(expectedData, nil)
+	repository.EXPECT().GetFollowersMetadata([]string{followerId1, followerId2, followerId3}).Return(expectedData, nil)
 	expectedBodyResponse := `{
 		"error": false,
 		"message": "200 OK",
@@ -69,7 +69,7 @@ func TestGetFollowersMetadata(t *testing.T) {
 		]}
 	}`
 
-	controller.GetFollowerMetadatas(ginContext)
+	controller.GetFollowersMetadata(ginContext)
 
 	assert.Equal(t, apiResponse.Code, 200)
 	assert.Equal(t, removeSpace(apiResponse.Body.String()), removeSpace(expectedBodyResponse))
@@ -88,14 +88,14 @@ func TestInternalServerErrorOnGetFollowersMetadata(t *testing.T) {
 	ginContext.Request.URL.RawQuery = u.Encode()
 	expectedData := &[]follow.FollowerMetadata{}
 	expectedError := errors.New("some error")
-	repository.EXPECT().GetFollowerMetadatas([]string{followerId1, followerId2, followerId3}).Return(expectedData, expectedError)
+	repository.EXPECT().GetFollowersMetadata([]string{followerId1, followerId2, followerId3}).Return(expectedData, expectedError)
 	expectedBodyResponse := `{
 		"error": true,
 		"message": "` + expectedError.Error() + `",
 		"content":null
 	}`
 
-	controller.GetFollowerMetadatas(ginContext)
+	controller.GetFollowersMetadata(ginContext)
 
 	assert.Equal(t, apiResponse.Code, 500)
 	assert.Equal(t, removeSpace(apiResponse.Body.String()), removeSpace(expectedBodyResponse))
