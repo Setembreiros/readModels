@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"reflect"
 	"strconv"
 	"time"
 
@@ -26,126 +27,78 @@ func NewDynamodbClient(config aws.Config) *DynamoDBClient {
 	}
 }
 
+// Clean deletes all tables from DynamoDB.
+// This method is destructive and will remove all tables and data.
+// Errors are logged but not returned.
 func (dc *DynamoDBClient) Clean() {
-	// Step 1: Get the list of all tables
-	var tableNames []string
-	var lastEvaluatedTableName *string
+	ctx := context.TODO()
+	log.Info().Msg("Starting DynamoDB clean process")
 
+	var nextToken *string
+	tablesToDelete := []string{}
+
+	// List all tables
 	for {
-		input := &dynamodb.ListTablesInput{
-			ExclusiveStartTableName: lastEvaluatedTableName,
-			Limit:                   aws.Int32(100),
+		listTablesInput := &dynamodb.ListTablesInput{
+			ExclusiveStartTableName: nextToken,
 		}
 
-		result, err := dc.client.ListTables(context.TODO(), input)
+		response, err := dc.client.ListTables(ctx, listTablesInput)
 		if err != nil {
-			log.Error().Stack().Err(err).Msg("Error listing DynamoDB tables")
+			log.Error().Stack().Err(err).Msg("Failed to list DynamoDB tables")
 			return
 		}
 
-		tableNames = append(tableNames, result.TableNames...)
+		tablesToDelete = append(tablesToDelete, response.TableNames...)
 
-		lastEvaluatedTableName = result.LastEvaluatedTableName
-		if lastEvaluatedTableName == nil {
+		// Check if we need to continue pagination
+		if response.LastEvaluatedTableName == nil {
 			break
 		}
+		nextToken = response.LastEvaluatedTableName
 	}
 
-	// Step 2: For each table, delete all items
-	for _, tableName := range tableNames {
-		log.Info().Msgf("Clearing table: %s", tableName)
-
-		// Get table information to know the primary key
-		describeInput := &dynamodb.DescribeTableInput{
-			TableName: aws.String(tableName),
-		}
-
-		tableInfo, err := dc.client.DescribeTable(context.TODO(), describeInput)
-		if err != nil {
-			log.Error().Stack().Err(err).Msgf("Error getting table info for %s", tableName)
-			continue
-		}
-
-		// Get primary key attribute name
-		if len(tableInfo.Table.KeySchema) == 0 {
-			log.Error().Msgf("No key schema found for table %s", tableName)
-			continue
-		}
-
-		hashKeyName := *tableInfo.Table.KeySchema[0].AttributeName
-
-		// Scan to get all items
-		scanInput := &dynamodb.ScanInput{
-			TableName: aws.String(tableName),
-		}
-
-		var scanResult *dynamodb.ScanOutput
-		scanResult, err = dc.client.Scan(context.TODO(), scanInput)
-		if err != nil {
-			log.Error().Stack().Err(err).Msgf("Error scanning table %s", tableName)
-			continue
-		}
-
-		if len(scanResult.Items) == 0 {
-			log.Info().Msgf("No items to delete in table %s", tableName)
-			continue
-		}
-
-		// Prepare items to delete in batches of 25 (BatchWriteItem limit)
-		var writeRequests []types.WriteRequest
-		for _, item := range scanResult.Items {
-			key := map[string]types.AttributeValue{
-				hashKeyName: item[hashKeyName],
-			}
-
-			// If table has a sort key, add it to the key
-			if len(tableInfo.Table.KeySchema) > 1 {
-				rangeKeyName := *tableInfo.Table.KeySchema[1].AttributeName
-				key[rangeKeyName] = item[rangeKeyName]
-			}
-
-			writeRequests = append(writeRequests, types.WriteRequest{
-				DeleteRequest: &types.DeleteRequest{
-					Key: key,
-				},
-			})
-
-			// Process in batches of 25
-			if len(writeRequests) >= 25 {
-				batchInput := &dynamodb.BatchWriteItemInput{
-					RequestItems: map[string][]types.WriteRequest{
-						tableName: writeRequests,
-					},
-				}
-
-				_, err = dc.client.BatchWriteItem(context.TODO(), batchInput)
-				if err != nil {
-					log.Error().Stack().Err(err).Msgf("Error deleting items from table %s", tableName)
-				}
-
-				writeRequests = []types.WriteRequest{}
-			}
-		}
-
-		// Process remaining items
-		if len(writeRequests) > 0 {
-			batchInput := &dynamodb.BatchWriteItemInput{
-				RequestItems: map[string][]types.WriteRequest{
-					tableName: writeRequests,
-				},
-			}
-
-			_, err = dc.client.BatchWriteItem(context.TODO(), batchInput)
-			if err != nil {
-				log.Error().Stack().Err(err).Msgf("Error deleting remaining items from table %s", tableName)
-			}
-		}
-
-		log.Info().Msgf("Table %s cleared successfully", tableName)
+	if len(tablesToDelete) == 0 {
+		log.Info().Msg("No tables found to delete")
+		return
 	}
 
-	log.Info().Msg("All tables have been cleared successfully")
-	return
+	log.Info().Msgf("Found %d tables to delete", len(tablesToDelete))
+
+	// Delete all tables
+	failedCount := 0
+	for _, tableName := range tablesToDelete {
+		log.Info().Msgf("Deleting table: %s", tableName)
+
+		_, err := dc.client.DeleteTable(ctx, &dynamodb.DeleteTableInput{
+			TableName: aws.String(tableName),
+		})
+
+		if err != nil {
+			log.Error().Stack().Err(err).Msgf("Failed to delete table %s", tableName)
+			failedCount++
+			continue
+		}
+
+		// Wait for table deletion to complete
+		waiter := dynamodb.NewTableNotExistsWaiter(dc.client)
+		err = waiter.Wait(ctx, &dynamodb.DescribeTableInput{
+			TableName: aws.String(tableName),
+		}, 5*time.Minute)
+
+		if err != nil {
+			log.Warn().Err(err).Msgf("Wait for table deletion failed for %s", tableName)
+			continue
+		}
+
+		log.Info().Msgf("Table %s successfully deleted", tableName)
+	}
+
+	if failedCount > 0 {
+		log.Error().Msgf("Failed to delete %d tables", failedCount)
+	} else {
+		log.Info().Msgf("Successfully cleaned up %d DynamoDB tables", len(tablesToDelete))
+	}
 }
 
 func (dc *DynamoDBClient) TableExists(tableName string) bool {
@@ -277,6 +230,78 @@ func (dc *DynamoDBClient) GetData(tableName string, key any, result any) error {
 		log.Error().Stack().Err(err).Msg("Couldn't unmarshal response")
 		return err
 	}
+
+	return nil
+}
+
+func (dc *DynamoDBClient) GetMultipleData(tableName string, keys []any, results any) error {
+	if len(keys) == 0 {
+		return nil
+	}
+
+	err := validateIsPointerToSlice(results)
+	if err != nil {
+		return err
+	}
+
+	keyItems := make([]map[string]types.AttributeValue, 0, len(keys))
+
+	keysAndAttributes := &types.KeysAndAttributes{
+		Keys: keyItems,
+	}
+
+	for _, key := range keys {
+		k, err := attributevalue.MarshalMap(key)
+		if err != nil {
+			log.Error().Stack().Err(err).Msgf("Couldn't map key %v to AttributeValues", key)
+			return err
+		}
+		keysAndAttributes.Keys = append(keysAndAttributes.Keys, k)
+	}
+
+	requestItems := map[string]types.KeysAndAttributes{
+		tableName: *keysAndAttributes,
+	}
+
+	response, err := dc.client.BatchGetItem(context.TODO(), &dynamodb.BatchGetItemInput{
+		RequestItems: requestItems,
+	})
+
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Couldn't get batch info from %s", tableName)
+		return err
+	}
+
+	responseItems, ok := response.Responses[tableName]
+	if !ok || len(responseItems) == 0 {
+		err = database.NewNotFoundError(tableName, keys)
+		log.Error().Stack().Err(err).Msg("No items were found")
+		return err
+	}
+	resultsVal := reflect.ValueOf(results)
+
+	sliceType := resultsVal.Elem().Type()
+	elemType := sliceType.Elem()
+	newSlice := reflect.MakeSlice(sliceType, 0, len(responseItems))
+
+	// Process each item in the response
+	for _, item := range responseItems {
+		// Create a new element of the slice's element type
+		newElem := reflect.New(elemType).Interface()
+
+		// Unmarshal the item into the new element
+		err = attributevalue.UnmarshalMap(item, &newElem)
+		if err != nil {
+			log.Error().Stack().Err(err).Msg("Couldn't unmarshal response item")
+			// We don't know which key this corresponds to, so we can't add to errorMap
+			continue
+		}
+
+		// Add the element to the new slice
+		newSlice = reflect.Append(newSlice, reflect.ValueOf(newElem).Elem())
+	}
+
+	resultsVal.Elem().Set(newSlice)
 
 	return nil
 }
@@ -506,4 +531,28 @@ func mapAttributeType(attributeType string) (types.ScalarAttributeType, error) {
 	default:
 		return "", errors.New("attribute type " + attributeType + " doesn't exist")
 	}
+}
+
+func validateIsPointerToSlice(results any) error {
+	resultsVal := reflect.ValueOf(results)
+
+	if resultsVal.Kind() != reflect.Ptr || resultsVal.Elem().Kind() != reflect.Slice {
+		err := database.NewInvalidSlicePointerError(string(resultsVal.Kind()))
+		log.Error().Stack().Err(err).Msg("Invalid results parameter")
+		return err
+	}
+
+	return nil
+}
+
+func makeResultSlice(results any, lenght int) reflect.Value {
+	resultsVal := reflect.ValueOf(results)
+	sliceType := resultsVal.Elem().Type()
+	return reflect.MakeSlice(sliceType, 0, lenght)
+}
+
+func makeResultElement(results any) reflect.Type {
+	resultsVal := reflect.ValueOf(results)
+	sliceType := resultsVal.Elem().Type()
+	return sliceType.Elem()
 }
