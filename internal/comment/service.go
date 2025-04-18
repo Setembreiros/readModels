@@ -6,7 +6,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-//go:generate mockgen -source=service.go -destination=mock/service.go
+//go:generate mockgen -source=service.go -destination=test/mock/service.go
 
 type Repository interface {
 	AddNewComment(data *Comment) error

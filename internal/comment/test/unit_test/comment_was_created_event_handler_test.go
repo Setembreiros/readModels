@@ -1,27 +1,19 @@
-package comment_handler_test
+package comment_test
 
 import (
-	"bytes"
 	"encoding/json"
 	"readmodels/internal/comment"
 	comment_handler "readmodels/internal/comment/handler"
-	mock_comment "readmodels/internal/comment/mock"
 	"testing"
 	"time"
 
-	"github.com/golang/mock/gomock"
-	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
 )
 
-var loggerOutput bytes.Buffer
-var repository *mock_comment.MockRepository
 var handler *comment_handler.CommentWasCreatedEventHandler
 
 func setUpHandler(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	repository = mock_comment.NewMockRepository(ctrl)
-	log.Logger = log.Output(&loggerOutput)
+	SetUp(t)
 	handler = comment_handler.NewCommentWasCreatedEventHandler(repository)
 }
 
