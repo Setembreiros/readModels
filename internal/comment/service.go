@@ -17,7 +17,7 @@ type CommentService struct {
 }
 
 type Comment struct {
-	CommentId uint64    `json:"commentId"`
+	CommentId string    `json:"commentId"`
 	Username  string    `json:"username"`
 	PostId    string    `json:"postId"`
 	Content   string    `json:"content"`
@@ -33,9 +33,9 @@ func NewCommentService(repository Repository) *CommentService {
 func (s *CommentService) CreateNewComment(data *Comment) {
 	err := s.repository.AddNewComment(data)
 	if err != nil {
-		log.Error().Stack().Err(err).Msgf("Error adding comment with id %d", data.CommentId)
+		log.Error().Stack().Err(err).Msgf("Error adding comment with id %s", data.CommentId)
 		return
 	}
 
-	log.Info().Msgf("Comment with id %d was added", data.CommentId)
+	log.Info().Msgf("Comment with id %s was added", data.CommentId)
 }

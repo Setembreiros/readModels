@@ -21,3 +21,7 @@ type PostMetadata struct {
 	CreatedAt   time.Time `json:"created_at"`
 	LastUpdated time.Time `json:"last_updated"`
 }
+
+type CommentKey struct {
+	CommentId string
+}

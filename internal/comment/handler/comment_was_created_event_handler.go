@@ -9,7 +9,7 @@ import (
 )
 
 type CommentWasCreatedEvent struct {
-	CommentId uint64 `json:"commentId"`
+	CommentId string `json:"commentId"`
 	Username  string `json:"username"`
 	PostId    string `json:"postId"`
 	Content   string `json:"text"`
