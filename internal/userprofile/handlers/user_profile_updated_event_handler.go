@@ -1,6 +1,7 @@
 package userprofile_handler
 
 import (
+	common_data "readmodels/internal/common/data"
 	userprofile "readmodels/internal/userprofile"
 
 	"github.com/rs/zerolog/log"
@@ -31,7 +32,7 @@ func (handler *UserProfileUpdatedEventHandler) Handle(event []byte) {
 	var userProfileUpdatedEvent UserProfileUpdatedEvent
 	log.Info().Msg("Handling UserProfileUpdatedEvent")
 
-	err := Decode(event, &userProfileUpdatedEvent)
+	err := common_data.DeserializeData(event, &userProfileUpdatedEvent)
 	if err != nil {
 		log.Error().Stack().Err(err).Msg("Invalid event data")
 		return

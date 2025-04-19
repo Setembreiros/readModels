@@ -1,8 +1,8 @@
 package comment_handler
 
 import (
-	"encoding/json"
 	"readmodels/internal/comment"
+	common_data "readmodels/internal/common/data"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -34,7 +34,7 @@ func (handler *CommentWasCreatedEventHandler) Handle(event []byte) {
 	var commentWasCreatedEvent CommentWasCreatedEvent
 	log.Info().Msg("Handling CommentWasCreatedEvent")
 
-	err := Decode(event, &commentWasCreatedEvent)
+	err := common_data.DeserializeData(event, &commentWasCreatedEvent)
 	if err != nil {
 		log.Error().Stack().Err(err).Msg("Invalid event data")
 		return
@@ -46,10 +46,6 @@ func (handler *CommentWasCreatedEventHandler) Handle(event []byte) {
 	}
 
 	handler.service.CreateNewComment(data)
-}
-
-func Decode(datab []byte, data any) error {
-	return json.Unmarshal(datab, &data)
 }
 
 func mapData(event CommentWasCreatedEvent) (*comment.Comment, error) {

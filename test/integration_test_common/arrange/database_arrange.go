@@ -3,6 +3,7 @@ package integration_test_arrange
 import (
 	"context"
 	"readmodels/cmd/provider"
+	"readmodels/internal/comment"
 	database "readmodels/internal/db"
 	"readmodels/internal/userprofile"
 	"testing"
@@ -30,4 +31,19 @@ func AddUserProfileToDatabase(t *testing.T, db *database.Database, data *userpro
 	assert.Equal(t, userProfile.Name, data.Name)
 	assert.Equal(t, userProfile.Bio, data.Bio)
 	assert.Equal(t, userProfile.Link, data.Link)
+}
+
+func AddCommentToDatabase(t *testing.T, db *database.Database, data *comment.Comment) {
+	err := db.Client.InsertData("readmodels.comments", data)
+	assert.Nil(t, err)
+	commentKey := &database.CommentKey{
+		CommentId: data.CommentId,
+	}
+	var comment comment.Comment
+	err = db.Client.GetData("readmodels.comments", commentKey, &comment)
+	assert.Nil(t, err)
+	assert.Equal(t, comment.CommentId, data.CommentId)
+	assert.Equal(t, comment.Username, data.Username)
+	assert.Equal(t, comment.PostId, data.PostId)
+	assert.Equal(t, comment.Content, data.Content)
 }
