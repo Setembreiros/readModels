@@ -6,7 +6,10 @@ import (
 	"readmodels/infrastructure/kafka"
 	"readmodels/internal/api"
 	"readmodels/internal/bus"
+	"readmodels/internal/comment"
+	comment_handler "readmodels/internal/comment/handler"
 	database "readmodels/internal/db"
+	"readmodels/internal/follow"
 	"readmodels/internal/post"
 	post_handler "readmodels/internal/post/handler"
 	"readmodels/internal/userprofile"
@@ -36,6 +39,7 @@ func (p *Provider) ProvideApiControllers(database *database.Database) []api.Cont
 	return []api.Controller{
 		userprofile.NewUserProfileController(userprofile.UserProfileRepository(*database)),
 		post.NewPostController(post.PostRepository(*database)),
+		follow.NewFollowController(follow.FollowRepository(*database)),
 	}
 }
 
@@ -70,6 +74,10 @@ func (p *Provider) ProvideSubscriptions(database *database.Database) *[]bus.Even
 		{
 			EventType: "PostsWereDeletedEvent",
 			Handler:   post_handler.NewPostsWereDeletedEventHandler(post.PostRepository(*database)),
+		},
+		{
+			EventType: "CommentWasCreatedEvent",
+			Handler:   comment_handler.NewCommentWasCreatedEventHandler(comment.CommentRepository(*database)),
 		},
 	}
 }
