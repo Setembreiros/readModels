@@ -20,7 +20,7 @@ func TestCreateNewCommentWithService(t *testing.T) {
 	setUpService(t)
 	timeNow := time.Now().UTC()
 	data := &comment.Comment{
-		CommentId: "123456",
+		CommentId: uint64(123456),
 		Username:  "user123",
 		PostId:    "post123",
 		Content:   "Exemplo de content",
@@ -37,7 +37,7 @@ func TestErrorOnCreateNewCommentWithService(t *testing.T) {
 	setUpService(t)
 	timeNow := time.Now().UTC()
 	data := &comment.Comment{
-		CommentId: "123456",
+		CommentId: uint64(123456),
 		Username:  "user123",
 		PostId:    "post123",
 		Content:   "Exemplo de content",

@@ -22,7 +22,7 @@ func TestHandleCommentWasCreatedEvent(t *testing.T) {
 	timeLayout := "2006-01-02T15:04:05.000000000Z"
 	timeNow := time.Now().UTC().Format(timeLayout)
 	data := &comment_handler.CommentWasCreatedEvent{
-		CommentId: "123456",
+		CommentId: uint64(123456),
 		Username:  "user123",
 		PostId:    "post123",
 		Content:   "Exemplo de content",
@@ -31,7 +31,7 @@ func TestHandleCommentWasCreatedEvent(t *testing.T) {
 	event, _ := json.Marshal(data)
 	expectedTime, _ := time.Parse(timeLayout, timeNow)
 	expectedComment := &comment.Comment{
-		CommentId: "123456",
+		CommentId: uint64(123456),
 		Username:  "user123",
 		PostId:    "post123",
 		Content:   "Exemplo de content",

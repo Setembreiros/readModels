@@ -23,5 +23,5 @@ type PostMetadata struct {
 }
 
 type CommentKey struct {
-	CommentId string
+	CommentId uint64
 }

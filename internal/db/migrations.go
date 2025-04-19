@@ -67,7 +67,7 @@ func (db *Database) ApplyMigrations(ctx context.Context) error {
 		keys := []TableAttributes{
 			{
 				Name:          "CommentId",
-				AttributeType: "string",
+				AttributeType: "number",
 			},
 		}
 		err := db.Client.CreateTable("readmodels.comments", &keys, ctx)

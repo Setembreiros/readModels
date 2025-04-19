@@ -8,12 +8,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func AssertCommentExists(t *testing.T, db *database.Database, expectedCommentId string, expectedComment *comment.Comment) {
+func AssertCommentExists(t *testing.T, db *database.Database, expectedCommentId uint64, expectedComment *comment.Comment) {
 	commentKey := &database.CommentKey{
 		CommentId: expectedCommentId,
 	}
 	var comment comment.Comment
-	err := db.Client.GetData("readmodels.comments", commentKey, comment)
+	err := db.Client.GetData("readmodels.comments", commentKey, &comment)
 	assert.Nil(t, err)
 	assert.Equal(t, expectedCommentId, comment.CommentId)
 	assert.Equal(t, expectedComment.PostId, comment.PostId)
