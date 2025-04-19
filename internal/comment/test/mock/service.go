@@ -61,3 +61,19 @@ func (mr *MockRepositoryMockRecorder) DeleteComment(commentId interface{}) *gomo
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteComment", reflect.TypeOf((*MockRepository)(nil).DeleteComment), commentId)
 }
+
+// GetCommentsByPostId mocks base method.
+func (m *MockRepository) GetCommentsByPostId(postId string, lastCommentId uint64, limit int) ([]comment.Comment, uint64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCommentsByPostId", postId, lastCommentId, limit)
+	ret0, _ := ret[0].([]comment.Comment)
+	ret1, _ := ret[1].(uint64)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetCommentsByPostId indicates an expected call of GetCommentsByPostId.
+func (mr *MockRepositoryMockRecorder) GetCommentsByPostId(postId, lastCommentId, limit interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCommentsByPostId", reflect.TypeOf((*MockRepository)(nil).GetCommentsByPostId), postId, lastCommentId, limit)
+}
