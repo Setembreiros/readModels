@@ -12,7 +12,7 @@ type CommentWasCreatedEvent struct {
 	CommentId uint64 `json:"commentId"`
 	Username  string `json:"username"`
 	PostId    string `json:"postId"`
-	Content   string `json:"text"`
+	Content   string `json:"content"`
 	CreatedAt string `json:"createdAt"`
 }
 
@@ -44,6 +44,7 @@ func (handler *CommentWasCreatedEventHandler) Handle(event []byte) {
 	if err != nil {
 		return
 	}
+
 	handler.service.CreateNewComment(data)
 }
 

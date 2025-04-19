@@ -6,6 +6,8 @@ import (
 	"readmodels/infrastructure/kafka"
 	"readmodels/internal/api"
 	"readmodels/internal/bus"
+	"readmodels/internal/comment"
+	comment_handler "readmodels/internal/comment/handler"
 	database "readmodels/internal/db"
 	"readmodels/internal/follow"
 	"readmodels/internal/post"
@@ -72,6 +74,10 @@ func (p *Provider) ProvideSubscriptions(database *database.Database) *[]bus.Even
 		{
 			EventType: "PostsWereDeletedEvent",
 			Handler:   post_handler.NewPostsWereDeletedEventHandler(post.PostRepository(*database)),
+		},
+		{
+			EventType: "CommentWasCreatedEvent",
+			Handler:   comment_handler.NewCommentWasCreatedEventHandler(comment.CommentRepository(*database)),
 		},
 	}
 }
