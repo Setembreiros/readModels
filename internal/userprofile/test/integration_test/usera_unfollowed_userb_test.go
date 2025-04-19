@@ -82,7 +82,7 @@ func createUnfollowedUserBEvent(followerId, followeeId string) []byte {
 }
 
 func assertFollowersDecreased(t *testing.T, username string) {
-	userProfileKey := &userprofile.UserProfileKey{
+	userProfileKey := &database.UserProfileKey{
 		Username: username,
 	}
 	var userProfile userprofile.UserProfile
@@ -93,7 +93,7 @@ func assertFollowersDecreased(t *testing.T, username string) {
 }
 
 func assertFolloweesDecreased(t *testing.T, username string) {
-	userProfileKey := &userprofile.UserProfileKey{
+	userProfileKey := &database.UserProfileKey{
 		Username: username,
 	}
 	var userProfile userprofile.UserProfile

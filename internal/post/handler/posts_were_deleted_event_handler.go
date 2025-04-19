@@ -1,6 +1,7 @@
 package post_handler
 
 import (
+	common_data "readmodels/internal/common/data"
 	"readmodels/internal/post"
 
 	"github.com/rs/zerolog/log"
@@ -29,7 +30,7 @@ func (handler *PostsWereDeletedEventHandler) Handle(event []byte) {
 	var postsWereDeletedEvent PostsWereDeletedEvent
 	log.Info().Msg("Handling PostWasCreatedEvent")
 
-	err := Decode(event, &postsWereDeletedEvent)
+	err := common_data.DeserializeData(event, &postsWereDeletedEvent)
 	if err != nil {
 		log.Error().Stack().Err(err).Msg("Invalid event data")
 		return

@@ -1,7 +1,7 @@
 package post_handler
 
 import (
-	"encoding/json"
+	common_data "readmodels/internal/common/data"
 	"readmodels/internal/post"
 	"time"
 
@@ -40,24 +40,18 @@ func (handler *PostWasCreatedEventHandler) Handle(event []byte) {
 	var postWasCreatedEvent PostWasCreatedEvent
 	log.Info().Msg("Handling PostWasCreatedEvent")
 
-	err := Decode(event, &postWasCreatedEvent)
+	err := common_data.DeserializeData(event, &postWasCreatedEvent)
 	if err != nil {
 		log.Error().Stack().Err(err).Msg("Invalid event data")
 		return
 	}
 
-	log.Info().Msg("createdAT: " + postWasCreatedEvent.Metadata.CreatedAt)
 	data, err := mapData(postWasCreatedEvent)
 	if err != nil {
 		return
 	}
-	log.Info().Msg("createdAT2: " + data.CreatedAt.String())
 
 	handler.service.CreateNewPostMetadata(data)
-}
-
-func Decode(datab []byte, data any) error {
-	return json.Unmarshal(datab, &data)
 }
 
 func mapData(event PostWasCreatedEvent) (*post.PostMetadata, error) {
