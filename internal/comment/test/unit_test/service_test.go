@@ -54,7 +54,7 @@ func TestErrorOnCreateNewCommentWithService(t *testing.T) {
 func TestGetCommentsByPostIdWithService(t *testing.T) {
 	setUpService(t)
 	postId := "post1"
-	expectedComments := []comment.Comment{
+	expectedComments := []*comment.Comment{
 		{
 			CommentId: uint64(5),
 			Username:  "username1",
@@ -89,7 +89,7 @@ func TestGetCommentsByPostIdWithService(t *testing.T) {
 func TestErrorOnGetCommentsByPostIdWithService(t *testing.T) {
 	setUpService(t)
 	postId := "post1"
-	expectedComments := []comment.Comment{}
+	expectedComments := []*comment.Comment{}
 	expectedLastCommentId := uint64(0)
 	repository.EXPECT().GetCommentsByPostId(postId, uint64(0), 12).Return(expectedComments, uint64(0), errors.New("some error"))
 

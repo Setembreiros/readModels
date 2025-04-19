@@ -10,7 +10,7 @@ import (
 
 type Repository interface {
 	AddNewComment(data *Comment) error
-	GetCommentsByPostId(postId string, lastCommentId uint64, limit int) ([]Comment, uint64, error)
+	GetCommentsByPostId(postId string, lastCommentId uint64, limit int) ([]*Comment, uint64, error)
 	DeleteComment(commentId uint64) error
 }
 
@@ -42,7 +42,7 @@ func (s *CommentService) CreateNewComment(data *Comment) {
 	log.Info().Msgf("Comment with id %d was added", data.CommentId)
 }
 
-func (s *CommentService) GetCommentsByPostId(postId string, lastCommentId uint64, limit int) ([]Comment, uint64, error) {
+func (s *CommentService) GetCommentsByPostId(postId string, lastCommentId uint64, limit int) ([]*Comment, uint64, error) {
 	comments, lastCommentId, err := s.repository.GetCommentsByPostId(postId, lastCommentId, limit)
 	if err != nil {
 		log.Error().Stack().Err(err).Msgf("Error getting  %s's comments", postId)

@@ -75,6 +75,22 @@ func (mr *MockDatabaseClientMockRecorder) CreateTable(tableName, keys, ctx inter
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTable", reflect.TypeOf((*MockDatabaseClient)(nil).CreateTable), tableName, keys, ctx)
 }
 
+// GetCommentsByIndexPostId mocks base method.
+func (m *MockDatabaseClient) GetCommentsByIndexPostId(postID string, lastCommentId uint64, limit int) ([]*database.Comment, uint64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCommentsByIndexPostId", postID, lastCommentId, limit)
+	ret0, _ := ret[0].([]*database.Comment)
+	ret1, _ := ret[1].(uint64)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetCommentsByIndexPostId indicates an expected call of GetCommentsByIndexPostId.
+func (mr *MockDatabaseClientMockRecorder) GetCommentsByIndexPostId(postID, lastCommentId, limit interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCommentsByIndexPostId", reflect.TypeOf((*MockDatabaseClient)(nil).GetCommentsByIndexPostId), postID, lastCommentId, limit)
+}
+
 // GetData mocks base method.
 func (m *MockDatabaseClient) GetData(tableName string, key, result any) error {
 	m.ctrl.T.Helper()

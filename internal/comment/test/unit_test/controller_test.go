@@ -34,7 +34,7 @@ func TestGetCommentsByPostIdWithController_WhenSuccess(t *testing.T) {
 	timeLayout := "2006-01-02T15:04:05.00Z"
 	timeNowString := time.Now().UTC().Format(timeLayout)
 	timeNow, _ := time.Parse(timeLayout, timeNowString)
-	expectedComments := []comment.Comment{
+	expectedComments := []*comment.Comment{
 		{
 			CommentId: uint64(5),
 			Username:  "username1",
@@ -105,7 +105,7 @@ func TestGetCommentsByPostIdWithController_WhenSuccessWithDefaultPaginationParam
 	timeLayout := "2006-01-02T15:04:05.00Z"
 	timeNowString := time.Now().UTC().Format(timeLayout)
 	timeNow, _ := time.Parse(timeLayout, timeNowString)
-	expectedComments := []comment.Comment{
+	expectedComments := []*comment.Comment{
 		{
 			CommentId: uint64(5),
 			Username:  "username1",
@@ -172,7 +172,7 @@ func TestInternalServerErrorOnGetCommentsByPostIdWithController_WhenServiceCallF
 	expectedPostId := "post1"
 	ginContext.Params = []gin.Param{{Key: "postId", Value: expectedPostId}}
 	expectedError := errors.New("some error")
-	repository.EXPECT().GetCommentsByPostId(expectedPostId, uint64(0), 12).Return([]comment.Comment{}, uint64(0), expectedError)
+	repository.EXPECT().GetCommentsByPostId(expectedPostId, uint64(0), 12).Return([]*comment.Comment{}, uint64(0), expectedError)
 	expectedBodyResponse := `{
 		"error": true,
 		"message": "` + expectedError.Error() + `",

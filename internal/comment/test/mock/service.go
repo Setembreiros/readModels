@@ -63,10 +63,10 @@ func (mr *MockRepositoryMockRecorder) DeleteComment(commentId interface{}) *gomo
 }
 
 // GetCommentsByPostId mocks base method.
-func (m *MockRepository) GetCommentsByPostId(postId string, lastCommentId uint64, limit int) ([]comment.Comment, uint64, error) {
+func (m *MockRepository) GetCommentsByPostId(postId string, lastCommentId uint64, limit int) ([]*comment.Comment, uint64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCommentsByPostId", postId, lastCommentId, limit)
-	ret0, _ := ret[0].([]comment.Comment)
+	ret0, _ := ret[0].([]*comment.Comment)
 	ret1, _ := ret[1].(uint64)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2

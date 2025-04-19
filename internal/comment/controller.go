@@ -13,8 +13,8 @@ type CommentController struct {
 }
 
 type GetCommentsResponse struct {
-	Comments      []Comment `json:"comments"`
-	LastCommentId uint64    `json:"lastCommentId"`
+	Comments      []*Comment `json:"comments"`
+	LastCommentId uint64     `json:"lastCommentId"`
 }
 
 func NewCommentController(repository Repository) *CommentController {
