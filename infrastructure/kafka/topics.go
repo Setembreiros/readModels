@@ -9,5 +9,6 @@ func getTopics() []string {
 		"UserAFollowedUserBEvent",
 		"UserAUnfollowedUserBEvent",
 		"CommentWasCreatedEvent",
+		"CommentWasDeletedEvent",
 	}
 }
