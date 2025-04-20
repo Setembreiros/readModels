@@ -102,6 +102,36 @@ func TestErrorOnGetCommentsByPostIdWithService(t *testing.T) {
 	assert.Equal(t, expectedLastCommentId, lastCommentId)
 }
 
+func TestUpdateCommentWithService(t *testing.T) {
+	setUpService(t)
+	timeNow := time.Now().UTC()
+	data := &model.Comment{
+		CommentId: uint64(123456),
+		Content:   "Exemplo de content",
+		UpdatedAt: timeNow,
+	}
+	repository.EXPECT().UpdateComment(data)
+
+	commentService.UpdateComment(data)
+
+	assert.Contains(t, loggerOutput.String(), "Comment with id 123456 was updated")
+}
+
+func TestErrorOnUpdateNewCommentWithService(t *testing.T) {
+	setUpService(t)
+	timeNow := time.Now().UTC()
+	data := &model.Comment{
+		CommentId: uint64(123456),
+		Content:   "Exemplo de content",
+		UpdatedAt: timeNow,
+	}
+	repository.EXPECT().UpdateComment(data).Return(errors.New("some error"))
+
+	commentService.UpdateComment(data)
+
+	assert.Contains(t, loggerOutput.String(), "Error updating comment with id 123456")
+}
+
 func TestDeleteCommentWithService(t *testing.T) {
 	setUpService(t)
 	commentId := uint64(123456)

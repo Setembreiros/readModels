@@ -11,6 +11,7 @@ import (
 type Repository interface {
 	AddNewComment(data *model.Comment) error
 	GetCommentsByPostId(postId string, lastCommentId uint64, limit int) ([]*model.Comment, uint64, error)
+	UpdateComment(data *model.Comment) error
 	DeleteComment(commentId uint64) error
 }
 
@@ -42,6 +43,16 @@ func (s *CommentService) GetCommentsByPostId(postId string, lastCommentId uint64
 	}
 
 	return comments, lastCommentId, nil
+}
+
+func (s *CommentService) UpdateComment(data *model.Comment) {
+	err := s.repository.UpdateComment(data)
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Error updating comment with id %d", data.CommentId)
+		return
+	}
+
+	log.Info().Msgf("Comment with id %d was updated", data.CommentId)
 }
 
 func (s *CommentService) DeleteComment(commentId uint64) {
