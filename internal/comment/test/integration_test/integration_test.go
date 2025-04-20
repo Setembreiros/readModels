@@ -22,6 +22,7 @@ var db *database.Database
 var cache *database.Cache
 var controller *comment.CommentController
 var commentWasCreatedEventHandler *comment_handler.CommentWasCreatedEventHandler
+var commentWasUpdatedEventHandler *comment_handler.CommentWasUpdatedEventHandler
 var commentWasDeletedEventHandler *comment_handler.CommentWasDeletedEventHandler
 var apiResponse *httptest.ResponseRecorder
 var ginContext *gin.Context
@@ -36,6 +37,7 @@ func setUp(t *testing.T) {
 	repository := comment.NewCommentRepository(db, cache)
 	controller = comment.NewCommentController(repository)
 	commentWasCreatedEventHandler = comment_handler.NewCommentWasCreatedEventHandler(repository)
+	commentWasUpdatedEventHandler = comment_handler.NewCommentWasUpdatedEventHandler(repository)
 	commentWasDeletedEventHandler = comment_handler.NewCommentWasDeletedEventHandler(repository)
 }
 
@@ -94,6 +96,7 @@ func TestGetCommentsByPostId_WhenDatabaseReturnsSuccess(t *testing.T) {
 			PostId:    "post1",
 			Content:   "o meu comentario 3",
 			CreatedAt: timeNow,
+			UpdatedAt: timeNow,
 		},
 		{
 			CommentId: uint64(6),
@@ -101,6 +104,7 @@ func TestGetCommentsByPostId_WhenDatabaseReturnsSuccess(t *testing.T) {
 			PostId:    "post1",
 			Content:   "o meu comentario 6",
 			CreatedAt: timeNow,
+			UpdatedAt: timeNow,
 		},
 		{
 			CommentId: uint64(8),
@@ -108,6 +112,7 @@ func TestGetCommentsByPostId_WhenDatabaseReturnsSuccess(t *testing.T) {
 			PostId:    "post1",
 			Content:   "o meu comentario 8",
 			CreatedAt: timeNow,
+			UpdatedAt: timeNow,
 		},
 		{
 			CommentId: uint64(9),
@@ -115,6 +120,7 @@ func TestGetCommentsByPostId_WhenDatabaseReturnsSuccess(t *testing.T) {
 			PostId:    "post1",
 			Content:   "o meu comentario 9",
 			CreatedAt: timeNow,
+			UpdatedAt: timeNow,
 		},
 	}
 	expectedBodyResponse := `{
@@ -127,28 +133,32 @@ func TestGetCommentsByPostId_WhenDatabaseReturnsSuccess(t *testing.T) {
 				"postId":    "post1",
 				"username":  "username1",
 				"content": 	 "o meu comentario 3",
-				"createdAt": "` + timeNowString + `"
+				"createdAt": "` + timeNowString + `",
+				"updatedAt": "` + timeNowString + `"
 			},	
 			{
 				"commentId": 6,
 				"postId":    "post1",
 				"username":  "username2",
 				"content": 	 "o meu comentario 6",
-				"createdAt": "` + timeNowString + `"
+				"createdAt": "` + timeNowString + `",
+				"updatedAt": "` + timeNowString + `"
 			},	
 			{
 				"commentId": 8,
 				"postId":    "post1",
 				"username":  "username3",
 				"content": 	 "o meu comentario 8",
-				"createdAt": "` + timeNowString + `"
+				"createdAt": "` + timeNowString + `",
+				"updatedAt": "` + timeNowString + `"
 			},
 			{
 				"commentId": 9,
 				"postId":    "post1",
 				"username":  "username1",
 				"content": 	 "o meu comentario 9",
-				"createdAt": "` + timeNowString + `"
+				"createdAt": "` + timeNowString + `",
+				"updatedAt": "` + timeNowString + `"
 			}
 			],
 			"lastCommentId":9
@@ -177,6 +187,7 @@ func TestGetCommentsByPostId_WhenCacheReturnsSuccess(t *testing.T) {
 			PostId:    "post1",
 			Content:   "o meu comentario 3",
 			CreatedAt: timeNow,
+			UpdatedAt: timeNow,
 		},
 		{
 			CommentId: uint64(6),
@@ -184,6 +195,7 @@ func TestGetCommentsByPostId_WhenCacheReturnsSuccess(t *testing.T) {
 			PostId:    "post1",
 			Content:   "o meu comentario 6",
 			CreatedAt: timeNow,
+			UpdatedAt: timeNow,
 		},
 		{
 			CommentId: uint64(8),
@@ -191,6 +203,7 @@ func TestGetCommentsByPostId_WhenCacheReturnsSuccess(t *testing.T) {
 			PostId:    "post1",
 			Content:   "o meu comentario 8",
 			CreatedAt: timeNow,
+			UpdatedAt: timeNow,
 		},
 		{
 			CommentId: uint64(9),
@@ -198,6 +211,7 @@ func TestGetCommentsByPostId_WhenCacheReturnsSuccess(t *testing.T) {
 			PostId:    "post1",
 			Content:   "o meu comentario 9",
 			CreatedAt: timeNow,
+			UpdatedAt: timeNow,
 		},
 	})
 	ginContext.Request, _ = http.NewRequest("GET", "/comments", nil)
@@ -216,28 +230,32 @@ func TestGetCommentsByPostId_WhenCacheReturnsSuccess(t *testing.T) {
 				"postId":    "post1",
 				"username":  "username1",
 				"content": 	 "o meu comentario 3",
-				"createdAt": "` + timeNowString + `"
+				"createdAt": "` + timeNowString + `",
+				"updatedAt": "` + timeNowString + `"
 			},	
 			{
 				"commentId": 6,
 				"postId":    "post1",
 				"username":  "username2",
 				"content": 	 "o meu comentario 6",
-				"createdAt": "` + timeNowString + `"
+				"createdAt": "` + timeNowString + `",
+				"updatedAt": "` + timeNowString + `"
 			},	
 			{
 				"commentId": 8,
 				"postId":    "post1",
 				"username":  "username3",
 				"content": 	 "o meu comentario 8",
-				"createdAt": "` + timeNowString + `"
+				"createdAt": "` + timeNowString + `",
+				"updatedAt": "` + timeNowString + `"
 			},
 			{
 				"commentId": 9,
 				"postId":    "post1",
 				"username":  "username1",
 				"content": 	 "o meu comentario 9",
-				"createdAt": "` + timeNowString + `"
+				"createdAt": "` + timeNowString + `",
+				"updatedAt": "` + timeNowString + `"
 			}
 			],
 			"lastCommentId":9
@@ -247,6 +265,40 @@ func TestGetCommentsByPostId_WhenCacheReturnsSuccess(t *testing.T) {
 	controller.GetCommentsByPostId(ginContext)
 
 	integration_test_assert.AssertSuccessResult(t, apiResponse, expectedBodyResponse)
+}
+
+func TestUpdateComment_WhenDatabaseReturnsSuccess(t *testing.T) {
+	setUp(t)
+	defer tearDown()
+	existingComment := &model.Comment{
+		CommentId: uint64(1234),
+		Username:  "user123",
+		PostId:    "post123",
+		Content:   "Exemplo de content",
+		CreatedAt: time.Now(),
+	}
+	integration_test_arrange.AddCommentToDatabase(t, db, existingComment)
+	timeLayout := "2006-01-02T15:04:05.000000000Z"
+	timeNow := time.Now().UTC().Format(timeLayout)
+	data := &comment_handler.CommentWasUpdatedEvent{
+		CommentId: existingComment.CommentId,
+		Content:   "Exemplo de content actualizado",
+		UpdatedAt: timeNow,
+	}
+	event, _ := test_common.SerializeData(data)
+	expectedTime, _ := time.Parse(timeLayout, data.UpdatedAt)
+	expectedComment := &model.Comment{
+		CommentId: data.CommentId,
+		Username:  existingComment.Username,
+		PostId:    existingComment.PostId,
+		Content:   data.Content,
+		CreatedAt: existingComment.CreatedAt,
+		UpdatedAt: expectedTime,
+	}
+
+	commentWasUpdatedEventHandler.Handle(event)
+
+	integration_test_assert.AssertCommentExists(t, db, data.CommentId, expectedComment)
 }
 
 func TestDeleteComment_WhenDatabaseReturnsSuccess(t *testing.T) {
@@ -277,6 +329,7 @@ func populateDb(t *testing.T, time time.Time) {
 			PostId:    "post1",
 			Content:   "o meu comentario 1",
 			CreatedAt: time,
+			UpdatedAt: time,
 		},
 		{
 			CommentId: uint64(2),
@@ -284,6 +337,7 @@ func populateDb(t *testing.T, time time.Time) {
 			PostId:    "post1",
 			Content:   "o meu comentario 2",
 			CreatedAt: time,
+			UpdatedAt: time,
 		},
 		{
 			CommentId: uint64(3),
@@ -291,6 +345,7 @@ func populateDb(t *testing.T, time time.Time) {
 			PostId:    "post1",
 			Content:   "o meu comentario 3",
 			CreatedAt: time,
+			UpdatedAt: time,
 		},
 		{
 			CommentId: uint64(4),
@@ -298,6 +353,7 @@ func populateDb(t *testing.T, time time.Time) {
 			PostId:    "post2",
 			Content:   "o meu comentario 4",
 			CreatedAt: time,
+			UpdatedAt: time,
 		},
 		{
 			CommentId: uint64(5),
@@ -305,6 +361,7 @@ func populateDb(t *testing.T, time time.Time) {
 			PostId:    "post2",
 			Content:   "o meu comentario 5",
 			CreatedAt: time,
+			UpdatedAt: time,
 		},
 		{
 			CommentId: uint64(6),
@@ -312,6 +369,7 @@ func populateDb(t *testing.T, time time.Time) {
 			PostId:    "post1",
 			Content:   "o meu comentario 6",
 			CreatedAt: time,
+			UpdatedAt: time,
 		},
 		{
 			CommentId: uint64(7),
@@ -319,6 +377,7 @@ func populateDb(t *testing.T, time time.Time) {
 			PostId:    "post2",
 			Content:   "o meu comentario 7",
 			CreatedAt: time,
+			UpdatedAt: time,
 		},
 		{
 			CommentId: uint64(8),
@@ -326,6 +385,7 @@ func populateDb(t *testing.T, time time.Time) {
 			PostId:    "post1",
 			Content:   "o meu comentario 8",
 			CreatedAt: time,
+			UpdatedAt: time,
 		},
 		{
 			CommentId: uint64(9),
@@ -333,6 +393,7 @@ func populateDb(t *testing.T, time time.Time) {
 			PostId:    "post1",
 			Content:   "o meu comentario 9",
 			CreatedAt: time,
+			UpdatedAt: time,
 		},
 		{
 			CommentId: uint64(10),
@@ -340,6 +401,7 @@ func populateDb(t *testing.T, time time.Time) {
 			PostId:    "post2",
 			Content:   "o meu comentario 10",
 			CreatedAt: time,
+			UpdatedAt: time,
 		},
 		{
 			CommentId: uint64(11),
@@ -347,6 +409,7 @@ func populateDb(t *testing.T, time time.Time) {
 			PostId:    "post1",
 			Content:   "o meu comentario 11",
 			CreatedAt: time,
+			UpdatedAt: time,
 		},
 	}
 
