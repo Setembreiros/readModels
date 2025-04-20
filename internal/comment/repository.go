@@ -37,6 +37,19 @@ func (r CommentRepository) GetCommentsByPostId(postId string, lastCommentId uint
 	return comments, newLastCommentId, nil
 }
 
+func (r CommentRepository) UpdateComment(data *model.Comment) error {
+	commentKey := &database.CommentKey{
+		CommentId: data.CommentId,
+	}
+
+	updateAttributes := map[string]interface{}{
+		"Content":   data.Content,
+		"UpdatedAt": data.UpdatedAt,
+	}
+
+	return r.database.Client.UpdateData("readmodels.comments", commentKey, updateAttributes)
+}
+
 func (r CommentRepository) DeleteComment(commentId uint64) error {
 	key := &database.CommentKey{
 		CommentId: commentId,
