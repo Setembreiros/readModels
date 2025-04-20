@@ -5,7 +5,7 @@
 package mock_comment
 
 import (
-	comment "readmodels/internal/comment"
+	model "readmodels/internal/model"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -35,7 +35,7 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 }
 
 // AddNewComment mocks base method.
-func (m *MockRepository) AddNewComment(data *comment.Comment) error {
+func (m *MockRepository) AddNewComment(data *model.Comment) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AddNewComment", data)
 	ret0, _ := ret[0].(error)
@@ -63,10 +63,10 @@ func (mr *MockRepositoryMockRecorder) DeleteComment(commentId interface{}) *gomo
 }
 
 // GetCommentsByPostId mocks base method.
-func (m *MockRepository) GetCommentsByPostId(postId string, lastCommentId uint64, limit int) ([]*comment.Comment, uint64, error) {
+func (m *MockRepository) GetCommentsByPostId(postId string, lastCommentId uint64, limit int) ([]*model.Comment, uint64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCommentsByPostId", postId, lastCommentId, limit)
-	ret0, _ := ret[0].([]*comment.Comment)
+	ret0, _ := ret[0].([]*model.Comment)
 	ret1, _ := ret[1].(uint64)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2

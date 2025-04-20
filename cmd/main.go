@@ -44,9 +44,10 @@ func main() {
 	if err != nil {
 		os.Exit(1)
 	}
+	cache := provider.ProvideCache(ctx)
 	eventBus := provider.ProvideEventBus()
-	subscriptions := provider.ProvideSubscriptions(database)
-	apiEnpoint := provider.ProvideApiEndpoint(database)
+	subscriptions := provider.ProvideSubscriptions(database, cache)
+	apiEnpoint := provider.ProvideApiEndpoint(database, cache)
 	kafkaConsumer, err := provider.ProvideKafkaConsumer(eventBus)
 	if err != nil {
 		os.Exit(1)

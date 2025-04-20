@@ -9,6 +9,7 @@ import (
 	"time"
 
 	database "readmodels/internal/db"
+	"readmodels/internal/model"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
@@ -500,7 +501,7 @@ func (dc *DynamoDBClient) GetPostsByIndexUser(username string, lastPostId, lastP
 	return results, lastPostId, lastPostCreatedAt, nil
 }
 
-func (dc *DynamoDBClient) GetCommentsByIndexPostId(postID string, lastCommentId uint64, limit int) ([]*database.Comment, uint64, error) {
+func (dc *DynamoDBClient) GetCommentsByIndexPostId(postID string, lastCommentId uint64, limit int) ([]*model.Comment, uint64, error) {
 	input := &dynamodb.QueryInput{
 		TableName:              aws.String("readmodels.comments"),
 		IndexName:              aws.String("PostIdIndex"),
@@ -527,9 +528,9 @@ func (dc *DynamoDBClient) GetCommentsByIndexPostId(postID string, lastCommentId 
 		return nil, 0, err
 	}
 
-	var results []*database.Comment
+	var results []*model.Comment
 	for _, item := range response.Items {
-		var result database.Comment
+		var result model.Comment
 		err = attributevalue.UnmarshalMap(item, &result)
 		if err != nil {
 			log.Error().Stack().Err(err).Msg("Couldn't unmarshal comment response")

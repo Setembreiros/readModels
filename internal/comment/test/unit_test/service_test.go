@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"readmodels/internal/comment"
+	"readmodels/internal/model"
 	"testing"
 	"time"
 
@@ -20,7 +21,7 @@ func setUpService(t *testing.T) {
 func TestCreateNewCommentWithService(t *testing.T) {
 	setUpService(t)
 	timeNow := time.Now().UTC()
-	data := &comment.Comment{
+	data := &model.Comment{
 		CommentId: uint64(123456),
 		Username:  "user123",
 		PostId:    "post123",
@@ -37,7 +38,7 @@ func TestCreateNewCommentWithService(t *testing.T) {
 func TestErrorOnCreateNewCommentWithService(t *testing.T) {
 	setUpService(t)
 	timeNow := time.Now().UTC()
-	data := &comment.Comment{
+	data := &model.Comment{
 		CommentId: uint64(123456),
 		Username:  "user123",
 		PostId:    "post123",
@@ -54,7 +55,7 @@ func TestErrorOnCreateNewCommentWithService(t *testing.T) {
 func TestGetCommentsByPostIdWithService(t *testing.T) {
 	setUpService(t)
 	postId := "post1"
-	expectedComments := []*comment.Comment{
+	expectedComments := []*model.Comment{
 		{
 			CommentId: uint64(5),
 			Username:  "username1",
@@ -89,7 +90,7 @@ func TestGetCommentsByPostIdWithService(t *testing.T) {
 func TestErrorOnGetCommentsByPostIdWithService(t *testing.T) {
 	setUpService(t)
 	postId := "post1"
-	expectedComments := []*comment.Comment{}
+	expectedComments := []*model.Comment{}
 	expectedLastCommentId := uint64(0)
 	repository.EXPECT().GetCommentsByPostId(postId, uint64(0), 12).Return(expectedComments, uint64(0), errors.New("some error"))
 

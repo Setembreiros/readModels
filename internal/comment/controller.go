@@ -2,6 +2,7 @@ package comment
 
 import (
 	"readmodels/internal/api"
+	"readmodels/internal/model"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -13,8 +14,8 @@ type CommentController struct {
 }
 
 type GetCommentsResponse struct {
-	Comments      []*Comment `json:"comments"`
-	LastCommentId uint64     `json:"lastCommentId"`
+	Comments      []*model.Comment `json:"comments"`
+	LastCommentId uint64           `json:"lastCommentId"`
 }
 
 func NewCommentController(repository Repository) *CommentController {

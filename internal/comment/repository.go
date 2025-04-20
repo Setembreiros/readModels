@@ -2,41 +2,44 @@ package comment
 
 import (
 	database "readmodels/internal/db"
+	"readmodels/internal/model"
 )
 
-type CommentRepository database.Database
-
-func (r CommentRepository) AddNewComment(data *Comment) error {
-	return r.Client.InsertData("readmodels.comments", data)
+type CommentRepository struct {
+	cache    *database.Cache
+	database *database.Database
 }
 
-func (r CommentRepository) GetCommentsByPostId(postId string, lastCommentId uint64, limit int) ([]*Comment, uint64, error) {
-	data, lastCommentId, err := r.Client.GetCommentsByIndexPostId(postId, lastCommentId, limit)
+func NewCommentRepository(database *database.Database, cache *database.Cache) *CommentRepository {
+	return &CommentRepository{
+		cache:    cache,
+		database: database,
+	}
+}
+
+func (r CommentRepository) AddNewComment(data *model.Comment) error {
+	return r.database.Client.InsertData("readmodels.comments", data)
+}
+
+func (r CommentRepository) GetCommentsByPostId(postId string, lastCommentId uint64, limit int) ([]*model.Comment, uint64, error) {
+	comments, newLastCommentId, found := r.cache.Client.GetPostComments(postId, lastCommentId, limit)
+	if found {
+		return comments, newLastCommentId, nil
+	}
+
+	comments, newLastCommentId, err := r.database.Client.GetCommentsByIndexPostId(postId, lastCommentId, limit)
 	if err != nil {
-		return []*Comment{}, uint64(0), err
+		return []*model.Comment{}, uint64(0), err
 	}
 
-	var comments []*Comment
-	for _, comment := range data {
-		comments = append(comments, mapToDomain(comment))
-	}
+	r.cache.Client.SetPostComments(postId, lastCommentId, limit, comments)
 
-	return comments, lastCommentId, nil
+	return comments, newLastCommentId, nil
 }
 
 func (r CommentRepository) DeleteComment(commentId uint64) error {
 	key := &database.CommentKey{
 		CommentId: commentId,
 	}
-	return r.Client.RemoveData("readmodels.comments", key)
-}
-
-func mapToDomain(data *database.Comment) *Comment {
-	return &Comment{
-		CommentId: data.CommentId,
-		PostId:    data.PostId,
-		Username:  data.Username,
-		Content:   data.Content,
-		CreatedAt: data.CreatedAt,
-	}
+	return r.database.Client.RemoveData("readmodels.comments", key)
 }

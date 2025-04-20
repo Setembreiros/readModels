@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 	"readmodels/internal/comment"
+	"readmodels/internal/model"
 	"strconv"
 	"testing"
 	"time"
@@ -31,10 +32,10 @@ func TestGetCommentsByPostIdWithController_WhenSuccess(t *testing.T) {
 	u.Add("lastCommentId", strconv.FormatUint(expectedLastCommentId, 10))
 	u.Add("limit", strconv.Itoa(expectedLimit))
 	ginContext.Request.URL.RawQuery = u.Encode()
-	timeLayout := "2006-01-02T15:04:05.00Z"
+	timeLayout := "2006-01-02T15:04:05Z"
 	timeNowString := time.Now().UTC().Format(timeLayout)
 	timeNow, _ := time.Parse(timeLayout, timeNowString)
-	expectedComments := []*comment.Comment{
+	expectedComments := []*model.Comment{
 		{
 			CommentId: uint64(5),
 			Username:  "username1",
@@ -65,22 +66,22 @@ func TestGetCommentsByPostIdWithController_WhenSuccess(t *testing.T) {
 			"comments":[	
 			{
 				"commentId": 5,
-				"username":  "username1",
 				"postId":    "post1",
+				"username":  "username1",
 				"content": "o meu comentario 1",
 				"createdAt": "` + timeNowString + `"
 			},
 			{
 				"commentId": 6,
-				"username":  "username2",
 				"postId":    "post1",
+				"username":  "username2",
 				"content": "o meu comentario 2",
 				"createdAt": "` + timeNowString + `"
 			},
 			{
 				"commentId": 7,
-				"username":  "username1",
 				"postId":    "post1",
+				"username":  "username1",
 				"content": "o meu comentario 3",
 				"createdAt": "` + timeNowString + `"
 			}
@@ -102,10 +103,10 @@ func TestGetCommentsByPostIdWithController_WhenSuccessWithDefaultPaginationParam
 	ginContext.Params = []gin.Param{{Key: "postId", Value: expectedPostId}}
 	expectedDefaultLastCommentId := uint64(0)
 	expectedDefaultLimit := 12
-	timeLayout := "2006-01-02T15:04:05.00Z"
+	timeLayout := "2006-01-02T15:04:05Z"
 	timeNowString := time.Now().UTC().Format(timeLayout)
 	timeNow, _ := time.Parse(timeLayout, timeNowString)
-	expectedComments := []*comment.Comment{
+	expectedComments := []*model.Comment{
 		{
 			CommentId: uint64(5),
 			Username:  "username1",
@@ -136,22 +137,22 @@ func TestGetCommentsByPostIdWithController_WhenSuccessWithDefaultPaginationParam
 			"comments":[	
 			{
 				"commentId": 5,
-				"username":  "username1",
 				"postId":    "post1",
+				"username":  "username1",
 				"content": "o meu comentario 1",
 				"createdAt": "` + timeNowString + `"
 			},
 			{
 				"commentId": 6,
-				"username":  "username2",
 				"postId":    "post1",
+				"username":  "username2",
 				"content": "o meu comentario 2",
 				"createdAt": "` + timeNowString + `"
 			},
 			{
 				"commentId": 7,
-				"username":  "username1",
 				"postId":    "post1",
+				"username":  "username1",
 				"content": "o meu comentario 3",
 				"createdAt": "` + timeNowString + `"
 			}
@@ -172,7 +173,7 @@ func TestInternalServerErrorOnGetCommentsByPostIdWithController_WhenServiceCallF
 	expectedPostId := "post1"
 	ginContext.Params = []gin.Param{{Key: "postId", Value: expectedPostId}}
 	expectedError := errors.New("some error")
-	repository.EXPECT().GetCommentsByPostId(expectedPostId, uint64(0), 12).Return([]*comment.Comment{}, uint64(0), expectedError)
+	repository.EXPECT().GetCommentsByPostId(expectedPostId, uint64(0), 12).Return([]*model.Comment{}, uint64(0), expectedError)
 	expectedBodyResponse := `{
 		"error": true,
 		"message": "` + expectedError.Error() + `",
