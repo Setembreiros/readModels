@@ -44,3 +44,29 @@ func TestErrorOnCreateLikePostWithService(t *testing.T) {
 
 	assert.Contains(t, loggerOutput.String(), "Error creating like, username: user123 -> postId: post123")
 }
+
+func TestDeleteLikePostWithService(t *testing.T) {
+	setUpService(t)
+	data := &model.LikePost{
+		Username: "user123",
+		PostId:   "post123",
+	}
+	repositoryService.EXPECT().DeleteLikePost(data)
+
+	reactionService.DeleteLikePost(data)
+
+	assert.Contains(t, loggerOutput.String(), "Like was deleted, username: user123 -> postId: post123")
+}
+
+func TestErrorOnDeleteLikePostWithService(t *testing.T) {
+	setUpService(t)
+	data := &model.LikePost{
+		Username: "user123",
+		PostId:   "post123",
+	}
+	repositoryService.EXPECT().DeleteLikePost(data).Return(errors.New("some error"))
+
+	reactionService.DeleteLikePost(data)
+
+	assert.Contains(t, loggerOutput.String(), "Error deleting like, username: user123 -> postId: post123")
+}

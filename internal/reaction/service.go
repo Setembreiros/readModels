@@ -10,6 +10,7 @@ import (
 
 type Repository interface {
 	CreateLikePost(data *model.LikePost) error
+	DeleteLikePost(data *model.LikePost) error
 }
 
 type ReactionService struct {
@@ -30,4 +31,14 @@ func (s *ReactionService) CreateLikePost(data *model.LikePost) {
 	}
 
 	log.Info().Msgf("Like was created, username: %s -> postId: %s", data.Username, data.PostId)
+}
+
+func (s *ReactionService) DeleteLikePost(data *model.LikePost) {
+	err := s.repository.DeleteLikePost(data)
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Error deleting like, username: %s -> postId: %s", data.Username, data.PostId)
+		return
+	}
+
+	log.Info().Msgf("Like was deleted, username: %s -> postId: %s", data.Username, data.PostId)
 }
