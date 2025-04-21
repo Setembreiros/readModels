@@ -49,8 +49,7 @@ func tearDown() {
 func TestCreateNewComment_WhenDatabaseReturnsSuccess(t *testing.T) {
 	setUp(t)
 	defer tearDown()
-	timeLayout := "2006-01-02T15:04:05.000000000Z"
-	timeNow := time.Now().UTC().Format(timeLayout)
+	timeNow := time.Now().UTC().Format(model.TimeLayout)
 	data := &comment_handler.CommentWasCreatedEvent{
 		CommentId: uint64(123456),
 		Username:  "user123",
@@ -59,7 +58,7 @@ func TestCreateNewComment_WhenDatabaseReturnsSuccess(t *testing.T) {
 		CreatedAt: timeNow,
 	}
 	event, _ := test_common.SerializeData(data)
-	expectedTime, _ := time.Parse(timeLayout, data.CreatedAt)
+	expectedTime, _ := time.Parse(model.TimeLayout, data.CreatedAt)
 	expectedComment := &model.Comment{
 		CommentId: data.CommentId,
 		Username:  data.Username,
@@ -76,9 +75,8 @@ func TestCreateNewComment_WhenDatabaseReturnsSuccess(t *testing.T) {
 func TestGetCommentsByPostId_WhenDatabaseReturnsSuccess(t *testing.T) {
 	setUp(t)
 	defer tearDown()
-	timeLayout := "2006-01-02T15:04:05Z"
-	timeNowString := time.Now().UTC().Format(timeLayout)
-	timeNow, _ := time.Parse(timeLayout, timeNowString)
+	timeNowString := time.Now().UTC().Format(model.TimeLayout)
+	timeNow, _ := time.Parse(model.TimeLayout, timeNowString)
 	populateDb(t, timeNow)
 	postId := "post1"
 	lastCommentId := uint64(2)
@@ -174,9 +172,8 @@ func TestGetCommentsByPostId_WhenDatabaseReturnsSuccess(t *testing.T) {
 func TestGetCommentsByPostId_WhenCacheReturnsSuccess(t *testing.T) {
 	setUp(t)
 	defer tearDown()
-	timeLayout := "2006-01-02T15:04:05Z"
-	timeNowString := time.Now().UTC().Format(timeLayout)
-	timeNow, _ := time.Parse(timeLayout, timeNowString)
+	timeNowString := time.Now().UTC().Format(model.TimeLayout)
+	timeNow, _ := time.Parse(model.TimeLayout, timeNowString)
 	postId := "post1"
 	lastCommentId := uint64(2)
 	limit := 4
@@ -278,15 +275,14 @@ func TestUpdateComment_WhenDatabaseReturnsSuccess(t *testing.T) {
 		CreatedAt: time.Now(),
 	}
 	integration_test_arrange.AddCommentToDatabase(t, db, existingComment)
-	timeLayout := "2006-01-02T15:04:05.000000000Z"
-	timeNow := time.Now().UTC().Format(timeLayout)
+	timeNow := time.Now().UTC().Format(model.TimeLayout)
 	data := &comment_handler.CommentWasUpdatedEvent{
 		CommentId: existingComment.CommentId,
 		Content:   "Exemplo de content actualizado",
 		UpdatedAt: timeNow,
 	}
 	event, _ := test_common.SerializeData(data)
-	expectedTime, _ := time.Parse(timeLayout, data.UpdatedAt)
+	expectedTime, _ := time.Parse(model.TimeLayout, data.UpdatedAt)
 	expectedComment := &model.Comment{
 		CommentId: data.CommentId,
 		Username:  existingComment.Username,

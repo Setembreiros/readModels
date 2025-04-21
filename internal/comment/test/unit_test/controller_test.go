@@ -32,9 +32,8 @@ func TestGetCommentsByPostIdWithController_WhenSuccess(t *testing.T) {
 	u.Add("lastCommentId", strconv.FormatUint(expectedLastCommentId, 10))
 	u.Add("limit", strconv.Itoa(expectedLimit))
 	ginContext.Request.URL.RawQuery = u.Encode()
-	timeLayout := "2006-01-02T15:04:05Z"
-	timeNowString := time.Now().UTC().Format(timeLayout)
-	timeNow, _ := time.Parse(timeLayout, timeNowString)
+	timeNowString := time.Now().UTC().Format(model.TimeLayout)
+	timeNow, _ := time.Parse(model.TimeLayout, timeNowString)
 	expectedComments := []*model.Comment{
 		{
 			CommentId: uint64(5),
@@ -109,9 +108,8 @@ func TestGetCommentsByPostIdWithController_WhenSuccessWithDefaultPaginationParam
 	ginContext.Params = []gin.Param{{Key: "postId", Value: expectedPostId}}
 	expectedDefaultLastCommentId := uint64(0)
 	expectedDefaultLimit := 12
-	timeLayout := "2006-01-02T15:04:05Z"
-	timeNowString := time.Now().UTC().Format(timeLayout)
-	timeNow, _ := time.Parse(timeLayout, timeNowString)
+	timeNowString := time.Now().UTC().Format(model.TimeLayout)
+	timeNow, _ := time.Parse(model.TimeLayout, timeNowString)
 	expectedComments := []*model.Comment{
 		{
 			CommentId: uint64(5),

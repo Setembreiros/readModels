@@ -19,15 +19,14 @@ func setUpCommentWasUpdatedEventHandler(t *testing.T) {
 
 func TestHandleCommentWasUpdatedEvent(t *testing.T) {
 	setUpCommentWasUpdatedEventHandler(t)
-	timeLayout := "2006-01-02T15:04:05.000000000Z"
-	timeNow := time.Now().UTC().Format(timeLayout)
+	timeNow := time.Now().UTC().Format(model.TimeLayout)
 	data := &comment_handler.CommentWasUpdatedEvent{
 		CommentId: uint64(123456),
 		Content:   "Exemplo de content",
 		UpdatedAt: timeNow,
 	}
 	event, _ := json.Marshal(data)
-	expectedTime, _ := time.Parse(timeLayout, timeNow)
+	expectedTime, _ := time.Parse(model.TimeLayout, timeNow)
 	expectedComment := &model.Comment{
 		CommentId: data.CommentId,
 		Content:   data.Content,

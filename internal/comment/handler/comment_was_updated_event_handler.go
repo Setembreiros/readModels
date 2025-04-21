@@ -48,8 +48,7 @@ func (handler *CommentWasUpdatedEventHandler) Handle(event []byte) {
 }
 
 func mapUpdateEventData(event CommentWasUpdatedEvent) (*model.Comment, error) {
-	timeLayout := "2006-01-02T15:04:05.000000000Z"
-	parsedUpdatedAt, err := time.Parse(timeLayout, event.UpdatedAt)
+	parsedUpdatedAt, err := time.Parse(model.TimeLayout, event.UpdatedAt)
 	if err != nil {
 		log.Error().Stack().Err(err).Msg("Error parsing time UpdatedAt")
 		return nil, err

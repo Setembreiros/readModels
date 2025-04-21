@@ -39,7 +39,7 @@ func (p *Provider) ProvideApiEndpoint(database *database.Database, cache *databa
 func (p *Provider) ProvideApiControllers(database *database.Database, cache *database.Cache) []api.Controller {
 	return []api.Controller{
 		userprofile.NewUserProfileController(userprofile.UserProfileRepository(*database)),
-		post.NewPostController(post.PostRepository(*database)),
+		post.NewPostController(post.NewPostService(post.PostRepository(*database))),
 		follow.NewFollowController(follow.FollowRepository(*database)),
 		comment.NewCommentController(comment.NewCommentRepository(database, cache)),
 	}
@@ -71,7 +71,7 @@ func (p *Provider) ProvideSubscriptions(database *database.Database, cache *data
 		},
 		{
 			EventType: "PostWasCreatedEvent",
-			Handler:   post_handler.NewPostWasCreatedEventHandler(post.PostRepository(*database)),
+			Handler:   post_handler.NewPostWasCreatedEventHandler(post.NewPostService(post.PostRepository(*database))),
 		},
 		{
 			EventType: "PostsWereDeletedEvent",

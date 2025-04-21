@@ -50,8 +50,7 @@ func (handler *CommentWasCreatedEventHandler) Handle(event []byte) {
 }
 
 func mapData(event CommentWasCreatedEvent) (*model.Comment, error) {
-	timeLayout := "2006-01-02T15:04:05.000000000Z"
-	parsedCreatedAt, err := time.Parse(timeLayout, event.CreatedAt)
+	parsedCreatedAt, err := time.Parse(model.TimeLayout, event.CreatedAt)
 	if err != nil {
 		log.Error().Stack().Err(err).Msg("Error parsing time CreatedAt")
 		return nil, err
