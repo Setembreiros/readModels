@@ -10,17 +10,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var userLikedPostEventHandler *reaction_handler.UserLikedPostEventHandler
 var userLikedPostEventService *mock_reaction_handler.MockUserLikedPostEventService
+var userLikedPostEventHandler *reaction_handler.UserLikedPostEventHandler
 
-func setUpHandler(t *testing.T) {
+func setUpUserLikedPostEventHandler(t *testing.T) {
 	SetUp(t)
 	userLikedPostEventService = mock_reaction_handler.NewMockUserLikedPostEventService(ctrl)
 	userLikedPostEventHandler = reaction_handler.NewUserLikedPostEventHandler(userLikedPostEventService)
 }
 
 func TestHandleUserLikedPostEvent(t *testing.T) {
-	setUpHandler(t)
+	setUpUserLikedPostEventHandler(t)
 	data := &reaction_handler.UserLikedPostEvent{
 		Username: "user123",
 		PostId:   "post123",
@@ -36,7 +36,7 @@ func TestHandleUserLikedPostEvent(t *testing.T) {
 }
 
 func TestInvalidDataInUserLikedPostEventHandler(t *testing.T) {
-	setUpHandler(t)
+	setUpUserLikedPostEventHandler(t)
 	invalidData := "invalid data"
 	event, _ := json.Marshal(invalidData)
 

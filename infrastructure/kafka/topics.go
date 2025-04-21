@@ -11,5 +11,6 @@ func getTopics() []string {
 		"CommentWasCreatedEvent",
 		"CommentWasUpdatedEvent",
 		"CommentWasDeletedEvent",
+		"UserLikedPostEvent",
 	}
 }

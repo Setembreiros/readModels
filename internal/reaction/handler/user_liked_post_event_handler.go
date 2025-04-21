@@ -38,7 +38,7 @@ func (handler *UserLikedPostEventHandler) Handle(event []byte) {
 		return
 	}
 
-	data, err := mapData(userLikedPostEvent)
+	data, err := mapUserLikedPostEvent(userLikedPostEvent)
 	if err != nil {
 		return
 	}
@@ -46,7 +46,7 @@ func (handler *UserLikedPostEventHandler) Handle(event []byte) {
 	handler.service.CreateLikePost(data)
 }
 
-func mapData(event UserLikedPostEvent) (*model.LikePost, error) {
+func mapUserLikedPostEvent(event UserLikedPostEvent) (*model.LikePost, error) {
 	return &model.LikePost{
 		Username: event.Username,
 		PostId:   event.PostId,
