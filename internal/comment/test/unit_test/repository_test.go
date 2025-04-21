@@ -27,9 +27,12 @@ func TestCreateCommentInRepository(t *testing.T) {
 		Content:   "Exemplo de content",
 		CreatedAt: timeNow,
 	}
-	client.EXPECT().InsertData("readmodels.comments", data).Return(nil)
+	expectedPostKey := &database.PostMetadataKey{
+		PostId: data.PostId,
+	}
+	client.EXPECT().InsertDataAndIncreaseCounter("readmodels.comments", data, "PostMetadata", expectedPostKey, "Comments").Return(nil)
 
-	err := commentRepository.AddNewComment(data)
+	err := commentRepository.CreateComment(data)
 
 	assert.Nil(t, err)
 }
@@ -185,12 +188,16 @@ func TestUpdateCommentInRepository(t *testing.T) {
 func TestDeleteCommentInRepository(t *testing.T) {
 	setUpRepository(t)
 	commentId := uint64(7)
+	postId := "post1"
 	expectedKey := &database.CommentKey{
 		CommentId: commentId,
 	}
-	client.EXPECT().RemoveData("readmodels.comments", expectedKey)
+	expectedPostKey := &database.PostMetadataKey{
+		PostId: postId,
+	}
+	client.EXPECT().RemoveDataAndDecreaseCounter("readmodels.comments", expectedKey, "PostMetadata", expectedPostKey, "Comments")
 
-	err := commentRepository.DeleteComment(commentId)
+	err := commentRepository.DeleteComment(postId, commentId)
 
 	assert.Nil(t, err)
 }

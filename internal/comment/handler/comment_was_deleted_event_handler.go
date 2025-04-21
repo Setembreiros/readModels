@@ -1,27 +1,29 @@
 package comment_handler
 
 import (
-	"readmodels/internal/comment"
 	common_data "readmodels/internal/common/data"
 
 	"github.com/rs/zerolog/log"
 )
 
+//go:generate mockgen -source=comment_was_deleted_event_handler.go -destination=test/mock/comment_was_deleted_event_handler.go
+
 type CommentWasDeletedEvent struct {
+	PostId    string `json:"postId"`
 	CommentId uint64 `json:"commentId"`
 }
 
 type CommentWasDeletedEventService interface {
-	DeleteComment(commentId uint64)
+	DeleteComment(postId string, commentId uint64)
 }
 
 type CommentWasDeletedEventHandler struct {
 	service CommentWasDeletedEventService
 }
 
-func NewCommentWasDeletedEventHandler(repository comment.Repository) *CommentWasDeletedEventHandler {
+func NewCommentWasDeletedEventHandler(service CommentWasDeletedEventService) *CommentWasDeletedEventHandler {
 	return &CommentWasDeletedEventHandler{
-		service: comment.NewCommentService(repository),
+		service: service,
 	}
 }
 
@@ -35,5 +37,5 @@ func (handler *CommentWasDeletedEventHandler) Handle(event []byte) {
 		return
 	}
 
-	handler.service.DeleteComment(commentWasDeletedEvent.CommentId)
+	handler.service.DeleteComment(commentWasDeletedEvent.PostId, commentWasDeletedEvent.CommentId)
 }

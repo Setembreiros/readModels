@@ -17,8 +17,11 @@ func NewCommentRepository(database *database.Database, cache *database.Cache) *C
 	}
 }
 
-func (r CommentRepository) AddNewComment(data *model.Comment) error {
-	return r.database.Client.InsertData("readmodels.comments", data)
+func (r CommentRepository) CreateComment(data *model.Comment) error {
+	postKey := &database.PostMetadataKey{
+		PostId: data.PostId,
+	}
+	return r.database.Client.InsertDataAndIncreaseCounter("readmodels.comments", data, "PostMetadata", postKey, "Comments")
 }
 
 func (r CommentRepository) GetCommentsByPostId(postId string, lastCommentId uint64, limit int) ([]*model.Comment, uint64, error) {
@@ -37,6 +40,24 @@ func (r CommentRepository) GetCommentsByPostId(postId string, lastCommentId uint
 	return comments, newLastCommentId, nil
 }
 
+type postIdFromCommentData struct {
+	PostId string `json:"postId"`
+}
+
+func (r CommentRepository) GetPostIdFromComment(commentId uint64) (string, error) {
+	commentKey := &database.CommentKey{
+		CommentId: commentId,
+	}
+
+	data := &postIdFromCommentData{}
+	err := r.database.Client.GetData("readmodels.comments", commentKey, data)
+	if err != nil {
+		return "", err
+	}
+
+	return data.PostId, nil
+}
+
 func (r CommentRepository) UpdateComment(data *model.Comment) error {
 	commentKey := &database.CommentKey{
 		CommentId: data.CommentId,
@@ -50,9 +71,14 @@ func (r CommentRepository) UpdateComment(data *model.Comment) error {
 	return r.database.Client.UpdateData("readmodels.comments", commentKey, updateAttributes)
 }
 
-func (r CommentRepository) DeleteComment(commentId uint64) error {
-	key := &database.CommentKey{
+func (r CommentRepository) DeleteComment(postId string, commentId uint64) error {
+	commentKey := &database.CommentKey{
 		CommentId: commentId,
 	}
-	return r.database.Client.RemoveData("readmodels.comments", key)
+
+	postKey := &database.PostMetadataKey{
+		PostId: postId,
+	}
+
+	return r.database.Client.RemoveDataAndDecreaseCounter("readmodels.comments", commentKey, "PostMetadata", postKey, "Comments")
 }

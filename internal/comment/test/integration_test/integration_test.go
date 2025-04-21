@@ -35,10 +35,11 @@ func setUp(t *testing.T) {
 	db = integration_test_arrange.CreateTestDatabase(t, ginContext)
 	cache = integration_test_arrange.CreateTestCache(t, ginContext)
 	repository := comment.NewCommentRepository(db, cache)
+	service := comment.NewCommentService(repository)
 	controller = comment.NewCommentController(repository)
-	commentWasCreatedEventHandler = comment_handler.NewCommentWasCreatedEventHandler(repository)
+	commentWasCreatedEventHandler = comment_handler.NewCommentWasCreatedEventHandler(service)
 	commentWasUpdatedEventHandler = comment_handler.NewCommentWasUpdatedEventHandler(repository)
-	commentWasDeletedEventHandler = comment_handler.NewCommentWasDeletedEventHandler(repository)
+	commentWasDeletedEventHandler = comment_handler.NewCommentWasDeletedEventHandler(service)
 }
 
 func tearDown() {
@@ -49,6 +50,12 @@ func tearDown() {
 func TestCreateNewComment_WhenDatabaseReturnsSuccess(t *testing.T) {
 	setUp(t)
 	defer tearDown()
+	existingPost := &database.PostMetadata{
+		PostId:   "post123",
+		Username: "username1",
+		Type:     "TEXT",
+	}
+	integration_test_arrange.AddPostToDatabase(t, db, existingPost)
 	timeNow := time.Now().UTC().Format(model.TimeLayout)
 	data := &comment_handler.CommentWasCreatedEvent{
 		CommentId: uint64(123456),
@@ -70,6 +77,7 @@ func TestCreateNewComment_WhenDatabaseReturnsSuccess(t *testing.T) {
 	commentWasCreatedEventHandler.Handle(event)
 
 	integration_test_assert.AssertCommentExists(t, db, data.CommentId, expectedComment)
+	integration_test_assert.AssertPostCommentsIncreased(t, db, existingPost.PostId)
 }
 
 func TestGetCommentsByPostId_WhenDatabaseReturnsSuccess(t *testing.T) {
@@ -309,12 +317,14 @@ func TestDeleteComment_WhenDatabaseReturnsSuccess(t *testing.T) {
 	integration_test_arrange.AddCommentToDatabase(t, db, existingComment)
 	data := &comment_handler.CommentWasDeletedEvent{
 		CommentId: existingComment.CommentId,
+		PostId:    existingComment.PostId,
 	}
 	event, _ := test_common.SerializeData(data)
 
 	commentWasDeletedEventHandler.Handle(event)
 
 	integration_test_assert.AssertCommentDoesNotExist(t, db, data.CommentId)
+	integration_test_assert.AssertPostCommentsDecreased(t, db, existingComment.PostId)
 }
 
 func populateDb(t *testing.T, time time.Time) {

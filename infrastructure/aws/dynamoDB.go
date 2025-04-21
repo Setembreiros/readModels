@@ -207,6 +207,68 @@ func (dc *DynamoDBClient) InsertData(tableName string, attributes any) error {
 	return nil
 }
 
+func (dc *DynamoDBClient) InsertDataAndIncreaseCounter(tableName string, attributes any, counterTableName string, counterKey any, counterFieldName string) error {
+	// Marshal item attributes
+	item, err := attributevalue.MarshalMap(attributes)
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Couldn't marshal attributes to AttributeValues")
+		return err
+	}
+
+	// Marshal counter key
+	counterK, err := attributevalue.MarshalMap(counterKey)
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Couldn't map %v key to AttributeValues", counterKey)
+		return err
+	}
+
+	// Create PutItem operation
+	putItem := types.TransactWriteItem{
+		Put: &types.Put{
+			TableName: aws.String(tableName),
+			Item:      item,
+		},
+	}
+
+	// Create UpdateItem operation for counter
+	updateItem := types.TransactWriteItem{
+		Update: &types.Update{
+			TableName:        aws.String(counterTableName),
+			Key:              counterK,
+			UpdateExpression: aws.String("set #field = #field + :val"),
+			ExpressionAttributeNames: map[string]string{
+				"#field": counterFieldName,
+			},
+			ExpressionAttributeValues: map[string]types.AttributeValue{
+				":val": &types.AttributeValueMemberN{Value: strconv.Itoa(1)},
+			},
+		},
+	}
+
+	// Create transaction input with both operations
+	transactionInput := &dynamodb.TransactWriteItemsInput{
+		TransactItems: []types.TransactWriteItem{
+			putItem,
+			updateItem,
+		},
+	}
+
+	// Execute transaction
+	_, err = dc.client.TransactWriteItems(context.TODO(), transactionInput)
+	if err != nil {
+		var tce *types.TransactionCanceledException
+		if errors.As(err, &tce) {
+			log.Error().Stack().Err(err).Msgf("Transaction canceled: %v", tce.CancellationReasons)
+		} else {
+			log.Error().Stack().Err(err).Msgf("Failed to execute transaction")
+		}
+		return err
+	}
+
+	log.Info().Msgf("Successfully executed transaction: inserted item into %s and increased counter %s in %s", tableName, counterFieldName, counterTableName)
+	return nil
+}
+
 func (dc *DynamoDBClient) GetData(tableName string, key any, result any) error {
 	k, err := attributevalue.MarshalMap(key)
 	if err != nil {
@@ -307,24 +369,65 @@ func (dc *DynamoDBClient) GetMultipleData(tableName string, keys []any, results 
 	return nil
 }
 
-func (dc *DynamoDBClient) RemoveData(tableName string, key any) error {
+func (dc *DynamoDBClient) RemoveDataAndDecreaseCounter(tableName string, key any, counterTableName string, counterKey any, counterFieldName string) error {
+	// Marshal item key
 	k, err := attributevalue.MarshalMap(key)
 	if err != nil {
 		log.Error().Stack().Err(err).Msgf("Couldn't map %v key to AttributeValues", key)
 		return err
 	}
 
-	_, err = dc.client.DeleteItem(context.TODO(), &dynamodb.DeleteItemInput{
-		TableName: aws.String(tableName),
-		Key:       k,
-	})
-
+	// Marshal counter key
+	counterK, err := attributevalue.MarshalMap(counterKey)
 	if err != nil {
-		log.Error().Stack().Err(err).Msgf("Couldn't delete item from table %s", tableName)
+		log.Error().Stack().Err(err).Msgf("Couldn't map %v key to AttributeValues", counterKey)
 		return err
 	}
 
-	log.Info().Msgf("Item successfully deleted from table %s", tableName)
+	// Create DeleteItem operation
+	deleteItem := types.TransactWriteItem{
+		Delete: &types.Delete{
+			TableName: aws.String(tableName),
+			Key:       k,
+		},
+	}
+
+	// Create UpdateItem operation for counter
+	updateItem := types.TransactWriteItem{
+		Update: &types.Update{
+			TableName:        aws.String(counterTableName),
+			Key:              counterK,
+			UpdateExpression: aws.String("set #field = #field + :val"),
+			ExpressionAttributeNames: map[string]string{
+				"#field": counterFieldName,
+			},
+			ExpressionAttributeValues: map[string]types.AttributeValue{
+				":val": &types.AttributeValueMemberN{Value: strconv.Itoa(-1)},
+			},
+		},
+	}
+
+	// Create transaction input with both operations
+	transactionInput := &dynamodb.TransactWriteItemsInput{
+		TransactItems: []types.TransactWriteItem{
+			deleteItem,
+			updateItem,
+		},
+	}
+
+	// Execute transaction
+	_, err = dc.client.TransactWriteItems(context.TODO(), transactionInput)
+	if err != nil {
+		var tce *types.TransactionCanceledException
+		if errors.As(err, &tce) {
+			log.Error().Stack().Err(err).Msgf("Transaction canceled: %v", tce.CancellationReasons)
+		} else {
+			log.Error().Stack().Err(err).Msgf("Failed to execute transaction")
+		}
+		return err
+	}
+
+	log.Info().Msgf("Successfully executed transaction: removed item from %s and decreased counter %s in %s", tableName, counterFieldName, counterTableName)
 	return nil
 }
 
@@ -416,7 +519,7 @@ func (dc *DynamoDBClient) UpdateData(tableName string, key any, updateAttributes
 func (dc *DynamoDBClient) IncrementCounter(tableName string, key any, counterFieldName string, incrementValue int) error {
 	k, err := attributevalue.MarshalMap(key)
 	if err != nil {
-		log.Error().Stack().Err(err).Msgf("Non se puido converter a clave %v a AttributeValues", key)
+		log.Error().Stack().Err(err).Msgf("Couldn't map %v key to AttributeValues", key)
 		return err
 	}
 
@@ -435,7 +538,7 @@ func (dc *DynamoDBClient) IncrementCounter(tableName string, key any, counterFie
 
 	_, err = dc.client.UpdateItem(context.TODO(), input)
 	if err != nil {
-		log.Error().Stack().Err(err).Msgf("Non se puido actualizar o contador na táboa %s", tableName)
+		log.Error().Stack().Err(err).Msgf("Couldn't increase counter %s from table %s", counterFieldName, tableName)
 		return err
 	}
 

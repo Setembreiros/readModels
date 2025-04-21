@@ -61,6 +61,8 @@ func TestGetPostMetadatasByUser(t *testing.T) {
 			Type:        "TEXT",
 			Title:       "Exemplo de Título",
 			Description: "Exemplo de Descrición",
+			Comments:    1,
+			Likes:       2,
 			CreatedAt:   timeNow,
 			LastUpdated: timeNow,
 		},
@@ -70,6 +72,8 @@ func TestGetPostMetadatasByUser(t *testing.T) {
 			Type:        "IMAGE",
 			Title:       "Exemplo de Título 2",
 			Description: "Exemplo de Descrición 2",
+			Comments:    1,
+			Likes:       2,
 			CreatedAt:   timeNow,
 			LastUpdated: timeNow,
 		},
@@ -85,6 +89,8 @@ func TestGetPostMetadatasByUser(t *testing.T) {
 			"type":        "TEXT",
 			"title":       "Exemplo de Título",
 			"description": "Exemplo de Descrición",
+			"comments": 1,
+			"likes": 2,
 			"created_at":   "` + timeNow.Format(model.TimeLayout) + `",
 			"last_updated": "` + timeNow.Format(model.TimeLayout) + `"
 		},
@@ -94,6 +100,8 @@ func TestGetPostMetadatasByUser(t *testing.T) {
 			"type":        "IMAGE",
 			"title":       "Exemplo de Título 2",
 			"description": "Exemplo de Descrición 2",
+			"comments": 1,
+			"likes": 2,
 			"created_at":   "` + timeNow.Format(model.TimeLayout) + `",
 			"last_updated": "` + timeNow.Format(model.TimeLayout) + `"
 		}

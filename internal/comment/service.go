@@ -9,10 +9,10 @@ import (
 //go:generate mockgen -source=service.go -destination=test/mock/service.go
 
 type Repository interface {
-	AddNewComment(data *model.Comment) error
+	CreateComment(data *model.Comment) error
 	GetCommentsByPostId(postId string, lastCommentId uint64, limit int) ([]*model.Comment, uint64, error)
 	UpdateComment(data *model.Comment) error
-	DeleteComment(commentId uint64) error
+	DeleteComment(postId string, commentId uint64) error
 }
 
 type CommentService struct {
@@ -25,14 +25,14 @@ func NewCommentService(repository Repository) *CommentService {
 	}
 }
 
-func (s *CommentService) CreateNewComment(data *model.Comment) {
-	err := s.repository.AddNewComment(data)
+func (s *CommentService) CreateComment(data *model.Comment) {
+	err := s.repository.CreateComment(data)
 	if err != nil {
-		log.Error().Stack().Err(err).Msgf("Error adding comment with id %d", data.CommentId)
+		log.Error().Stack().Err(err).Msgf("Error creating comment with id %d in post %s", data.CommentId, data.PostId)
 		return
 	}
 
-	log.Info().Msgf("Comment with id %d was added", data.CommentId)
+	log.Info().Msgf("Comment with id %d in post %s was created", data.CommentId, data.PostId)
 }
 
 func (s *CommentService) GetCommentsByPostId(postId string, lastCommentId uint64, limit int) ([]*model.Comment, uint64, error) {
@@ -55,12 +55,12 @@ func (s *CommentService) UpdateComment(data *model.Comment) {
 	log.Info().Msgf("Comment with id %d was updated", data.CommentId)
 }
 
-func (s *CommentService) DeleteComment(commentId uint64) {
-	err := s.repository.DeleteComment(commentId)
+func (s *CommentService) DeleteComment(postId string, commentId uint64) {
+	err := s.repository.DeleteComment(postId, commentId)
 	if err != nil {
-		log.Error().Stack().Err(err).Msgf("Error deleting comment with id %d", commentId)
+		log.Error().Stack().Err(err).Msgf("Error deleting comment with id %d in post %s", commentId, postId)
 		return
 	}
 
-	log.Info().Msgf("Comment with id %d was deleted", commentId)
+	log.Info().Msgf("Comment with id %d in post %s was deleted", commentId, postId)
 }

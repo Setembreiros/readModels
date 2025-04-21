@@ -13,6 +13,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+var ctrl *gomock.Controller
 var loggerOutput bytes.Buffer
 var repository *mock_comment.MockRepository
 var client *mock_database.MockDatabaseClient
@@ -21,7 +22,7 @@ var apiResponse *httptest.ResponseRecorder
 var ginContext *gin.Context
 
 func SetUp(t *testing.T) {
-	ctrl := gomock.NewController(t)
+	ctrl = gomock.NewController(t)
 	repository = mock_comment.NewMockRepository(ctrl)
 	client = mock_database.NewMockDatabaseClient(ctrl)
 	cacheClient = mock_database.NewMockCacheClient(ctrl)

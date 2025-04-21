@@ -79,7 +79,7 @@ func (p *Provider) ProvideSubscriptions(database *database.Database, cache *data
 		},
 		{
 			EventType: "CommentWasCreatedEvent",
-			Handler:   comment_handler.NewCommentWasCreatedEventHandler(comment.NewCommentRepository(database, cache)),
+			Handler:   comment_handler.NewCommentWasCreatedEventHandler(comment.NewCommentService(comment.NewCommentRepository(database, cache))),
 		},
 		{
 			EventType: "CommentWasUpdatedEvent",
@@ -87,7 +87,7 @@ func (p *Provider) ProvideSubscriptions(database *database.Database, cache *data
 		},
 		{
 			EventType: "CommentWasDeletedEvent",
-			Handler:   comment_handler.NewCommentWasDeletedEventHandler(comment.NewCommentRepository(database, cache)),
+			Handler:   comment_handler.NewCommentWasDeletedEventHandler(comment.NewCommentService(comment.NewCommentRepository(database, cache))),
 		},
 	}
 }
