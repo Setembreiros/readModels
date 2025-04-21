@@ -64,6 +64,17 @@ func AssertLikePostExists(t *testing.T, db *database.Database, expectedLikePost 
 	assert.Equal(t, expectedLikePost.Username, likePost.Username)
 }
 
+func AssertLikePostDoesNotExists(t *testing.T, db *database.Database, expectedLikePost *model.LikePost) {
+	likePostKey := &database.LikePostKey{
+		PostId:   expectedLikePost.PostId,
+		Username: expectedLikePost.Username,
+	}
+	var likePost model.LikePost
+	err := db.Client.GetData("readmodels.likePosts", likePostKey, &likePost)
+	assert.NotNil(t, err)
+	assert.Equal(t, fmt.Sprintf("Data in table readmodels.likePosts not found for key %v", likePostKey), err.Error())
+}
+
 func AssertPostLikesIncreased(t *testing.T, db *database.Database, postId string) {
 	postKey := &database.PostMetadataKey{
 		PostId: postId,
@@ -72,4 +83,14 @@ func AssertPostLikesIncreased(t *testing.T, db *database.Database, postId string
 	err := db.Client.GetData("PostMetadata", postKey, &post)
 	assert.Nil(t, err)
 	assert.Equal(t, 1, post.Likes)
+}
+
+func AssertPostLikesDecreased(t *testing.T, db *database.Database, postId string) {
+	postKey := &database.PostMetadataKey{
+		PostId: postId,
+	}
+	var post database.PostMetadata
+	err := db.Client.GetData("PostMetadata", postKey, &post)
+	assert.Nil(t, err)
+	assert.Equal(t, 0, post.Likes)
 }

@@ -15,6 +15,7 @@ import (
 var db *database.Database
 var cache *database.Cache
 var userLikedPostEventHandler *reaction_handler.UserLikedPostEventHandler
+var userUnlikedPostEventHandler *reaction_handler.UserUnlikedPostEventHandler
 
 func setUp(t *testing.T) {
 	// Real infrastructure and services
@@ -24,6 +25,7 @@ func setUp(t *testing.T) {
 	repository := reaction.NewReactionRepository(db, cache)
 	service := reaction.NewReactionService(repository)
 	userLikedPostEventHandler = reaction_handler.NewUserLikedPostEventHandler(service)
+	userUnlikedPostEventHandler = reaction_handler.NewUserUnlikedPostEventHandler(service)
 }
 
 func tearDown() {
@@ -38,6 +40,7 @@ func TestCreateLikePost_WhenDatabaseReturnsSuccess(t *testing.T) {
 		PostId:   "post123",
 		Username: "username1",
 		Type:     "TEXT",
+		Likes:    0,
 	}
 	integration_test_arrange.AddPostToDatabase(t, db, existingPost)
 	data := &reaction_handler.UserLikedPostEvent{
@@ -54,4 +57,30 @@ func TestCreateLikePost_WhenDatabaseReturnsSuccess(t *testing.T) {
 
 	integration_test_assert.AssertLikePostExists(t, db, expectedLike)
 	integration_test_assert.AssertPostLikesIncreased(t, db, existingPost.PostId)
+}
+
+func TestDeleteLikePost_WhenDatabaseReturnsSuccess(t *testing.T) {
+	setUp(t)
+	defer tearDown()
+	existingPost := &database.PostMetadata{
+		PostId:   "post123",
+		Username: "username1",
+		Type:     "TEXT",
+		Likes:    1,
+	}
+	integration_test_arrange.AddPostToDatabase(t, db, existingPost)
+	data := &reaction_handler.UserUnlikedPostEvent{
+		Username: "user123",
+		PostId:   existingPost.PostId,
+	}
+	event, _ := test_common.SerializeData(data)
+	expectedLike := &model.LikePost{
+		Username: data.Username,
+		PostId:   data.PostId,
+	}
+
+	userUnlikedPostEventHandler.Handle(event)
+
+	integration_test_assert.AssertLikePostDoesNotExists(t, db, expectedLike)
+	integration_test_assert.AssertPostLikesDecreased(t, db, existingPost.PostId)
 }

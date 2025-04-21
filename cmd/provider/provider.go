@@ -95,6 +95,10 @@ func (p *Provider) ProvideSubscriptions(database *database.Database, cache *data
 			EventType: "UserLikedPostEvent",
 			Handler:   reaction_handler.NewUserLikedPostEventHandler(reaction.NewReactionService(reaction.NewReactionRepository(database, cache))),
 		},
+		{
+			EventType: "UserUnlikedPostEvent",
+			Handler:   reaction_handler.NewUserUnlikedPostEventHandler(reaction.NewReactionService(reaction.NewReactionRepository(database, cache))),
+		},
 	}
 }
 
