@@ -31,3 +31,19 @@ func TestCreateLikePostInRepository(t *testing.T) {
 
 	assert.Nil(t, err)
 }
+
+func TestDeleteLikePostInRepository(t *testing.T) {
+	setUpRepository(t)
+	data := &model.LikePost{
+		Username: "user123",
+		PostId:   "post123",
+	}
+	expectedPostKey := &database.PostMetadataKey{
+		PostId: data.PostId,
+	}
+	client.EXPECT().RemoveDataAndDecreaseCounter("readmodels.likePosts", data, "PostMetadata", expectedPostKey, "Likes").Return(nil)
+
+	err := reactionRepository.DeleteLikePost(data)
+
+	assert.Nil(t, err)
+}
