@@ -16,7 +16,7 @@ type ReactionService struct {
 	repository Repository
 }
 
-func NewCommentService(repository Repository) *ReactionService {
+func NewReactionService(repository Repository) *ReactionService {
 	return &ReactionService{
 		repository: repository,
 	}

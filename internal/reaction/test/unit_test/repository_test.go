@@ -25,7 +25,7 @@ func TestCreateLikePostInRepository(t *testing.T) {
 	expectedPostKey := &database.PostMetadataKey{
 		PostId: data.PostId,
 	}
-	client.EXPECT().InsertDataAndIncreaseCounter("readmodels.likes", data, "PostMetadata", expectedPostKey, "Likes").Return(nil)
+	client.EXPECT().InsertDataAndIncreaseCounter("readmodels.likePosts", data, "PostMetadata", expectedPostKey, "Likes").Return(nil)
 
 	err := reactionRepository.CreateLikePost(data)
 

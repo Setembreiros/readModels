@@ -1,4 +1,4 @@
-package reactio_handler
+package reaction_handler
 
 import (
 	common_data "readmodels/internal/common/data"

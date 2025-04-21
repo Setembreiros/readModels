@@ -153,6 +153,8 @@ func TestGetPostMetadatasByUserWithDefaultPaginationParameters(t *testing.T) {
 			"type":        "TEXT",
 			"title":       "Exemplo de Título",
 			"description": "Exemplo de Descrición",
+			"comments": 0,
+			"likes": 0,
 			"created_at":   "` + timeNow.Format(model.TimeLayout) + `",
 			"last_updated": "` + timeNow.Format(model.TimeLayout) + `"
 		},
@@ -162,6 +164,8 @@ func TestGetPostMetadatasByUserWithDefaultPaginationParameters(t *testing.T) {
 			"type":        "IMAGE",
 			"title":       "Exemplo de Título 2",
 			"description": "Exemplo de Descrición 2",
+			"comments": 0,
+			"likes": 0,
 			"created_at":   "` + timeNow.Format(model.TimeLayout) + `",
 			"last_updated": "` + timeNow.Format(model.TimeLayout) + `"
 		}

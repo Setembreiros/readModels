@@ -21,5 +21,5 @@ func (r ReactionRepository) CreateLikePost(data *model.LikePost) error {
 	postKey := &database.PostMetadataKey{
 		PostId: data.PostId,
 	}
-	return r.database.Client.InsertDataAndIncreaseCounter("readmodels.likes", data, "PostMetadata", postKey, "Likes")
+	return r.database.Client.InsertDataAndIncreaseCounter("readmodels.likePosts", data, "PostMetadata", postKey, "Likes")
 }

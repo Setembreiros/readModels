@@ -16,7 +16,7 @@ var reactionService *reaction.ReactionService
 func setUpService(t *testing.T) {
 	SetUp(t)
 	repositoryService = mock_reaction.NewMockRepository(ctrl)
-	reactionService = reaction.NewCommentService(repositoryService)
+	reactionService = reaction.NewReactionService(repositoryService)
 }
 
 func TestCreateLikePostWithService(t *testing.T) {
@@ -32,7 +32,7 @@ func TestCreateLikePostWithService(t *testing.T) {
 	assert.Contains(t, loggerOutput.String(), "Like was created, username: user123 -> postId: post123")
 }
 
-func TestErrorOnCreateNewCommentWithService(t *testing.T) {
+func TestErrorOnCreateLikePostWithService(t *testing.T) {
 	setUpService(t)
 	data := &model.LikePost{
 		Username: "user123",

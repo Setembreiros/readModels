@@ -13,6 +13,8 @@ import (
 	"readmodels/internal/follow"
 	"readmodels/internal/post"
 	post_handler "readmodels/internal/post/handler"
+	"readmodels/internal/reaction"
+	reaction_handler "readmodels/internal/reaction/handler"
 	"readmodels/internal/userprofile"
 	userprofile_handler "readmodels/internal/userprofile/handlers"
 
@@ -88,6 +90,10 @@ func (p *Provider) ProvideSubscriptions(database *database.Database, cache *data
 		{
 			EventType: "CommentWasDeletedEvent",
 			Handler:   comment_handler.NewCommentWasDeletedEventHandler(comment.NewCommentService(comment.NewCommentRepository(database, cache))),
+		},
+		{
+			EventType: "UserLikedPostEvent",
+			Handler:   reaction_handler.NewUserLikedPostEventHandler(reaction.NewReactionService(reaction.NewReactionRepository(database, cache))),
 		},
 	}
 }
