@@ -63,6 +63,7 @@ func TestGetPostMetadatasByUser(t *testing.T) {
 			Description: "Exemplo de Descrición",
 			Comments:    1,
 			Likes:       2,
+			Superlikes:  3,
 			CreatedAt:   timeNow,
 			LastUpdated: timeNow,
 		},
@@ -74,6 +75,7 @@ func TestGetPostMetadatasByUser(t *testing.T) {
 			Description: "Exemplo de Descrición 2",
 			Comments:    1,
 			Likes:       2,
+			Superlikes:  3,
 			CreatedAt:   timeNow,
 			LastUpdated: timeNow,
 		},
@@ -91,6 +93,7 @@ func TestGetPostMetadatasByUser(t *testing.T) {
 			"description": "Exemplo de Descrición",
 			"comments": 1,
 			"likes": 2,
+			"superlikes": 3,
 			"created_at":   "` + timeNow.Format(model.TimeLayout) + `",
 			"last_updated": "` + timeNow.Format(model.TimeLayout) + `"
 		},
@@ -102,6 +105,7 @@ func TestGetPostMetadatasByUser(t *testing.T) {
 			"description": "Exemplo de Descrición 2",
 			"comments": 1,
 			"likes": 2,
+			"superlikes": 3,
 			"created_at":   "` + timeNow.Format(model.TimeLayout) + `",
 			"last_updated": "` + timeNow.Format(model.TimeLayout) + `"
 		}
@@ -155,6 +159,7 @@ func TestGetPostMetadatasByUserWithDefaultPaginationParameters(t *testing.T) {
 			"description": "Exemplo de Descrición",
 			"comments": 0,
 			"likes": 0,
+			"superlikes": 0,
 			"created_at":   "` + timeNow.Format(model.TimeLayout) + `",
 			"last_updated": "` + timeNow.Format(model.TimeLayout) + `"
 		},
@@ -166,6 +171,7 @@ func TestGetPostMetadatasByUserWithDefaultPaginationParameters(t *testing.T) {
 			"description": "Exemplo de Descrición 2",
 			"comments": 0,
 			"likes": 0,
+			"superlikes": 0,
 			"created_at":   "` + timeNow.Format(model.TimeLayout) + `",
 			"last_updated": "` + timeNow.Format(model.TimeLayout) + `"
 		}

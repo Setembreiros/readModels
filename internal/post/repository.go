@@ -44,6 +44,7 @@ func mapToDomain(data *database.PostMetadata) *PostMetadata {
 		Description: data.Description,
 		Comments:    data.Comments,
 		Likes:       data.Likes,
+		Superlikes:  data.Superlikes,
 		CreatedAt:   data.CreatedAt,
 		LastUpdated: data.LastUpdated,
 	}
