@@ -37,3 +37,10 @@ func (r ReactionRepository) DeleteLikePost(data *model.LikePost) error {
 	}
 	return r.database.Client.RemoveDataAndDecreaseCounter("readmodels.likePosts", data, "PostMetadata", postKey, "Likes")
 }
+
+func (r ReactionRepository) DeleteSuperlikePost(data *model.SuperlikePost) error {
+	postKey := &database.PostMetadataKey{
+		PostId: data.PostId,
+	}
+	return r.database.Client.RemoveDataAndDecreaseCounter("readmodels.superlikePosts", data, "PostMetadata", postKey, "Superlikes")
+}

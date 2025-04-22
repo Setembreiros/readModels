@@ -75,3 +75,17 @@ func (mr *MockRepositoryMockRecorder) DeleteLikePost(data interface{}) *gomock.C
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteLikePost", reflect.TypeOf((*MockRepository)(nil).DeleteLikePost), data)
 }
+
+// DeleteSuperlikePost mocks base method.
+func (m *MockRepository) DeleteSuperlikePost(data *model.SuperlikePost) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteSuperlikePost", data)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteSuperlikePost indicates an expected call of DeleteSuperlikePost.
+func (mr *MockRepositoryMockRecorder) DeleteSuperlikePost(data interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSuperlikePost", reflect.TypeOf((*MockRepository)(nil).DeleteSuperlikePost), data)
+}

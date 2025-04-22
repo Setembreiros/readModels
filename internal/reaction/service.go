@@ -12,6 +12,7 @@ type Repository interface {
 	CreateLikePost(data *model.LikePost) error
 	CreateSuperlikePost(data *model.SuperlikePost) error
 	DeleteLikePost(data *model.LikePost) error
+	DeleteSuperlikePost(data *model.SuperlikePost) error
 }
 
 type ReactionService struct {
@@ -52,4 +53,14 @@ func (s *ReactionService) DeleteLikePost(data *model.LikePost) {
 	}
 
 	log.Info().Msgf("LikePost was deleted, username: %s -> postId: %s", data.Username, data.PostId)
+}
+
+func (s *ReactionService) DeleteSuperlikePost(data *model.SuperlikePost) {
+	err := s.repository.DeleteSuperlikePost(data)
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Error deleting superlikePost, username: %s -> postId: %s", data.Username, data.PostId)
+		return
+	}
+
+	log.Info().Msgf("SuperlikePost was deleted, username: %s -> postId: %s", data.Username, data.PostId)
 }

@@ -14,5 +14,6 @@ func getTopics() []string {
 		"UserLikedPostEvent",
 		"UserUnlikedPostEvent",
 		"UserSuperlikedPostEvent",
+		"UserUnsuperlikedPostEvent",
 	}
 }
