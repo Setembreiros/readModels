@@ -20,6 +20,7 @@ type PostMetadata struct {
 	Description string    `json:"description"`
 	Comments    int       `json:"comments"`
 	Likes       int       `json:"likes"`
+	Superlikes  int       `json:"superlikes"`
 	CreatedAt   time.Time `json:"created_at"`
 	LastUpdated time.Time `json:"last_updated"`
 }
@@ -29,6 +30,11 @@ type CommentKey struct {
 }
 
 type LikePostKey struct {
+	PostId   string
+	Username string
+}
+
+type SuperlikePostKey struct {
 	PostId   string
 	Username string
 }

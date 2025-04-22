@@ -10,6 +10,7 @@ import (
 
 type Repository interface {
 	CreateLikePost(data *model.LikePost) error
+	CreateSuperlikePost(data *model.SuperlikePost) error
 	DeleteLikePost(data *model.LikePost) error
 }
 
@@ -26,19 +27,29 @@ func NewReactionService(repository Repository) *ReactionService {
 func (s *ReactionService) CreateLikePost(data *model.LikePost) {
 	err := s.repository.CreateLikePost(data)
 	if err != nil {
-		log.Error().Stack().Err(err).Msgf("Error creating like, username: %s -> postId: %s", data.Username, data.PostId)
+		log.Error().Stack().Err(err).Msgf("Error creating likePost, username: %s -> postId: %s", data.Username, data.PostId)
 		return
 	}
 
-	log.Info().Msgf("Like was created, username: %s -> postId: %s", data.Username, data.PostId)
+	log.Info().Msgf("LikePost was created, username: %s -> postId: %s", data.Username, data.PostId)
+}
+
+func (s *ReactionService) CreateSuperlikePost(data *model.SuperlikePost) {
+	err := s.repository.CreateSuperlikePost(data)
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Error creating superlikePost, username: %s -> postId: %s", data.Username, data.PostId)
+		return
+	}
+
+	log.Info().Msgf("SuperlikePost was created, username: %s -> postId: %s", data.Username, data.PostId)
 }
 
 func (s *ReactionService) DeleteLikePost(data *model.LikePost) {
 	err := s.repository.DeleteLikePost(data)
 	if err != nil {
-		log.Error().Stack().Err(err).Msgf("Error deleting like, username: %s -> postId: %s", data.Username, data.PostId)
+		log.Error().Stack().Err(err).Msgf("Error deleting likePost, username: %s -> postId: %s", data.Username, data.PostId)
 		return
 	}
 
-	log.Info().Msgf("Like was deleted, username: %s -> postId: %s", data.Username, data.PostId)
+	log.Info().Msgf("LikePost was deleted, username: %s -> postId: %s", data.Username, data.PostId)
 }

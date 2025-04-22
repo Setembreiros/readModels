@@ -15,6 +15,7 @@ import (
 var db *database.Database
 var cache *database.Cache
 var userLikedPostEventHandler *reaction_handler.UserLikedPostEventHandler
+var userSuperlikedPostEventHandler *reaction_handler.UserSuperlikedPostEventHandler
 var userUnlikedPostEventHandler *reaction_handler.UserUnlikedPostEventHandler
 
 func setUp(t *testing.T) {
@@ -25,6 +26,7 @@ func setUp(t *testing.T) {
 	repository := reaction.NewReactionRepository(db, cache)
 	service := reaction.NewReactionService(repository)
 	userLikedPostEventHandler = reaction_handler.NewUserLikedPostEventHandler(service)
+	userSuperlikedPostEventHandler = reaction_handler.NewUserSuperlikedPostEventHandler(service)
 	userUnlikedPostEventHandler = reaction_handler.NewUserUnlikedPostEventHandler(service)
 }
 
@@ -57,6 +59,32 @@ func TestCreateLikePost_WhenDatabaseReturnsSuccess(t *testing.T) {
 
 	integration_test_assert.AssertLikePostExists(t, db, expectedLike)
 	integration_test_assert.AssertPostLikesIncreased(t, db, existingPost.PostId)
+}
+
+func TestCreateSuperlikePost_WhenDatabaseReturnsSuccess(t *testing.T) {
+	setUp(t)
+	defer tearDown()
+	existingPost := &database.PostMetadata{
+		PostId:     "post123",
+		Username:   "username1",
+		Type:       "TEXT",
+		Superlikes: 0,
+	}
+	integration_test_arrange.AddPostToDatabase(t, db, existingPost)
+	data := &reaction_handler.UserSuperlikedPostEvent{
+		Username: "user123",
+		PostId:   existingPost.PostId,
+	}
+	event, _ := test_common.SerializeData(data)
+	expectedSuperlike := &model.SuperlikePost{
+		Username: data.Username,
+		PostId:   data.PostId,
+	}
+
+	userSuperlikedPostEventHandler.Handle(event)
+
+	integration_test_assert.AssertSuperlikePostExists(t, db, expectedSuperlike)
+	integration_test_assert.AssertPostSuperlikesIncreased(t, db, existingPost.PostId)
 }
 
 func TestDeleteLikePost_WhenDatabaseReturnsSuccess(t *testing.T) {
