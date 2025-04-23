@@ -3,6 +3,7 @@ package userprofile_test
 import (
 	"bytes"
 	"errors"
+	"readmodels/internal/model"
 	"readmodels/internal/userprofile"
 	mock_userprofile "readmodels/internal/userprofile/test/mock"
 	"testing"
@@ -25,7 +26,7 @@ func setUpService(t *testing.T) {
 
 func TestCreateNewUserProfileWithService(t *testing.T) {
 	setUpService(t)
-	data := &userprofile.UserProfile{
+	data := &model.UserProfile{
 		Username:  "username1",
 		Name:      "user name",
 		Bio:       "",
@@ -42,7 +43,7 @@ func TestCreateNewUserProfileWithService(t *testing.T) {
 
 func TestErrorOnCreateNewUserProfileWithService(t *testing.T) {
 	setUpService(t)
-	data := &userprofile.UserProfile{
+	data := &model.UserProfile{
 		Username:  "username1",
 		Name:      "user name",
 		Bio:       "",
@@ -59,7 +60,7 @@ func TestErrorOnCreateNewUserProfileWithService(t *testing.T) {
 
 func TestUpdateUserProfileWithService(t *testing.T) {
 	setUpService(t)
-	data := &userprofile.UserProfile{
+	data := &model.UserProfile{
 		Username:  "username1",
 		Name:      "user name",
 		Bio:       "O mellor usuario do mundo",
@@ -76,7 +77,7 @@ func TestUpdateUserProfileWithService(t *testing.T) {
 
 func TestErrorOnUpdateUserProfileWithService(t *testing.T) {
 	setUpService(t)
-	data := &userprofile.UserProfile{
+	data := &model.UserProfile{
 		Username:  "username1",
 		Name:      "user name",
 		Bio:       "O mellor usuario do mundo",
@@ -94,7 +95,7 @@ func TestErrorOnUpdateUserProfileWithService(t *testing.T) {
 func TestGetUserProfileWithService(t *testing.T) {
 	setUpService(t)
 	username := "username1"
-	expectedData := &userprofile.UserProfile{
+	expectedData := &model.UserProfile{
 		Username:  "username1",
 		Name:      "user name",
 		Bio:       "",
@@ -110,7 +111,7 @@ func TestGetUserProfileWithService(t *testing.T) {
 func TestErrorOnGetUserProfileWithService(t *testing.T) {
 	setUpService(t)
 	username := "username1"
-	expectedData := &userprofile.UserProfile{}
+	expectedData := &model.UserProfile{}
 	serviceRepository.EXPECT().GetUserProfile(username).Return(expectedData, errors.New("some error"))
 
 	userProfileService.GetUserProfile(username)

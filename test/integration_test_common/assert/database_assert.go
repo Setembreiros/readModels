@@ -52,27 +52,28 @@ func AssertPostCommentsDecreased(t *testing.T, db *database.Database, postId str
 	assert.Equal(t, 0, post.Comments)
 }
 
-func AssertLikePostExists(t *testing.T, db *database.Database, expectedLikePost *model.LikePost) {
-	likePostKey := &database.LikePostKey{
-		PostId:   expectedLikePost.PostId,
-		Username: expectedLikePost.Username,
+func AssertPostLikeExists(t *testing.T, db *database.Database, expectedPostLike *model.PostLike) {
+	postLikeKey := &database.PostLikeKey{
+		PostId:   expectedPostLike.PostId,
+		Username: expectedPostLike.User.Username,
 	}
-	var likePost model.LikePost
-	err := db.Client.GetData("readmodels.likePosts", likePostKey, &likePost)
+	var postLike database.PostLikeMetadata
+	err := db.Client.GetData("readmodels.postLikes", postLikeKey, &postLike)
 	assert.Nil(t, err)
-	assert.Equal(t, expectedLikePost.PostId, likePost.PostId)
-	assert.Equal(t, expectedLikePost.Username, likePost.Username)
+	assert.Equal(t, expectedPostLike.PostId, postLike.PostId)
+	assert.Equal(t, expectedPostLike.User.Username, postLike.Username)
+	assert.Equal(t, expectedPostLike.User.Name, postLike.Name)
 }
 
-func AssertLikePostDoesNotExists(t *testing.T, db *database.Database, expectedLikePost *model.LikePost) {
-	likePostKey := &database.LikePostKey{
-		PostId:   expectedLikePost.PostId,
-		Username: expectedLikePost.Username,
+func AssertPostLikeDoesNotExists(t *testing.T, db *database.Database, expectedPostLike *model.PostLike) {
+	postLikeKey := &database.PostLikeKey{
+		PostId:   expectedPostLike.PostId,
+		Username: expectedPostLike.User.Username,
 	}
-	var likePost model.LikePost
-	err := db.Client.GetData("readmodels.likePosts", likePostKey, &likePost)
+	var postLike database.PostLikeMetadata
+	err := db.Client.GetData("readmodels.postLikes", postLikeKey, &postLike)
 	assert.NotNil(t, err)
-	assert.Equal(t, fmt.Sprintf("Data in table readmodels.likePosts not found for key %v", likePostKey), err.Error())
+	assert.Equal(t, fmt.Sprintf("Data in table readmodels.postLikes not found for key %v", postLikeKey), err.Error())
 }
 
 func AssertPostLikesIncreased(t *testing.T, db *database.Database, postId string) {
@@ -95,27 +96,28 @@ func AssertPostLikesDecreased(t *testing.T, db *database.Database, postId string
 	assert.Equal(t, 0, post.Likes)
 }
 
-func AssertSuperlikePostExists(t *testing.T, db *database.Database, expectedSuperlikePost *model.SuperlikePost) {
-	superlikePostKey := &database.SuperlikePostKey{
-		PostId:   expectedSuperlikePost.PostId,
-		Username: expectedSuperlikePost.Username,
+func AssertPostSuperlikeExists(t *testing.T, db *database.Database, expectedPostSuperlike *model.PostSuperlike) {
+	postSuperlikeKey := &database.PostSuperlikeKey{
+		PostId:   expectedPostSuperlike.PostId,
+		Username: expectedPostSuperlike.User.Username,
 	}
-	var superlikePost model.SuperlikePost
-	err := db.Client.GetData("readmodels.superlikePosts", superlikePostKey, &superlikePost)
+	var postSuperlike database.PostSuperlikeMetadata
+	err := db.Client.GetData("readmodels.postSuperlikes", postSuperlikeKey, &postSuperlike)
 	assert.Nil(t, err)
-	assert.Equal(t, expectedSuperlikePost.PostId, superlikePost.PostId)
-	assert.Equal(t, expectedSuperlikePost.Username, superlikePost.Username)
+	assert.Equal(t, expectedPostSuperlike.PostId, postSuperlike.PostId)
+	assert.Equal(t, expectedPostSuperlike.User.Username, postSuperlike.Username)
+	assert.Equal(t, expectedPostSuperlike.User.Name, postSuperlike.Name)
 }
 
-func AssertSuperlikePostDoesNotExists(t *testing.T, db *database.Database, expectedSuperlikePost *model.SuperlikePost) {
-	likePostKey := &database.SuperlikePostKey{
-		PostId:   expectedSuperlikePost.PostId,
-		Username: expectedSuperlikePost.Username,
+func AssertPostSuperlikeDoesNotExists(t *testing.T, db *database.Database, expectedPostSuperlike *model.PostSuperlike) {
+	postLikeKey := &database.PostSuperlikeKey{
+		PostId:   expectedPostSuperlike.PostId,
+		Username: expectedPostSuperlike.User.Username,
 	}
-	var superlikePost model.SuperlikePost
-	err := db.Client.GetData("readmodels.superlikePosts", likePostKey, &superlikePost)
+	var postSuperlike database.PostSuperlikeMetadata
+	err := db.Client.GetData("readmodels.postSuperlikes", postLikeKey, &postSuperlike)
 	assert.NotNil(t, err)
-	assert.Equal(t, fmt.Sprintf("Data in table readmodels.superlikePosts not found for key %v", likePostKey), err.Error())
+	assert.Equal(t, fmt.Sprintf("Data in table readmodels.postSuperlikes not found for key %v", postLikeKey), err.Error())
 }
 
 func AssertPostSuperlikesIncreased(t *testing.T, db *database.Database, postId string) {

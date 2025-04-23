@@ -34,58 +34,58 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 	return m.recorder
 }
 
-// CreateLikePost mocks base method.
-func (m *MockRepository) CreateLikePost(data *model.LikePost) error {
+// CreatePostLike mocks base method.
+func (m *MockRepository) CreatePostLike(data *model.PostLike) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateLikePost", data)
+	ret := m.ctrl.Call(m, "CreatePostLike", data)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// CreateLikePost indicates an expected call of CreateLikePost.
-func (mr *MockRepositoryMockRecorder) CreateLikePost(data interface{}) *gomock.Call {
+// CreatePostLike indicates an expected call of CreatePostLike.
+func (mr *MockRepositoryMockRecorder) CreatePostLike(data interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateLikePost", reflect.TypeOf((*MockRepository)(nil).CreateLikePost), data)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreatePostLike", reflect.TypeOf((*MockRepository)(nil).CreatePostLike), data)
 }
 
-// CreateSuperlikePost mocks base method.
-func (m *MockRepository) CreateSuperlikePost(data *model.SuperlikePost) error {
+// CreatePostSuperlike mocks base method.
+func (m *MockRepository) CreatePostSuperlike(data *model.PostSuperlike) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateSuperlikePost", data)
+	ret := m.ctrl.Call(m, "CreatePostSuperlike", data)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// CreateSuperlikePost indicates an expected call of CreateSuperlikePost.
-func (mr *MockRepositoryMockRecorder) CreateSuperlikePost(data interface{}) *gomock.Call {
+// CreatePostSuperlike indicates an expected call of CreatePostSuperlike.
+func (mr *MockRepositoryMockRecorder) CreatePostSuperlike(data interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSuperlikePost", reflect.TypeOf((*MockRepository)(nil).CreateSuperlikePost), data)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreatePostSuperlike", reflect.TypeOf((*MockRepository)(nil).CreatePostSuperlike), data)
 }
 
-// DeleteLikePost mocks base method.
-func (m *MockRepository) DeleteLikePost(data *model.LikePost) error {
+// DeletePostLike mocks base method.
+func (m *MockRepository) DeletePostLike(data *model.PostLike) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteLikePost", data)
+	ret := m.ctrl.Call(m, "DeletePostLike", data)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// DeleteLikePost indicates an expected call of DeleteLikePost.
-func (mr *MockRepositoryMockRecorder) DeleteLikePost(data interface{}) *gomock.Call {
+// DeletePostLike indicates an expected call of DeletePostLike.
+func (mr *MockRepositoryMockRecorder) DeletePostLike(data interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteLikePost", reflect.TypeOf((*MockRepository)(nil).DeleteLikePost), data)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeletePostLike", reflect.TypeOf((*MockRepository)(nil).DeletePostLike), data)
 }
 
-// DeleteSuperlikePost mocks base method.
-func (m *MockRepository) DeleteSuperlikePost(data *model.SuperlikePost) error {
+// DeletePostSuperlike mocks base method.
+func (m *MockRepository) DeletePostSuperlike(data *model.PostSuperlike) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteSuperlikePost", data)
+	ret := m.ctrl.Call(m, "DeletePostSuperlike", data)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// DeleteSuperlikePost indicates an expected call of DeleteSuperlikePost.
-func (mr *MockRepositoryMockRecorder) DeleteSuperlikePost(data interface{}) *gomock.Call {
+// DeletePostSuperlike indicates an expected call of DeletePostSuperlike.
+func (mr *MockRepositoryMockRecorder) DeletePostSuperlike(data interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSuperlikePost", reflect.TypeOf((*MockRepository)(nil).DeleteSuperlikePost), data)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeletePostSuperlike", reflect.TypeOf((*MockRepository)(nil).DeletePostSuperlike), data)
 }

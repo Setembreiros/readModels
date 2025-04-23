@@ -15,7 +15,7 @@ type UserSuperlikedPostEvent struct {
 }
 
 type UserSuperlikedPostEventService interface {
-	CreateSuperlikePost(data *model.SuperlikePost)
+	CreatePostSuperlike(data *model.PostSuperlike)
 }
 
 type UserSuperlikedPostEventHandler struct {
@@ -43,12 +43,14 @@ func (handler *UserSuperlikedPostEventHandler) Handle(event []byte) {
 		return
 	}
 
-	handler.service.CreateSuperlikePost(data)
+	handler.service.CreatePostSuperlike(data)
 }
 
-func mapUserSuperlikedPostEvent(event UserSuperlikedPostEvent) (*model.SuperlikePost, error) {
-	return &model.SuperlikePost{
-		Username: event.Username,
-		PostId:   event.PostId,
+func mapUserSuperlikedPostEvent(event UserSuperlikedPostEvent) (*model.PostSuperlike, error) {
+	return &model.PostSuperlike{
+		User: &model.UserMetadata{
+			Username: event.Username,
+		},
+		PostId: event.PostId,
 	}, nil
 }

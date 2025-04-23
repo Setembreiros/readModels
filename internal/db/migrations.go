@@ -91,7 +91,7 @@ func (db *Database) ApplyMigrations(ctx context.Context) error {
 		}
 	}
 
-	if !db.Client.TableExists("readmodels.likePosts") {
+	if !db.Client.TableExists("readmodels.postLikes") {
 		keys := []TableAttributes{
 			{
 				Name:          "PostId",
@@ -102,13 +102,13 @@ func (db *Database) ApplyMigrations(ctx context.Context) error {
 				AttributeType: "string",
 			},
 		}
-		err := db.Client.CreateTable("readmodels.likePosts", &keys, ctx)
+		err := db.Client.CreateTable("readmodels.postLikes", &keys, ctx)
 		if err != nil {
 			return err
 		}
 	}
 
-	if !db.Client.TableExists("readmodels.superlikePosts") {
+	if !db.Client.TableExists("readmodels.postSuperlikes") {
 		keys := []TableAttributes{
 			{
 				Name:          "PostId",
@@ -119,7 +119,7 @@ func (db *Database) ApplyMigrations(ctx context.Context) error {
 				AttributeType: "string",
 			},
 		}
-		err := db.Client.CreateTable("readmodels.superlikePosts", &keys, ctx)
+		err := db.Client.CreateTable("readmodels.postSuperlikes", &keys, ctx)
 		if err != nil {
 			return err
 		}

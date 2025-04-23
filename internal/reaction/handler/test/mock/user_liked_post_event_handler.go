@@ -34,14 +34,14 @@ func (m *MockUserLikedPostEventService) EXPECT() *MockUserLikedPostEventServiceM
 	return m.recorder
 }
 
-// CreateLikePost mocks base method.
-func (m *MockUserLikedPostEventService) CreateLikePost(data *model.LikePost) {
+// CreatePostLike mocks base method.
+func (m *MockUserLikedPostEventService) CreatePostLike(data *model.PostLike) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "CreateLikePost", data)
+	m.ctrl.Call(m, "CreatePostLike", data)
 }
 
-// CreateLikePost indicates an expected call of CreateLikePost.
-func (mr *MockUserLikedPostEventServiceMockRecorder) CreateLikePost(data interface{}) *gomock.Call {
+// CreatePostLike indicates an expected call of CreatePostLike.
+func (mr *MockUserLikedPostEventServiceMockRecorder) CreatePostLike(data interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateLikePost", reflect.TypeOf((*MockUserLikedPostEventService)(nil).CreateLikePost), data)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreatePostLike", reflect.TypeOf((*MockUserLikedPostEventService)(nil).CreatePostLike), data)
 }

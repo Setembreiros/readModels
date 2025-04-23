@@ -16,50 +16,104 @@ func setUpRepository(t *testing.T) {
 	reactionRepository = reaction.NewReactionRepository(database.NewDatabase(client), database.NewCache(cacheClient))
 }
 
-func TestCreateLikePostInRepository(t *testing.T) {
+func TestCreatePostLikeInRepository(t *testing.T) {
 	setUpRepository(t)
-	data := &model.LikePost{
-		Username: "user123",
-		PostId:   "post123",
+	data := &model.PostLike{
+		User: &model.UserMetadata{
+			Username: "user123",
+		},
+		PostId: "post123",
+	}
+	expectedData := &database.PostLikeMetadata{
+		PostId:   data.PostId,
+		Username: data.User.Username,
+	}
+	expectedUserKey := &database.UserProfileKey{
+		Username: data.User.Username,
 	}
 	expectedPostKey := &database.PostMetadataKey{
 		PostId: data.PostId,
 	}
-	client.EXPECT().InsertDataAndIncreaseCounter("readmodels.likePosts", data, "PostMetadata", expectedPostKey, "Likes").Return(nil)
+	expectedUserFullname := &struct {
+		Name string `json:"name"`
+	}{}
+	client.EXPECT().GetData("UserProfile", expectedUserKey, expectedUserFullname).Return(nil)
+	client.EXPECT().InsertDataAndIncreaseCounter("readmodels.postLikes", expectedData, "PostMetadata", expectedPostKey, "Likes").Return(nil)
 
-	err := reactionRepository.CreateLikePost(data)
+	err := reactionRepository.CreatePostLike(data)
 
 	assert.Nil(t, err)
 }
 
-func TestCreateSuperlikePostInRepository(t *testing.T) {
+func TestCreatePostSuperlikeInRepository(t *testing.T) {
 	setUpRepository(t)
-	data := &model.SuperlikePost{
-		Username: "user123",
-		PostId:   "post123",
+	data := &model.PostSuperlike{
+		User: &model.UserMetadata{
+			Username: "user123",
+		},
+		PostId: "post123",
+	}
+	expectedData := &database.PostSuperlikeMetadata{
+		PostId:   data.PostId,
+		Username: data.User.Username,
+	}
+	expectedUserKey := &database.UserProfileKey{
+		Username: data.User.Username,
 	}
 	expectedPostKey := &database.PostMetadataKey{
 		PostId: data.PostId,
 	}
-	client.EXPECT().InsertDataAndIncreaseCounter("readmodels.superlikePosts", data, "PostMetadata", expectedPostKey, "Superlikes").Return(nil)
+	expectedUserFullname := &struct {
+		Name string `json:"name"`
+	}{}
+	client.EXPECT().GetData("UserProfile", expectedUserKey, expectedUserFullname).Return(nil)
+	client.EXPECT().InsertDataAndIncreaseCounter("readmodels.postSuperlikes", expectedData, "PostMetadata", expectedPostKey, "Superlikes").Return(nil)
 
-	err := reactionRepository.CreateSuperlikePost(data)
+	err := reactionRepository.CreatePostSuperlike(data)
 
 	assert.Nil(t, err)
 }
 
-func TestDeleteLikePostInRepository(t *testing.T) {
+func TestDeletePostLikeInRepository(t *testing.T) {
 	setUpRepository(t)
-	data := &model.LikePost{
-		Username: "user123",
-		PostId:   "post123",
+	data := &model.PostLike{
+		User: &model.UserMetadata{
+			Username: "user123",
+		},
+		PostId: "post123",
+	}
+	expectedData := &database.PostLikeKey{
+		PostId:   data.PostId,
+		Username: data.User.Username,
 	}
 	expectedPostKey := &database.PostMetadataKey{
 		PostId: data.PostId,
 	}
-	client.EXPECT().RemoveDataAndDecreaseCounter("readmodels.likePosts", data, "PostMetadata", expectedPostKey, "Likes").Return(nil)
+	client.EXPECT().RemoveDataAndDecreaseCounter("readmodels.postLikes", expectedData, "PostMetadata", expectedPostKey, "Likes").Return(nil)
 
-	err := reactionRepository.DeleteLikePost(data)
+	err := reactionRepository.DeletePostLike(data)
+
+	assert.Nil(t, err)
+}
+
+func TestDeletePostSUperlikeInRepository(t *testing.T) {
+	setUpRepository(t)
+	data := &model.PostSuperlike{
+		User: &model.UserMetadata{
+			Username: "user123",
+		},
+		PostId: "post123",
+	}
+	expectedData := &database.PostSuperlikeKey{
+		PostId:   data.PostId,
+		Username: data.User.Username,
+	}
+	expectedPostKey := &database.PostMetadataKey{
+		PostId: data.PostId,
+	}
+	client.EXPECT().RemoveDataAndDecreaseCounter("readmodels.postSuperlikes", expectedData, "PostMetadata", expectedPostKey, "Superlikes").Return(nil)
+
+	err := reactionRepository.DeletePostSuperlike(data)
 
 	assert.Nil(t, err)
 }

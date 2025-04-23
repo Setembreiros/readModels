@@ -3,7 +3,7 @@ package userprofile_handler_test
 import (
 	"bytes"
 	"encoding/json"
-	userprofile "readmodels/internal/userprofile"
+	"readmodels/internal/model"
 	userprofile_handler "readmodels/internal/userprofile/handlers"
 	mock_userprofile "readmodels/internal/userprofile/test/mock"
 	"testing"
@@ -34,7 +34,7 @@ func TestHandleUserWasRegisteredEventHandler(t *testing.T) {
 		FullName: "user lastname",
 	}
 	event, _ := json.Marshal(data)
-	expectedUserprofile := &userprofile.UserProfile{
+	expectedUserprofile := &model.UserProfile{
 		Username: "username1",
 		Name:     "user lastname",
 		Bio:      "",

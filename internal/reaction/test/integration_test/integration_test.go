@@ -37,7 +37,7 @@ func tearDown() {
 	cache.Client.Clean()
 }
 
-func TestCreateLikePost_WhenDatabaseReturnsSuccess(t *testing.T) {
+func TestCreatePostLike_WhenDatabaseReturnsSuccess(t *testing.T) {
 	setUp(t)
 	defer tearDown()
 	existingPost := &database.PostMetadata{
@@ -46,24 +46,32 @@ func TestCreateLikePost_WhenDatabaseReturnsSuccess(t *testing.T) {
 		Type:     "TEXT",
 		Likes:    0,
 	}
+	existingUserProfile := &model.UserProfile{
+		Username: "user123",
+		Name:     "fullname123",
+	}
 	integration_test_arrange.AddPostToDatabase(t, db, existingPost)
+	integration_test_arrange.AddUserProfileToDatabase(t, db, existingUserProfile)
 	data := &reaction_handler.UserLikedPostEvent{
 		Username: "user123",
 		PostId:   existingPost.PostId,
 	}
 	event, _ := test_common.SerializeData(data)
-	expectedLike := &model.LikePost{
-		Username: data.Username,
-		PostId:   data.PostId,
+	expectedLike := &model.PostLike{
+		User: &model.UserMetadata{
+			Username: data.Username,
+			Name:     existingUserProfile.Name,
+		},
+		PostId: data.PostId,
 	}
 
 	userLikedPostEventHandler.Handle(event)
 
-	integration_test_assert.AssertLikePostExists(t, db, expectedLike)
+	integration_test_assert.AssertPostLikeExists(t, db, expectedLike)
 	integration_test_assert.AssertPostLikesIncreased(t, db, existingPost.PostId)
 }
 
-func TestCreateSuperlikePost_WhenDatabaseReturnsSuccess(t *testing.T) {
+func TestCreatePostSuperlike_WhenDatabaseReturnsSuccess(t *testing.T) {
 	setUp(t)
 	defer tearDown()
 	existingPost := &database.PostMetadata{
@@ -72,24 +80,32 @@ func TestCreateSuperlikePost_WhenDatabaseReturnsSuccess(t *testing.T) {
 		Type:       "TEXT",
 		Superlikes: 0,
 	}
+	existingUserProfile := &model.UserProfile{
+		Username: "user123",
+		Name:     "fullname123",
+	}
 	integration_test_arrange.AddPostToDatabase(t, db, existingPost)
+	integration_test_arrange.AddUserProfileToDatabase(t, db, existingUserProfile)
 	data := &reaction_handler.UserSuperlikedPostEvent{
 		Username: "user123",
 		PostId:   existingPost.PostId,
 	}
 	event, _ := test_common.SerializeData(data)
-	expectedSuperlike := &model.SuperlikePost{
-		Username: data.Username,
-		PostId:   data.PostId,
+	expectedSuperlike := &model.PostSuperlike{
+		User: &model.UserMetadata{
+			Username: data.Username,
+			Name:     existingUserProfile.Name,
+		},
+		PostId: data.PostId,
 	}
 
 	userSuperlikedPostEventHandler.Handle(event)
 
-	integration_test_assert.AssertSuperlikePostExists(t, db, expectedSuperlike)
+	integration_test_assert.AssertPostSuperlikeExists(t, db, expectedSuperlike)
 	integration_test_assert.AssertPostSuperlikesIncreased(t, db, existingPost.PostId)
 }
 
-func TestDeleteLikePost_WhenDatabaseReturnsSuccess(t *testing.T) {
+func TestDeletePostLike_WhenDatabaseReturnsSuccess(t *testing.T) {
 	setUp(t)
 	defer tearDown()
 	existingPost := &database.PostMetadata{
@@ -104,18 +120,20 @@ func TestDeleteLikePost_WhenDatabaseReturnsSuccess(t *testing.T) {
 		PostId:   existingPost.PostId,
 	}
 	event, _ := test_common.SerializeData(data)
-	expectedLike := &model.LikePost{
-		Username: data.Username,
-		PostId:   data.PostId,
+	expectedLike := &model.PostLike{
+		User: &model.UserMetadata{
+			Username: data.Username,
+		},
+		PostId: data.PostId,
 	}
 
 	userUnlikedPostEventHandler.Handle(event)
 
-	integration_test_assert.AssertLikePostDoesNotExists(t, db, expectedLike)
+	integration_test_assert.AssertPostLikeDoesNotExists(t, db, expectedLike)
 	integration_test_assert.AssertPostLikesDecreased(t, db, existingPost.PostId)
 }
 
-func TestDeleteSuperlikePost_WhenDatabaseReturnsSuccess(t *testing.T) {
+func TestDeletePostSuperlike_WhenDatabaseReturnsSuccess(t *testing.T) {
 	setUp(t)
 	defer tearDown()
 	existingPost := &database.PostMetadata{
@@ -130,13 +148,15 @@ func TestDeleteSuperlikePost_WhenDatabaseReturnsSuccess(t *testing.T) {
 		PostId:   existingPost.PostId,
 	}
 	event, _ := test_common.SerializeData(data)
-	expectedSuperlike := &model.SuperlikePost{
-		Username: data.Username,
-		PostId:   data.PostId,
+	expectedSuperlike := &model.PostSuperlike{
+		User: &model.UserMetadata{
+			Username: data.Username,
+		},
+		PostId: data.PostId,
 	}
 
 	userUnsuperlikedPostEventHandler.Handle(event)
 
-	integration_test_assert.AssertSuperlikePostDoesNotExists(t, db, expectedSuperlike)
+	integration_test_assert.AssertPostSuperlikeDoesNotExists(t, db, expectedSuperlike)
 	integration_test_assert.AssertPostSuperlikesDecreased(t, db, existingPost.PostId)
 }

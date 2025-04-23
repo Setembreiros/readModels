@@ -6,7 +6,7 @@ import (
 	"net/url"
 	database "readmodels/internal/db"
 	"readmodels/internal/follow"
-	"readmodels/internal/userprofile"
+	"readmodels/internal/model"
 	integration_test_arrange "readmodels/test/integration_test_common/arrange"
 	integration_test_assert "readmodels/test/integration_test_common/assert"
 	"testing"
@@ -142,7 +142,7 @@ func TestGetFolloweesMetadata_WhenDatabaseReturnsSuccess(t *testing.T) {
 
 func populateDb(t *testing.T, data []follow.FollowerMetadata) {
 	for _, follower := range data {
-		integration_test_arrange.AddUserProfileToDatabase(t, db, &userprofile.UserProfile{
+		integration_test_arrange.AddUserProfileToDatabase(t, db, &model.UserProfile{
 			Username: follower.Username,
 			Name:     follower.Name,
 		})

@@ -17,30 +17,78 @@ func NewReactionRepository(database *database.Database, cache *database.Cache) *
 	}
 }
 
-func (r ReactionRepository) CreateLikePost(data *model.LikePost) error {
-	postKey := &database.PostMetadataKey{
-		PostId: data.PostId,
+func (r ReactionRepository) CreatePostLike(postLike *model.PostLike) error {
+	userFullname, err := r.getUserFullname(postLike.User.Username)
+	if err != nil {
+		return err
 	}
-	return r.database.Client.InsertDataAndIncreaseCounter("readmodels.likePosts", data, "PostMetadata", postKey, "Likes")
+
+	postLikeMetadata := &database.PostLikeMetadata{
+		PostId:   postLike.PostId,
+		Username: postLike.User.Username,
+		Name:     userFullname,
+	}
+
+	postKey := &database.PostMetadataKey{
+		PostId: postLikeMetadata.PostId,
+	}
+	return r.database.Client.InsertDataAndIncreaseCounter("readmodels.postLikes", postLikeMetadata, "PostMetadata", postKey, "Likes")
 }
 
-func (r ReactionRepository) CreateSuperlikePost(data *model.SuperlikePost) error {
-	postKey := &database.PostMetadataKey{
-		PostId: data.PostId,
+func (r ReactionRepository) CreatePostSuperlike(postSuperlike *model.PostSuperlike) error {
+	userFullname, err := r.getUserFullname(postSuperlike.User.Username)
+	if err != nil {
+		return err
 	}
-	return r.database.Client.InsertDataAndIncreaseCounter("readmodels.superlikePosts", data, "PostMetadata", postKey, "Superlikes")
+
+	postSuperlikeMetadata := &database.PostSuperlikeMetadata{
+		PostId:   postSuperlike.PostId,
+		Username: postSuperlike.User.Username,
+		Name:     userFullname,
+	}
+
+	postKey := &database.PostMetadataKey{
+		PostId: postSuperlike.PostId,
+	}
+	return r.database.Client.InsertDataAndIncreaseCounter("readmodels.postSuperlikes", postSuperlikeMetadata, "PostMetadata", postKey, "Superlikes")
 }
 
-func (r ReactionRepository) DeleteLikePost(data *model.LikePost) error {
+func (r ReactionRepository) DeletePostLike(postLike *model.PostLike) error {
 	postKey := &database.PostMetadataKey{
-		PostId: data.PostId,
+		PostId: postLike.PostId,
 	}
-	return r.database.Client.RemoveDataAndDecreaseCounter("readmodels.likePosts", data, "PostMetadata", postKey, "Likes")
+
+	postLikeMetadataKey := &database.PostLikeKey{
+		PostId:   postLike.PostId,
+		Username: postLike.User.Username,
+	}
+	return r.database.Client.RemoveDataAndDecreaseCounter("readmodels.postLikes", postLikeMetadataKey, "PostMetadata", postKey, "Likes")
 }
 
-func (r ReactionRepository) DeleteSuperlikePost(data *model.SuperlikePost) error {
-	postKey := &database.PostMetadataKey{
-		PostId: data.PostId,
+func (r ReactionRepository) DeletePostSuperlike(postSuperLike *model.PostSuperlike) error {
+	postSuperLikeMetadataKey := &database.PostSuperlikeKey{
+		PostId:   postSuperLike.PostId,
+		Username: postSuperLike.User.Username,
 	}
-	return r.database.Client.RemoveDataAndDecreaseCounter("readmodels.superlikePosts", data, "PostMetadata", postKey, "Superlikes")
+	postKey := &database.PostMetadataKey{
+		PostId: postSuperLike.PostId,
+	}
+	return r.database.Client.RemoveDataAndDecreaseCounter("readmodels.postSuperlikes", postSuperLikeMetadataKey, "PostMetadata", postKey, "Superlikes")
+}
+
+func (r ReactionRepository) getUserFullname(username string) (string, error) {
+	userKey := &database.UserProfileKey{
+		Username: username,
+	}
+
+	userFullname := &struct {
+		Name string `json:"name"`
+	}{}
+
+	err := r.database.Client.GetData("UserProfile", userKey, userFullname)
+	if err != nil {
+		return "", err
+	}
+
+	return userFullname.Name, nil
 }

@@ -2,6 +2,7 @@ package userprofile_handler
 
 import (
 	common_data "readmodels/internal/common/data"
+	"readmodels/internal/model"
 	userprofile "readmodels/internal/userprofile"
 
 	"github.com/rs/zerolog/log"
@@ -15,7 +16,7 @@ type UserProfileUpdatedEvent struct {
 }
 
 type UserProfileUpdatedEventService interface {
-	UpdateUserProfile(data *userprofile.UserProfile)
+	UpdateUserProfile(data *model.UserProfile)
 }
 
 type UserProfileUpdatedEventHandler struct {
@@ -42,8 +43,8 @@ func (handler *UserProfileUpdatedEventHandler) Handle(event []byte) {
 	handler.service.UpdateUserProfile(data)
 }
 
-func mapToUserProfile(event UserProfileUpdatedEvent) *userprofile.UserProfile {
-	return &userprofile.UserProfile{
+func mapToUserProfile(event UserProfileUpdatedEvent) *model.UserProfile {
+	return &model.UserProfile{
 		Username: event.Username,
 		Name:     event.FullName,
 		Bio:      event.Bio,

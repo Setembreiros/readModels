@@ -5,7 +5,6 @@ import (
 	"readmodels/cmd/provider"
 	database "readmodels/internal/db"
 	"readmodels/internal/model"
-	"readmodels/internal/userprofile"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -18,13 +17,13 @@ func CreateTestDatabase(t *testing.T, ctx context.Context) *database.Database {
 	return db
 }
 
-func AddUserProfileToDatabase(t *testing.T, db *database.Database, data *userprofile.UserProfile) {
+func AddUserProfileToDatabase(t *testing.T, db *database.Database, data *model.UserProfile) {
 	err := db.Client.InsertData("UserProfile", data)
 	assert.Nil(t, err)
 	userProfileKey := &database.UserProfileKey{
 		Username: data.Username,
 	}
-	var userProfile userprofile.UserProfile
+	var userProfile model.UserProfile
 	err = db.Client.GetData("UserProfile", userProfileKey, &userProfile)
 	assert.Nil(t, err)
 	assert.Equal(t, userProfile.Username, data.Username)

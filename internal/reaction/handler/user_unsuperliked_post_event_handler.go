@@ -15,7 +15,7 @@ type UserUnsuperlikedPostEvent struct {
 }
 
 type UserUnsuperlikedPostEventService interface {
-	DeleteSuperlikePost(data *model.SuperlikePost)
+	DeletePostSuperlike(data *model.PostSuperlike)
 }
 
 type UserUnsuperlikedPostEventHandler struct {
@@ -43,12 +43,14 @@ func (handler *UserUnsuperlikedPostEventHandler) Handle(event []byte) {
 		return
 	}
 
-	handler.service.DeleteSuperlikePost(data)
+	handler.service.DeletePostSuperlike(data)
 }
 
-func mapUserUnsuperlikedPostEvent(event UserUnsuperlikedPostEvent) (*model.SuperlikePost, error) {
-	return &model.SuperlikePost{
-		Username: event.Username,
-		PostId:   event.PostId,
+func mapUserUnsuperlikedPostEvent(event UserUnsuperlikedPostEvent) (*model.PostSuperlike, error) {
+	return &model.PostSuperlike{
+		User: &model.UserMetadata{
+			Username: event.Username,
+		},
+		PostId: event.PostId,
 	}, nil
 }

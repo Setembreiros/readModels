@@ -19,80 +19,92 @@ func setUpService(t *testing.T) {
 	reactionService = reaction.NewReactionService(repositoryService)
 }
 
-func TestCreateLikePostWithService(t *testing.T) {
+func TestCreatePostLikeWithService(t *testing.T) {
 	setUpService(t)
-	data := &model.LikePost{
-		Username: "user123",
-		PostId:   "post123",
+	data := &model.PostLike{
+		User: &model.UserMetadata{
+			Username: "user123",
+		},
+		PostId: "post123",
 	}
-	repositoryService.EXPECT().CreateLikePost(data)
+	repositoryService.EXPECT().CreatePostLike(data)
 
-	reactionService.CreateLikePost(data)
+	reactionService.CreatePostLike(data)
 
-	assert.Contains(t, loggerOutput.String(), "LikePost was created, username: user123 -> postId: post123")
+	assert.Contains(t, loggerOutput.String(), "PostLike was created, username: user123 -> postId: post123")
 }
 
-func TestErrorOnCreateLikePostWithService(t *testing.T) {
+func TestErrorOnCreatePostLikeWithService(t *testing.T) {
 	setUpService(t)
-	data := &model.LikePost{
-		Username: "user123",
-		PostId:   "post123",
+	data := &model.PostLike{
+		User: &model.UserMetadata{
+			Username: "user123",
+		},
+		PostId: "post123",
 	}
-	repositoryService.EXPECT().CreateLikePost(data).Return(errors.New("some error"))
+	repositoryService.EXPECT().CreatePostLike(data).Return(errors.New("some error"))
 
-	reactionService.CreateLikePost(data)
+	reactionService.CreatePostLike(data)
 
-	assert.Contains(t, loggerOutput.String(), "Error creating likePost, username: user123 -> postId: post123")
+	assert.Contains(t, loggerOutput.String(), "Error creating postLike, username: user123 -> postId: post123")
 }
 
-func TestCreateSuperlikePostWithService(t *testing.T) {
+func TestCreatePostSuperlikeWithService(t *testing.T) {
 	setUpService(t)
-	data := &model.SuperlikePost{
-		Username: "user123",
-		PostId:   "post123",
+	data := &model.PostSuperlike{
+		User: &model.UserMetadata{
+			Username: "user123",
+		},
+		PostId: "post123",
 	}
-	repositoryService.EXPECT().CreateSuperlikePost(data)
+	repositoryService.EXPECT().CreatePostSuperlike(data)
 
-	reactionService.CreateSuperlikePost(data)
+	reactionService.CreatePostSuperlike(data)
 
-	assert.Contains(t, loggerOutput.String(), "SuperlikePost was created, username: user123 -> postId: post123")
+	assert.Contains(t, loggerOutput.String(), "PostSuperlike was created, username: user123 -> postId: post123")
 }
 
-func TestErrorOnCreateSuperlikePostWithService(t *testing.T) {
+func TestErrorOnCreatePostSuperlikeWithService(t *testing.T) {
 	setUpService(t)
-	data := &model.SuperlikePost{
-		Username: "user123",
-		PostId:   "post123",
+	data := &model.PostSuperlike{
+		User: &model.UserMetadata{
+			Username: "user123",
+		},
+		PostId: "post123",
 	}
-	repositoryService.EXPECT().CreateSuperlikePost(data).Return(errors.New("some error"))
+	repositoryService.EXPECT().CreatePostSuperlike(data).Return(errors.New("some error"))
 
-	reactionService.CreateSuperlikePost(data)
+	reactionService.CreatePostSuperlike(data)
 
-	assert.Contains(t, loggerOutput.String(), "Error creating superlikePost, username: user123 -> postId: post123")
+	assert.Contains(t, loggerOutput.String(), "Error creating postSuperlike, username: user123 -> postId: post123")
 }
 
-func TestDeleteLikePostWithService(t *testing.T) {
+func TestDeletePostLikeWithService(t *testing.T) {
 	setUpService(t)
-	data := &model.LikePost{
-		Username: "user123",
-		PostId:   "post123",
+	data := &model.PostLike{
+		User: &model.UserMetadata{
+			Username: "user123",
+		},
+		PostId: "post123",
 	}
-	repositoryService.EXPECT().DeleteLikePost(data)
+	repositoryService.EXPECT().DeletePostLike(data)
 
-	reactionService.DeleteLikePost(data)
+	reactionService.DeletePostLike(data)
 
-	assert.Contains(t, loggerOutput.String(), "LikePost was deleted, username: user123 -> postId: post123")
+	assert.Contains(t, loggerOutput.String(), "PostLike was deleted, username: user123 -> postId: post123")
 }
 
-func TestErrorOnDeleteLikePostWithService(t *testing.T) {
+func TestErrorOnDeletePostLikeWithService(t *testing.T) {
 	setUpService(t)
-	data := &model.LikePost{
-		Username: "user123",
-		PostId:   "post123",
+	data := &model.PostLike{
+		User: &model.UserMetadata{
+			Username: "user123",
+		},
+		PostId: "post123",
 	}
-	repositoryService.EXPECT().DeleteLikePost(data).Return(errors.New("some error"))
+	repositoryService.EXPECT().DeletePostLike(data).Return(errors.New("some error"))
 
-	reactionService.DeleteLikePost(data)
+	reactionService.DeletePostLike(data)
 
-	assert.Contains(t, loggerOutput.String(), "Error deleting likePost, username: user123 -> postId: post123")
+	assert.Contains(t, loggerOutput.String(), "Error deleting postLike, username: user123 -> postId: post123")
 }
