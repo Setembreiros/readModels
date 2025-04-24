@@ -17,10 +17,16 @@ type ReactionController struct {
 
 type ControllerService interface {
 	GetPostLikesMetadata(postId, lastUsername string, limit int) ([]*model.UserMetadata, string, error)
+	GetPostSuperlikesMetadata(postId, lastUsername string, limit int) ([]*model.UserMetadata, string, error)
 }
 
-type GetPostLikeMetadataResponse struct {
+type GetPostLikesMetadataResponse struct {
 	Users        []*model.UserMetadata `json:"postLikes"`
+	LastUsername string                `json:"lastUsername"`
+}
+
+type GetPostSuperlikesMetadataResponse struct {
+	Users        []*model.UserMetadata `json:"postSuperlikes"`
 	LastUsername string                `json:"lastUsername"`
 }
 
@@ -32,6 +38,7 @@ func NewReactionController(service ControllerService) *ReactionController {
 
 func (controller *ReactionController) Routes(routerGroup *gin.RouterGroup) {
 	routerGroup.GET("/postLikes/:postId", controller.GetPostLikesMetadata)
+	routerGroup.GET("/postSuperlikes/:postId", controller.GetPostSuperlikesMetadata)
 }
 
 func (controller *ReactionController) GetPostLikesMetadata(c *gin.Context) {
@@ -53,7 +60,32 @@ func (controller *ReactionController) GetPostLikesMetadata(c *gin.Context) {
 		return
 	}
 
-	api.SendOKWithResult(c, &GetPostLikeMetadataResponse{
+	api.SendOKWithResult(c, &GetPostLikesMetadataResponse{
+		Users:        users,
+		LastUsername: lastUsername,
+	})
+}
+
+func (controller *ReactionController) GetPostSuperlikesMetadata(c *gin.Context) {
+	log.Info().Msg("Handling Request GET PostSuperlikes")
+	postId := c.Param("postId")
+	if postId == "" {
+		api.SendBadRequest(c, "Missing parameter postId")
+		return
+	}
+
+	lastUsername, limit, err := getQueryParameters(c)
+	if err != nil || limit <= 0 {
+		return
+	}
+
+	users, lastUsername, err := controller.service.GetPostSuperlikesMetadata(postId, lastUsername, limit)
+	if err != nil {
+		api.SendInternalServerError(c, err.Error())
+		return
+	}
+
+	api.SendOKWithResult(c, &GetPostSuperlikesMetadataResponse{
 		Users:        users,
 		LastUsername: lastUsername,
 	})
