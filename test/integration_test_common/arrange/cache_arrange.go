@@ -16,3 +16,7 @@ func CreateTestCache(t *testing.T, ctx context.Context) *database.Cache {
 func AddCachedCommentsToCache(t *testing.T, cache *database.Cache, postId string, lastCommentId uint64, limit int, comments []*model.Comment) {
 	cache.Client.SetPostComments(postId, lastCommentId, limit, comments)
 }
+
+func AddCachedPostLikesToCache(t *testing.T, cache *database.Cache, postId string, lastUsername string, limit int, postLikes []*model.UserMetadata) {
+	cache.Client.SetPostLikes(postId, lastUsername, limit, postLikes)
+}

@@ -80,3 +80,18 @@ func AddPostToDatabase(t *testing.T, db *database.Database, data *database.PostM
 	assert.Equal(t, data.Comments, post.Comments)
 	assert.Equal(t, data.Likes, post.Likes)
 }
+
+func AddPostLikeToDatabase(t *testing.T, db *database.Database, data *database.PostLikeMetadata) {
+	err := db.Client.InsertData("readmodels.postLikes", data)
+	assert.Nil(t, err)
+	likeKey := &database.PostLikeKey{
+		PostId:   data.PostId,
+		Username: data.Username,
+	}
+	var postLike database.PostLikeMetadata
+	err = db.Client.GetData("readmodels.postLikes", likeKey, &postLike)
+	assert.Nil(t, err)
+	assert.Equal(t, postLike.PostId, data.PostId)
+	assert.Equal(t, postLike.Username, data.Username)
+	assert.Equal(t, postLike.Name, data.Name)
+}
