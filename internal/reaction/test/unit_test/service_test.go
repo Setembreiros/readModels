@@ -121,6 +121,47 @@ func TestErrorOnGetPostLikesMetadataWithService(t *testing.T) {
 	assert.Equal(t, expectedLastUsername, lastUsername)
 }
 
+func TestGetPostSuperlikesMetadataWithService(t *testing.T) {
+	setUpService(t)
+	postId := "post1"
+	expectedPostSuperlikes := []*model.UserMetadata{
+		{
+			Username: "username1",
+			Name:     "fullname1",
+		},
+		{
+			Username: "username2",
+			Name:     "fullname2",
+		},
+		{
+			Username: "username3",
+			Name:     "fullname3",
+		},
+	}
+	expectedLastUsername := "username3"
+	repositoryService.EXPECT().GetPostSuperlikesMetadata(postId, "", 12).Return(expectedPostSuperlikes, expectedLastUsername, nil)
+
+	postSuperlikes, lastUsername, err := reactionService.GetPostSuperlikesMetadata(postId, "", 12)
+	assert.Nil(t, err)
+	assert.ElementsMatch(t, expectedPostSuperlikes, postSuperlikes)
+	assert.Equal(t, expectedLastUsername, lastUsername)
+}
+
+func TestErrorOnGetPostSuperlikesMetadataWithService(t *testing.T) {
+	setUpService(t)
+	postId := "post1"
+	expectedPostSuperlikes := []*model.UserMetadata{}
+	expectedLastUsername := ""
+	repositoryService.EXPECT().GetPostSuperlikesMetadata(postId, "", 12).Return(expectedPostSuperlikes, expectedLastUsername, errors.New("some error"))
+
+	postSuperlikes, lastUsername, err := reactionService.GetPostSuperlikesMetadata(postId, "", 12)
+
+	assert.Contains(t, loggerOutput.String(), fmt.Sprintf(`Error getting post %s's superlikes`, postId))
+	assert.NotNil(t, err)
+	assert.ElementsMatch(t, expectedPostSuperlikes, postSuperlikes)
+	assert.Equal(t, expectedLastUsername, lastUsername)
+}
+
 func TestDeletePostLikeWithService(t *testing.T) {
 	setUpService(t)
 	data := &model.PostLike{
