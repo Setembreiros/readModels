@@ -10,6 +10,7 @@ import (
 
 type Repository interface {
 	AddNewComment(data *Comment) error
+	DeleteComment(commentId uint64) error
 }
 
 type CommentService struct {
@@ -38,4 +39,14 @@ func (s *CommentService) CreateNewComment(data *Comment) {
 	}
 
 	log.Info().Msgf("Comment with id %d was added", data.CommentId)
+}
+
+func (s *CommentService) DeleteComment(commentId uint64) {
+	err := s.repository.DeleteComment(commentId)
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Error deleting comment with id %d", commentId)
+		return
+	}
+
+	log.Info().Msgf("Comment with id %d was deleted", commentId)
 }

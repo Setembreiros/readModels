@@ -49,3 +49,23 @@ func TestErrorOnCreateNewCommentWithService(t *testing.T) {
 
 	assert.Contains(t, loggerOutput.String(), "Error adding comment with id 123456")
 }
+
+func TestDeleteCommentWithService(t *testing.T) {
+	setUpService(t)
+	commentId := uint64(123456)
+	repository.EXPECT().DeleteComment(commentId)
+
+	commentService.DeleteComment(commentId)
+
+	assert.Contains(t, loggerOutput.String(), "Comment with id 123456 was deleted")
+}
+
+func TestErrorOnDeleteCommentWithService(t *testing.T) {
+	setUpService(t)
+	commentId := uint64(123456)
+	repository.EXPECT().DeleteComment(commentId).Return(errors.New("some error"))
+
+	commentService.DeleteComment(commentId)
+
+	assert.Contains(t, loggerOutput.String(), "Error deleting comment with id 123456")
+}

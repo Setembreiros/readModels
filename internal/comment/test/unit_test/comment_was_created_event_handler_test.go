@@ -10,11 +10,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var handler *comment_handler.CommentWasCreatedEventHandler
+var commentWasCreatedEventHandler *comment_handler.CommentWasCreatedEventHandler
 
 func setUpHandler(t *testing.T) {
 	SetUp(t)
-	handler = comment_handler.NewCommentWasCreatedEventHandler(repository)
+	commentWasCreatedEventHandler = comment_handler.NewCommentWasCreatedEventHandler(repository)
 }
 
 func TestHandleCommentWasCreatedEvent(t *testing.T) {
@@ -39,7 +39,7 @@ func TestHandleCommentWasCreatedEvent(t *testing.T) {
 	}
 	repository.EXPECT().AddNewComment(expectedComment)
 
-	handler.Handle(event)
+	commentWasCreatedEventHandler.Handle(event)
 }
 
 func TestInvalidDataInCommentWasCreatedEventHandler(t *testing.T) {
@@ -47,7 +47,7 @@ func TestInvalidDataInCommentWasCreatedEventHandler(t *testing.T) {
 	invalidData := "invalid data"
 	event, _ := json.Marshal(invalidData)
 
-	handler.Handle(event)
+	commentWasCreatedEventHandler.Handle(event)
 
 	assert.Contains(t, loggerOutput.String(), "Invalid event data")
 }

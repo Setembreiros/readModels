@@ -79,6 +79,10 @@ func (p *Provider) ProvideSubscriptions(database *database.Database) *[]bus.Even
 			EventType: "CommentWasCreatedEvent",
 			Handler:   comment_handler.NewCommentWasCreatedEventHandler(comment.CommentRepository(*database)),
 		},
+		{
+			EventType: "CommentWasDeletedEvent",
+			Handler:   comment_handler.NewCommentWasDeletedEventHandler(comment.CommentRepository(*database)),
+		},
 	}
 }
 

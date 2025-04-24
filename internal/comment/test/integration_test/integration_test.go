@@ -13,14 +13,16 @@ import (
 )
 
 var db *database.Database
-var handler *comment_handler.CommentWasCreatedEventHandler
+var commentWasCreatedEventHandler *comment_handler.CommentWasCreatedEventHandler
+var commentWasDeletedEventHandler *comment_handler.CommentWasDeletedEventHandler
 
 func setUp(t *testing.T) {
 	// Real infrastructure and services
 	ctx := context.TODO()
 	db = integration_test_arrange.CreateTestDatabase(t, ctx)
 	repository := comment.CommentRepository(*db)
-	handler = comment_handler.NewCommentWasCreatedEventHandler(repository)
+	commentWasCreatedEventHandler = comment_handler.NewCommentWasCreatedEventHandler(repository)
+	commentWasDeletedEventHandler = comment_handler.NewCommentWasDeletedEventHandler(repository)
 }
 
 func tearDown() {
@@ -49,7 +51,27 @@ func TestCreateNewComment_WhenDatabaseReturnsSuccess(t *testing.T) {
 		CreatedAt: expectedTime,
 	}
 
-	handler.Handle(event)
+	commentWasCreatedEventHandler.Handle(event)
 
 	integration_test_assert.AssertCommentExists(t, db, data.CommentId, expectedComment)
+}
+
+func TestDeleteComment_WhenDatabaseReturnsSuccess(t *testing.T) {
+	setUp(t)
+	defer tearDown()
+	existingComment := &comment.Comment{
+		CommentId: uint64(1234),
+		Username:  "user123",
+		PostId:    "post123",
+		Content:   "Exemplo de content",
+	}
+	integration_test_arrange.AddCommentToDatabase(t, db, existingComment)
+	data := &comment_handler.CommentWasDeletedEvent{
+		CommentId: existingComment.CommentId,
+	}
+	event, _ := test_common.SerializeData(data)
+
+	commentWasDeletedEventHandler.Handle(event)
+
+	integration_test_assert.AssertCommentDoesNotExist(t, db, data.CommentId)
 }

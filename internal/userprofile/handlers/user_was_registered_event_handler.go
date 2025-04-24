@@ -1,7 +1,7 @@
 package userprofile_handler
 
 import (
-	"encoding/json"
+	common_data "readmodels/internal/common/data"
 	userprofile "readmodels/internal/userprofile"
 
 	"github.com/rs/zerolog/log"
@@ -33,7 +33,7 @@ func (handler *UserWasRegisteredEventHandler) Handle(event []byte) {
 	var userWasRegisteredEvent UserWasRegisteredEvent
 	log.Info().Msg("Handling UserWasRegisteredEvent")
 
-	err := Decode(event, &userWasRegisteredEvent)
+	err := common_data.DeserializeData(event, &userWasRegisteredEvent)
 	if err != nil {
 		log.Error().Stack().Err(err).Msg("Invalid event data")
 		return
@@ -50,8 +50,4 @@ func mapData(event UserWasRegisteredEvent) *userprofile.UserProfile {
 		Bio:      "",
 		Link:     "",
 	}
-}
-
-func Decode(datab []byte, data any) error {
-	return json.Unmarshal(datab, &data)
 }

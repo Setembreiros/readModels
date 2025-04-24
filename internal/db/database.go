@@ -23,6 +23,7 @@ type DatabaseClient interface {
 	InsertData(tableName string, attributes any) error
 	GetData(tableName string, key any, result any) error
 	GetMultipleData(tableName string, keys []any, results any) error
+	RemoveData(tableName string, key any) error
 	RemoveMultipleData(tableName string, keys []any) error
 	UpdateData(tableName string, key any, updateAttributes map[string]any) error
 	IncrementCounter(tableName string, key any, counterFieldName string, incrementValue int) error

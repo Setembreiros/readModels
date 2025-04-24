@@ -306,6 +306,27 @@ func (dc *DynamoDBClient) GetMultipleData(tableName string, keys []any, results 
 	return nil
 }
 
+func (dc *DynamoDBClient) RemoveData(tableName string, key any) error {
+	k, err := attributevalue.MarshalMap(key)
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Couldn't map %v key to AttributeValues", key)
+		return err
+	}
+
+	_, err = dc.client.DeleteItem(context.TODO(), &dynamodb.DeleteItemInput{
+		TableName: aws.String(tableName),
+		Key:       k,
+	})
+
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Couldn't delete item from table %s", tableName)
+		return err
+	}
+
+	log.Info().Msgf("Item successfully deleted from table %s", tableName)
+	return nil
+}
+
 func (dc *DynamoDBClient) RemoveMultipleData(tableName string, keys []any) error {
 	writeRequests := make([]types.WriteRequest, len(keys))
 	for i, key := range keys {
