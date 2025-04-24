@@ -46,12 +46,10 @@ func (handler *PostWasCreatedEventHandler) Handle(event []byte) {
 		return
 	}
 
-	log.Info().Msg("createdAT: " + postWasCreatedEvent.Metadata.CreatedAt)
 	data, err := mapData(postWasCreatedEvent)
 	if err != nil {
 		return
 	}
-	log.Info().Msg("createdAT2: " + data.CreatedAt.String())
 
 	handler.service.CreateNewPostMetadata(data)
 }
