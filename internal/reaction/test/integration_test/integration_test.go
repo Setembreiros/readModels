@@ -44,7 +44,7 @@ func setUp(t *testing.T) {
 }
 
 func tearDown() {
-	db.Client.Clean()
+	db.Client.Truncate()
 	cache.Client.Clean()
 }
 

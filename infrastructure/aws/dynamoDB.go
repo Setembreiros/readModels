@@ -102,6 +102,129 @@ func (dc *DynamoDBClient) Clean() {
 	}
 }
 
+// Truncate truncates all tables in DynamoDB without deleting the table structures.
+// This method removes all data from tables but preserves the table definitions.
+// Errors are logged but not returned.
+func (dc *DynamoDBClient) Truncate() {
+	ctx := context.TODO()
+	log.Info().Msg("Starting DynamoDB table content cleaning process")
+
+	var nextToken *string
+	tablesToClean := []string{}
+
+	// List all tables
+	for {
+		listTablesInput := &dynamodb.ListTablesInput{
+			ExclusiveStartTableName: nextToken,
+		}
+
+		response, err := dc.client.ListTables(ctx, listTablesInput)
+		if err != nil {
+			log.Error().Stack().Err(err).Msg("Failed to list DynamoDB tables")
+			return
+		}
+
+		tablesToClean = append(tablesToClean, response.TableNames...)
+
+		// Check if we need to continue pagination
+		if response.LastEvaluatedTableName == nil {
+			break
+		}
+		nextToken = response.LastEvaluatedTableName
+	}
+
+	if len(tablesToClean) == 0 {
+		log.Info().Msg("No tables found to clean")
+		return
+	}
+
+	log.Info().Msgf("Found %d tables to clean", len(tablesToClean))
+
+	// Clean all tables
+	failedCount := 0
+	for _, tableName := range tablesToClean {
+		log.Info().Msgf("Cleaning table: %s", tableName)
+
+		// First, get the table description to identify key attributes
+		tableDesc, err := dc.client.DescribeTable(ctx, &dynamodb.DescribeTableInput{
+			TableName: aws.String(tableName),
+		})
+		if err != nil {
+			log.Error().Stack().Err(err).Msgf("Failed to describe table %s", tableName)
+			failedCount++
+			continue
+		}
+
+		// Get primary key schema
+		keySchema := tableDesc.Table.KeySchema
+		if len(keySchema) == 0 {
+			log.Error().Msgf("Failed to get key schema for table %s", tableName)
+			failedCount++
+			continue
+		}
+
+		// Scan table to get all items
+		var scanToken map[string]types.AttributeValue
+		totalItemsDeleted := 0
+
+		for {
+			scanInput := &dynamodb.ScanInput{
+				TableName:         aws.String(tableName),
+				ExclusiveStartKey: scanToken,
+			}
+
+			scanOutput, err := dc.client.Scan(ctx, scanInput)
+			if err != nil {
+				log.Error().Stack().Err(err).Msgf("Failed to scan table %s", tableName)
+				failedCount++
+				break
+			}
+
+			// Delete each item found in the scan
+			for _, item := range scanOutput.Items {
+				deleteInput := &dynamodb.DeleteItemInput{
+					TableName: aws.String(tableName),
+					Key:       extractKeyFromItem(item, keySchema),
+				}
+
+				_, err := dc.client.DeleteItem(ctx, deleteInput)
+				if err != nil {
+					log.Error().Stack().Err(err).Msgf("Failed to delete item from table %s", tableName)
+					continue
+				}
+				totalItemsDeleted++
+			}
+
+			// Check if we need to continue pagination
+			if scanOutput.LastEvaluatedKey == nil {
+				break
+			}
+			scanToken = scanOutput.LastEvaluatedKey
+		}
+
+		log.Info().Msgf("Table %s successfully cleaned - %d items deleted", tableName, totalItemsDeleted)
+	}
+
+	if failedCount > 0 {
+		log.Error().Msgf("Failed to clean %d tables", failedCount)
+	} else {
+		log.Info().Msgf("Successfully cleaned %d DynamoDB tables", len(tablesToClean))
+	}
+}
+
+// extractKeyFromItem extracts the primary key components from an item based on the key schema
+func extractKeyFromItem(item map[string]types.AttributeValue, keySchema []types.KeySchemaElement) map[string]types.AttributeValue {
+	key := make(map[string]types.AttributeValue)
+
+	for _, k := range keySchema {
+		if val, exists := item[*k.AttributeName]; exists {
+			key[*k.AttributeName] = val
+		}
+	}
+
+	return key
+}
+
 func (dc *DynamoDBClient) TableExists(tableName string) bool {
 	exists := true
 	_, err := dc.client.DescribeTable(

@@ -253,6 +253,18 @@ func (mr *MockDatabaseClientMockRecorder) TableExists(tableName interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TableExists", reflect.TypeOf((*MockDatabaseClient)(nil).TableExists), tableName)
 }
 
+// Truncate mocks base method.
+func (m *MockDatabaseClient) Truncate() {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "Truncate")
+}
+
+// Truncate indicates an expected call of Truncate.
+func (mr *MockDatabaseClientMockRecorder) Truncate() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Truncate", reflect.TypeOf((*MockDatabaseClient)(nil).Truncate))
+}
+
 // UpdateData mocks base method.
 func (m *MockDatabaseClient) UpdateData(tableName string, key any, updateAttributes map[string]any) error {
 	m.ctrl.T.Helper()
