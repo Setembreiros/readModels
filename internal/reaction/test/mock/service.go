@@ -89,3 +89,19 @@ func (mr *MockRepositoryMockRecorder) DeletePostSuperlike(data interface{}) *gom
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeletePostSuperlike", reflect.TypeOf((*MockRepository)(nil).DeletePostSuperlike), data)
 }
+
+// GetPostLikesMetadata mocks base method.
+func (m *MockRepository) GetPostLikesMetadata(postId, lastUsername string, limit int) ([]*model.UserMetadata, string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPostLikesMetadata", postId, lastUsername, limit)
+	ret0, _ := ret[0].([]*model.UserMetadata)
+	ret1, _ := ret[1].(string)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetPostLikesMetadata indicates an expected call of GetPostLikesMetadata.
+func (mr *MockRepositoryMockRecorder) GetPostLikesMetadata(postId, lastUsername, limit interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPostLikesMetadata", reflect.TypeOf((*MockRepository)(nil).GetPostLikesMetadata), postId, lastUsername, limit)
+}

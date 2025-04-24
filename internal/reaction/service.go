@@ -11,6 +11,7 @@ import (
 type Repository interface {
 	CreatePostLike(data *model.PostLike) error
 	CreatePostSuperlike(data *model.PostSuperlike) error
+	GetPostLikesMetadata(postId, lastUsername string, limit int) ([]*model.UserMetadata, string, error)
 	DeletePostLike(data *model.PostLike) error
 	DeletePostSuperlike(data *model.PostSuperlike) error
 }
@@ -43,6 +44,16 @@ func (s *ReactionService) CreatePostSuperlike(data *model.PostSuperlike) {
 	}
 
 	log.Info().Msgf("PostSuperlike was created, username: %s -> postId: %s", data.User.Username, data.PostId)
+}
+
+func (s *ReactionService) GetPostLikesMetadata(postId, lastUsername string, limit int) ([]*model.UserMetadata, string, error) {
+	users, lastUsername, err := s.repository.GetPostLikesMetadata(postId, lastUsername, limit)
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Error getting post %s's likes", postId)
+		return users, lastUsername, err
+	}
+
+	return users, lastUsername, nil
 }
 
 func (s *ReactionService) DeletePostLike(data *model.PostLike) {

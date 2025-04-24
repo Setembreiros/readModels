@@ -2,6 +2,7 @@ package reaction_test
 
 import (
 	"errors"
+	"fmt"
 	"readmodels/internal/model"
 	"readmodels/internal/reaction"
 	mock_reaction "readmodels/internal/reaction/test/mock"
@@ -77,6 +78,47 @@ func TestErrorOnCreatePostSuperlikeWithService(t *testing.T) {
 	reactionService.CreatePostSuperlike(data)
 
 	assert.Contains(t, loggerOutput.String(), "Error creating postSuperlike, username: user123 -> postId: post123")
+}
+
+func TestGetPostLikesMetadataWithService(t *testing.T) {
+	setUpService(t)
+	postId := "post1"
+	expectedPostLikes := []*model.UserMetadata{
+		{
+			Username: "username1",
+			Name:     "fullname1",
+		},
+		{
+			Username: "username2",
+			Name:     "fullname2",
+		},
+		{
+			Username: "username3",
+			Name:     "fullname3",
+		},
+	}
+	expectedLastUsername := "username3"
+	repositoryService.EXPECT().GetPostLikesMetadata(postId, "", 12).Return(expectedPostLikes, expectedLastUsername, nil)
+
+	postLikes, lastUsername, err := reactionService.GetPostLikesMetadata(postId, "", 12)
+	assert.Nil(t, err)
+	assert.ElementsMatch(t, expectedPostLikes, postLikes)
+	assert.Equal(t, expectedLastUsername, lastUsername)
+}
+
+func TestErrorOnGetPostLikesMetadataWithService(t *testing.T) {
+	setUpService(t)
+	postId := "post1"
+	expectedPostLikes := []*model.UserMetadata{}
+	expectedLastUsername := ""
+	repositoryService.EXPECT().GetPostLikesMetadata(postId, "", 12).Return(expectedPostLikes, expectedLastUsername, errors.New("some error"))
+
+	postLikes, lastUsername, err := reactionService.GetPostLikesMetadata(postId, "", 12)
+
+	assert.Contains(t, loggerOutput.String(), fmt.Sprintf(`Error getting post %s's likes`, postId))
+	assert.NotNil(t, err)
+	assert.ElementsMatch(t, expectedPostLikes, postLikes)
+	assert.Equal(t, expectedLastUsername, lastUsername)
 }
 
 func TestDeletePostLikeWithService(t *testing.T) {
