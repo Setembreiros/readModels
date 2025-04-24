@@ -102,6 +102,129 @@ func (dc *DynamoDBClient) Clean() {
 	}
 }
 
+// Truncate truncates all tables in DynamoDB without deleting the table structures.
+// This method removes all data from tables but preserves the table definitions.
+// Errors are logged but not returned.
+func (dc *DynamoDBClient) Truncate() {
+	ctx := context.TODO()
+	log.Info().Msg("Starting DynamoDB table content cleaning process")
+
+	var nextToken *string
+	tablesToClean := []string{}
+
+	// List all tables
+	for {
+		listTablesInput := &dynamodb.ListTablesInput{
+			ExclusiveStartTableName: nextToken,
+		}
+
+		response, err := dc.client.ListTables(ctx, listTablesInput)
+		if err != nil {
+			log.Error().Stack().Err(err).Msg("Failed to list DynamoDB tables")
+			return
+		}
+
+		tablesToClean = append(tablesToClean, response.TableNames...)
+
+		// Check if we need to continue pagination
+		if response.LastEvaluatedTableName == nil {
+			break
+		}
+		nextToken = response.LastEvaluatedTableName
+	}
+
+	if len(tablesToClean) == 0 {
+		log.Info().Msg("No tables found to clean")
+		return
+	}
+
+	log.Info().Msgf("Found %d tables to clean", len(tablesToClean))
+
+	// Clean all tables
+	failedCount := 0
+	for _, tableName := range tablesToClean {
+		log.Info().Msgf("Cleaning table: %s", tableName)
+
+		// First, get the table description to identify key attributes
+		tableDesc, err := dc.client.DescribeTable(ctx, &dynamodb.DescribeTableInput{
+			TableName: aws.String(tableName),
+		})
+		if err != nil {
+			log.Error().Stack().Err(err).Msgf("Failed to describe table %s", tableName)
+			failedCount++
+			continue
+		}
+
+		// Get primary key schema
+		keySchema := tableDesc.Table.KeySchema
+		if len(keySchema) == 0 {
+			log.Error().Msgf("Failed to get key schema for table %s", tableName)
+			failedCount++
+			continue
+		}
+
+		// Scan table to get all items
+		var scanToken map[string]types.AttributeValue
+		totalItemsDeleted := 0
+
+		for {
+			scanInput := &dynamodb.ScanInput{
+				TableName:         aws.String(tableName),
+				ExclusiveStartKey: scanToken,
+			}
+
+			scanOutput, err := dc.client.Scan(ctx, scanInput)
+			if err != nil {
+				log.Error().Stack().Err(err).Msgf("Failed to scan table %s", tableName)
+				failedCount++
+				break
+			}
+
+			// Delete each item found in the scan
+			for _, item := range scanOutput.Items {
+				deleteInput := &dynamodb.DeleteItemInput{
+					TableName: aws.String(tableName),
+					Key:       extractKeyFromItem(item, keySchema),
+				}
+
+				_, err := dc.client.DeleteItem(ctx, deleteInput)
+				if err != nil {
+					log.Error().Stack().Err(err).Msgf("Failed to delete item from table %s", tableName)
+					continue
+				}
+				totalItemsDeleted++
+			}
+
+			// Check if we need to continue pagination
+			if scanOutput.LastEvaluatedKey == nil {
+				break
+			}
+			scanToken = scanOutput.LastEvaluatedKey
+		}
+
+		log.Info().Msgf("Table %s successfully cleaned - %d items deleted", tableName, totalItemsDeleted)
+	}
+
+	if failedCount > 0 {
+		log.Error().Msgf("Failed to clean %d tables", failedCount)
+	} else {
+		log.Info().Msgf("Successfully cleaned %d DynamoDB tables", len(tablesToClean))
+	}
+}
+
+// extractKeyFromItem extracts the primary key components from an item based on the key schema
+func extractKeyFromItem(item map[string]types.AttributeValue, keySchema []types.KeySchemaElement) map[string]types.AttributeValue {
+	key := make(map[string]types.AttributeValue)
+
+	for _, k := range keySchema {
+		if val, exists := item[*k.AttributeName]; exists {
+			key[*k.AttributeName] = val
+		}
+	}
+
+	return key
+}
+
 func (dc *DynamoDBClient) TableExists(tableName string) bool {
 	exists := true
 	_, err := dc.client.DescribeTable(
@@ -681,6 +804,56 @@ func (dc *DynamoDBClient) GetPostLikesByIndexPostId(postID string, lastUsername 
 	response, err := dc.client.Query(context.TODO(), input)
 	if err != nil {
 		log.Error().Stack().Err(err).Msgf("Couldn't get postLikes for post %s", postID)
+		return nil, "", err
+	}
+
+	var results []*model.UserMetadata
+	for _, item := range response.Items {
+		var result model.UserMetadata
+		err = attributevalue.UnmarshalMap(item, &result)
+		if err != nil {
+			log.Error().Stack().Err(err).Msg("Couldn't unmarshal postLike response")
+			return nil, "", err
+		}
+
+		results = append(results, &result)
+	}
+
+	nextLastUsername := ""
+	if response.LastEvaluatedKey != nil {
+		if val, ok := response.LastEvaluatedKey["Username"]; ok {
+			if username, ok := val.(*types.AttributeValueMemberS); ok {
+				nextLastUsername = username.Value
+			}
+		}
+	}
+
+	return results, nextLastUsername, nil
+}
+
+func (dc *DynamoDBClient) GetPostSuperlikesByIndexPostId(postID string, lastUsername string, limit int) ([]*model.UserMetadata, string, error) {
+	input := &dynamodb.QueryInput{
+		TableName:              aws.String("readmodels.postSuperlikes"),
+		KeyConditionExpression: aws.String("#postId = :postId"),
+		ExpressionAttributeNames: map[string]string{
+			"#postId": "PostId",
+		},
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":postId": &types.AttributeValueMemberS{Value: postID},
+		},
+		Limit: aws.Int32(int32(limit)),
+	}
+
+	if lastUsername != "" {
+		input.ExclusiveStartKey = map[string]types.AttributeValue{
+			"PostId":   &types.AttributeValueMemberS{Value: postID},
+			"Username": &types.AttributeValueMemberS{Value: lastUsername},
+		}
+	}
+
+	response, err := dc.client.Query(context.TODO(), input)
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Couldn't get postSuperlikes for post %s", postID)
 		return nil, "", err
 	}
 

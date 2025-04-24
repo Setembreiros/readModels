@@ -136,6 +136,22 @@ func (mr *MockDatabaseClientMockRecorder) GetPostLikesByIndexPostId(postID, last
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPostLikesByIndexPostId", reflect.TypeOf((*MockDatabaseClient)(nil).GetPostLikesByIndexPostId), postID, lastUsername, limit)
 }
 
+// GetPostSuperlikesByIndexPostId mocks base method.
+func (m *MockDatabaseClient) GetPostSuperlikesByIndexPostId(postID, lastUsername string, limit int) ([]*model.UserMetadata, string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPostSuperlikesByIndexPostId", postID, lastUsername, limit)
+	ret0, _ := ret[0].([]*model.UserMetadata)
+	ret1, _ := ret[1].(string)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetPostSuperlikesByIndexPostId indicates an expected call of GetPostSuperlikesByIndexPostId.
+func (mr *MockDatabaseClientMockRecorder) GetPostSuperlikesByIndexPostId(postID, lastUsername, limit interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPostSuperlikesByIndexPostId", reflect.TypeOf((*MockDatabaseClient)(nil).GetPostSuperlikesByIndexPostId), postID, lastUsername, limit)
+}
+
 // GetPostsByIndexUser mocks base method.
 func (m *MockDatabaseClient) GetPostsByIndexUser(username, lastPostId, lastPostCreatedAt string, limit int) ([]*database.PostMetadata, string, string, error) {
 	m.ctrl.T.Helper()
@@ -235,6 +251,18 @@ func (m *MockDatabaseClient) TableExists(tableName string) bool {
 func (mr *MockDatabaseClientMockRecorder) TableExists(tableName interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TableExists", reflect.TypeOf((*MockDatabaseClient)(nil).TableExists), tableName)
+}
+
+// Truncate mocks base method.
+func (m *MockDatabaseClient) Truncate() {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "Truncate")
+}
+
+// Truncate indicates an expected call of Truncate.
+func (mr *MockDatabaseClientMockRecorder) Truncate() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Truncate", reflect.TypeOf((*MockDatabaseClient)(nil).Truncate))
 }
 
 // UpdateData mocks base method.

@@ -30,7 +30,7 @@ func setUpUserAUnfollowedUserBEventHandler() {
 }
 
 func tearDownUserAUnfollowedUserBEvent() {
-	userAUnfollowedUserBEventDb.Client.Clean()
+	userAUnfollowedUserBEventDb.Client.Truncate()
 }
 
 func TestHandlingUserAUnfollowedUserBEvent_WhenItReturnsSuccess(t *testing.T) {

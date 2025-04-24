@@ -18,6 +18,7 @@ type Database struct {
 
 type DatabaseClient interface {
 	Clean()
+	Truncate()
 	TableExists(tableName string) bool
 	CreateTable(tableName string, keys *[]TableAttributes, ctx context.Context) error
 	CreateIndexesOnTable(tableName, indexName string, inndexes *[]TableAttributes, ctx context.Context) error
@@ -28,6 +29,7 @@ type DatabaseClient interface {
 	GetPostsByIndexUser(username string, lastPostId, lastPostCreatedAt string, limit int) ([]*PostMetadata, string, string, error)
 	GetCommentsByIndexPostId(postID string, lastCommentId uint64, limit int) ([]*model.Comment, uint64, error)
 	GetPostLikesByIndexPostId(postID string, lastUsername string, limit int) ([]*model.UserMetadata, string, error)
+	GetPostSuperlikesByIndexPostId(postID string, lastUsername string, limit int) ([]*model.UserMetadata, string, error)
 	UpdateData(tableName string, key any, updateAttributes map[string]any) error
 	IncrementCounter(tableName string, key any, counterFieldName string, incrementValue int) error
 	RemoveDataAndDecreaseCounter(tableName string, key any, counterTableName string, counterKey any, counterFieldName string) error

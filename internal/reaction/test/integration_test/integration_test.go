@@ -44,7 +44,7 @@ func setUp(t *testing.T) {
 }
 
 func tearDown() {
-	db.Client.Clean()
+	db.Client.Truncate()
 	cache.Client.Clean()
 }
 
@@ -119,7 +119,7 @@ func TestCreatePostSuperlike_WhenDatabaseReturnsSuccess(t *testing.T) {
 func TestGetPostLikesMetadata_WhenDatabaseReturnsSuccess(t *testing.T) {
 	setUp(t)
 	defer tearDown()
-	populateDb(t)
+	populatePostLikesDb(t)
 	postId := "post1"
 	lastUsername := "username2"
 	limit := 4
@@ -185,7 +185,7 @@ func TestGetPostLikesMetadata_WhenCacheReturnsSuccess(t *testing.T) {
 	postId := "post1"
 	lastUsername := "username2"
 	limit := 4
-	populateCache(t, postId, lastUsername, limit, []*model.UserMetadata{
+	populatePostLikesCache(t, postId, lastUsername, limit, []*model.UserMetadata{
 		{
 			Username: "username3",
 			Name:     "fullname3",
@@ -236,6 +236,130 @@ func TestGetPostLikesMetadata_WhenCacheReturnsSuccess(t *testing.T) {
 	}`
 
 	controller.GetPostLikesMetadata(ginContext)
+
+	integration_test_assert.AssertSuccessResult(t, apiResponse, expectedBodyResponse)
+}
+
+func TestGetPostSuperlikesMetadata_WhenDatabaseReturnsSuccess(t *testing.T) {
+	setUp(t)
+	defer tearDown()
+	populatePostSuperlikesDb(t)
+	postId := "post1"
+	lastUsername := "username2"
+	limit := 4
+	ginContext.Request, _ = http.NewRequest("GET", "/postSuperlikes", nil)
+	ginContext.Params = []gin.Param{{Key: "postId", Value: postId}}
+	u := url.Values{}
+	u.Add("lastUsername", lastUsername)
+	u.Add("limit", strconv.Itoa(limit))
+	ginContext.Request.URL.RawQuery = u.Encode()
+	expectedPostSuperlikes := []*model.UserMetadata{
+		{
+			Username: "username3",
+			Name:     "fullname3",
+		},
+		{
+			Username: "username4",
+			Name:     "fullname4",
+		},
+		{
+			Username: "username5",
+			Name:     "fullname5",
+		},
+		{
+			Username: "username6",
+			Name:     "fullname6",
+		},
+	}
+	expectedBodyResponse := `{
+		"error": false,
+		"message": "200 OK",
+		"content": {
+			"postSuperlikes":[	
+			{
+				"username":  "username3",
+				"name": 	 "fullname3"
+			},		
+			{
+				"username":  "username4",
+				"name": 	 "fullname4"
+			},		
+			{
+				"username":  "username5",
+				"name": 	 "fullname5"
+			},		
+			{
+				"username":  "username6",
+				"name": 	 "fullname6"
+			}
+			],
+			"lastUsername":"username6"
+		}
+	}`
+
+	controller.GetPostSuperlikesMetadata(ginContext)
+
+	integration_test_assert.AssertSuccessResult(t, apiResponse, expectedBodyResponse)
+	integration_test_assert.AssertCachedPostSuperlikesExists(t, cache, postId, lastUsername, limit, expectedPostSuperlikes)
+}
+
+func TestGetPostSuperlikesMetadata_WhenCacheReturnsSuccess(t *testing.T) {
+	setUp(t)
+	defer tearDown()
+	postId := "post1"
+	lastUsername := "username2"
+	limit := 4
+	populatePostSuperlikesCache(t, postId, lastUsername, limit, []*model.UserMetadata{
+		{
+			Username: "username3",
+			Name:     "fullname3",
+		},
+		{
+			Username: "username4",
+			Name:     "fullname4",
+		},
+		{
+			Username: "username5",
+			Name:     "fullname5",
+		},
+		{
+			Username: "username6",
+			Name:     "fullname6",
+		},
+	})
+	ginContext.Request, _ = http.NewRequest("GET", "/postSuperlikes", nil)
+	ginContext.Params = []gin.Param{{Key: "postId", Value: postId}}
+	u := url.Values{}
+	u.Add("lastUsername", lastUsername)
+	u.Add("limit", strconv.Itoa(limit))
+	ginContext.Request.URL.RawQuery = u.Encode()
+	expectedBodyResponse := `{
+		"error": false,
+		"message": "200 OK",
+		"content": {
+			"postSuperlikes":[	
+			{
+				"username":  "username3",
+				"name": 	 "fullname3"
+			},		
+			{
+				"username":  "username4",
+				"name": 	 "fullname4"
+			},		
+			{
+				"username":  "username5",
+				"name": 	 "fullname5"
+			},		
+			{
+				"username":  "username6",
+				"name": 	 "fullname6"
+			}
+			],
+			"lastUsername":"username6"
+		}
+	}`
+
+	controller.GetPostSuperlikesMetadata(ginContext)
 
 	integration_test_assert.AssertSuccessResult(t, apiResponse, expectedBodyResponse)
 }
@@ -296,7 +420,7 @@ func TestDeletePostSuperlike_WhenDatabaseReturnsSuccess(t *testing.T) {
 	integration_test_assert.AssertPostSuperlikesDecreased(t, db, existingPost.PostId)
 }
 
-func populateDb(t *testing.T) {
+func populatePostLikesDb(t *testing.T) {
 	existingPostLikes := []*database.PostLikeMetadata{
 		{
 			PostId:   "post1",
@@ -365,6 +489,79 @@ func populateDb(t *testing.T) {
 	}
 }
 
-func populateCache(t *testing.T, postId string, lastUsername string, limit int, postLikes []*model.UserMetadata) {
+func populatePostSuperlikesDb(t *testing.T) {
+	existingPostSuperlikes := []*database.PostSuperlikeMetadata{
+		{
+			PostId:   "post1",
+			Username: "username1",
+			Name:     "fullname1",
+		},
+		{
+			PostId:   "post2",
+			Username: "username1",
+			Name:     "fullname1",
+		},
+		{
+			PostId:   "post3",
+			Username: "username1",
+			Name:     "fullname1",
+		},
+		{
+			PostId:   "post1",
+			Username: "username2",
+			Name:     "fullname2",
+		},
+		{
+			PostId:   "post1",
+			Username: "username3",
+			Name:     "fullname3",
+		},
+		{
+			PostId:   "post2",
+			Username: "username1",
+			Name:     "fullname1",
+		},
+		{
+			PostId:   "post2",
+			Username: "username1",
+			Name:     "fullname1",
+		},
+		{
+			PostId:   "post1",
+			Username: "username4",
+			Name:     "fullname4",
+		},
+		{
+			PostId:   "post1",
+			Username: "username5",
+			Name:     "fullname5",
+		},
+		{
+			PostId:   "post3",
+			Username: "username1",
+			Name:     "fullname1",
+		},
+		{
+			PostId:   "post1",
+			Username: "username6",
+			Name:     "fullname6",
+		},
+		{
+			PostId:   "post1",
+			Username: "username7",
+			Name:     "fullname7",
+		},
+	}
+
+	for _, existingPostSuperlike := range existingPostSuperlikes {
+		integration_test_arrange.AddPostSuperlikeToDatabase(t, db, existingPostSuperlike)
+	}
+}
+
+func populatePostLikesCache(t *testing.T, postId string, lastUsername string, limit int, postLikes []*model.UserMetadata) {
 	integration_test_arrange.AddCachedPostLikesToCache(t, cache, postId, lastUsername, limit, postLikes)
+}
+
+func populatePostSuperlikesCache(t *testing.T, postId string, lastUsername string, limit int, postSuperlikes []*model.UserMetadata) {
+	integration_test_arrange.AddCachedPostSuperlikesToCache(t, cache, postId, lastUsername, limit, postSuperlikes)
 }

@@ -20,3 +20,7 @@ func AddCachedCommentsToCache(t *testing.T, cache *database.Cache, postId string
 func AddCachedPostLikesToCache(t *testing.T, cache *database.Cache, postId string, lastUsername string, limit int, postLikes []*model.UserMetadata) {
 	cache.Client.SetPostLikes(postId, lastUsername, limit, postLikes)
 }
+
+func AddCachedPostSuperlikesToCache(t *testing.T, cache *database.Cache, postId string, lastUsername string, limit int, postSuperlikes []*model.UserMetadata) {
+	cache.Client.SetPostSuperlikes(postId, lastUsername, limit, postSuperlikes)
+}

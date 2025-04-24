@@ -105,3 +105,19 @@ func (mr *MockRepositoryMockRecorder) GetPostLikesMetadata(postId, lastUsername,
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPostLikesMetadata", reflect.TypeOf((*MockRepository)(nil).GetPostLikesMetadata), postId, lastUsername, limit)
 }
+
+// GetPostSuperlikesMetadata mocks base method.
+func (m *MockRepository) GetPostSuperlikesMetadata(postId, lastUsername string, limit int) ([]*model.UserMetadata, string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPostSuperlikesMetadata", postId, lastUsername, limit)
+	ret0, _ := ret[0].([]*model.UserMetadata)
+	ret1, _ := ret[1].(string)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetPostSuperlikesMetadata indicates an expected call of GetPostSuperlikesMetadata.
+func (mr *MockRepositoryMockRecorder) GetPostSuperlikesMetadata(postId, lastUsername, limit interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPostSuperlikesMetadata", reflect.TypeOf((*MockRepository)(nil).GetPostSuperlikesMetadata), postId, lastUsername, limit)
+}
