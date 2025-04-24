@@ -1,7 +1,7 @@
 package comment
 
 import (
-	"time"
+	"readmodels/internal/model"
 
 	"github.com/rs/zerolog/log"
 )
@@ -9,20 +9,13 @@ import (
 //go:generate mockgen -source=service.go -destination=test/mock/service.go
 
 type Repository interface {
-	AddNewComment(data *Comment) error
+	AddNewComment(data *model.Comment) error
+	GetCommentsByPostId(postId string, lastCommentId uint64, limit int) ([]*model.Comment, uint64, error)
 	DeleteComment(commentId uint64) error
 }
 
 type CommentService struct {
 	repository Repository
-}
-
-type Comment struct {
-	CommentId uint64    `json:"commentId"`
-	Username  string    `json:"username"`
-	PostId    string    `json:"postId"`
-	Content   string    `json:"content"`
-	CreatedAt time.Time `json:"createdAt"`
 }
 
 func NewCommentService(repository Repository) *CommentService {
@@ -31,7 +24,7 @@ func NewCommentService(repository Repository) *CommentService {
 	}
 }
 
-func (s *CommentService) CreateNewComment(data *Comment) {
+func (s *CommentService) CreateNewComment(data *model.Comment) {
 	err := s.repository.AddNewComment(data)
 	if err != nil {
 		log.Error().Stack().Err(err).Msgf("Error adding comment with id %d", data.CommentId)
@@ -39,6 +32,16 @@ func (s *CommentService) CreateNewComment(data *Comment) {
 	}
 
 	log.Info().Msgf("Comment with id %d was added", data.CommentId)
+}
+
+func (s *CommentService) GetCommentsByPostId(postId string, lastCommentId uint64, limit int) ([]*model.Comment, uint64, error) {
+	comments, lastCommentId, err := s.repository.GetCommentsByPostId(postId, lastCommentId, limit)
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Error getting  %s's comments", postId)
+		return comments, lastCommentId, err
+	}
+
+	return comments, lastCommentId, nil
 }
 
 func (s *CommentService) DeleteComment(commentId uint64) {

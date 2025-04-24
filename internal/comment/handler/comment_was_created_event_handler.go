@@ -3,6 +3,7 @@ package comment_handler
 import (
 	"readmodels/internal/comment"
 	common_data "readmodels/internal/common/data"
+	"readmodels/internal/model"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -17,7 +18,7 @@ type CommentWasCreatedEvent struct {
 }
 
 type CommentWasCreatedEventService interface {
-	CreateNewComment(data *comment.Comment)
+	CreateNewComment(data *model.Comment)
 }
 
 type CommentWasCreatedEventHandler struct {
@@ -48,7 +49,7 @@ func (handler *CommentWasCreatedEventHandler) Handle(event []byte) {
 	handler.service.CreateNewComment(data)
 }
 
-func mapData(event CommentWasCreatedEvent) (*comment.Comment, error) {
+func mapData(event CommentWasCreatedEvent) (*model.Comment, error) {
 	timeLayout := "2006-01-02T15:04:05.000000000Z"
 	parsedCreatedAt, err := time.Parse(timeLayout, event.CreatedAt)
 	if err != nil {
@@ -56,7 +57,7 @@ func mapData(event CommentWasCreatedEvent) (*comment.Comment, error) {
 		return nil, err
 	}
 
-	return &comment.Comment{
+	return &model.Comment{
 		CommentId: event.CommentId,
 		Username:  event.Username,
 		PostId:    event.PostId,

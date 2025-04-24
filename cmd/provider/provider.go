@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	awsClients "readmodels/infrastructure/aws"
+	dbInfra "readmodels/infrastructure/cache"
 	"readmodels/infrastructure/kafka"
 	"readmodels/internal/api"
 	"readmodels/internal/bus"
@@ -31,15 +32,16 @@ func NewProvider(env string) *Provider {
 	}
 }
 
-func (p *Provider) ProvideApiEndpoint(database *database.Database) *api.Api {
-	return api.NewApiEndpoint(p.env, p.ProvideApiControllers(database))
+func (p *Provider) ProvideApiEndpoint(database *database.Database, cache *database.Cache) *api.Api {
+	return api.NewApiEndpoint(p.env, p.ProvideApiControllers(database, cache))
 }
 
-func (p *Provider) ProvideApiControllers(database *database.Database) []api.Controller {
+func (p *Provider) ProvideApiControllers(database *database.Database, cache *database.Cache) []api.Controller {
 	return []api.Controller{
 		userprofile.NewUserProfileController(userprofile.UserProfileRepository(*database)),
 		post.NewPostController(post.PostRepository(*database)),
 		follow.NewFollowController(follow.FollowRepository(*database)),
+		comment.NewCommentController(comment.NewCommentRepository(database, cache)),
 	}
 }
 
@@ -49,7 +51,7 @@ func (p *Provider) ProvideEventBus() *bus.EventBus {
 	return eventBus
 }
 
-func (p *Provider) ProvideSubscriptions(database *database.Database) *[]bus.EventSubscription {
+func (p *Provider) ProvideSubscriptions(database *database.Database, cache *database.Cache) *[]bus.EventSubscription {
 	return &[]bus.EventSubscription{
 		{
 			EventType: "UserWasRegisteredEvent",
@@ -77,11 +79,11 @@ func (p *Provider) ProvideSubscriptions(database *database.Database) *[]bus.Even
 		},
 		{
 			EventType: "CommentWasCreatedEvent",
-			Handler:   comment_handler.NewCommentWasCreatedEventHandler(comment.CommentRepository(*database)),
+			Handler:   comment_handler.NewCommentWasCreatedEventHandler(comment.NewCommentRepository(database, cache)),
 		},
 		{
 			EventType: "CommentWasDeletedEvent",
-			Handler:   comment_handler.NewCommentWasDeletedEventHandler(comment.CommentRepository(*database)),
+			Handler:   comment_handler.NewCommentWasDeletedEventHandler(comment.NewCommentRepository(database, cache)),
 		},
 	}
 }
@@ -101,6 +103,10 @@ func (p *Provider) ProvideKafkaConsumer(eventBus *bus.EventBus) (*kafka.KafkaCon
 	}
 
 	return kafka.NewKafkaConsumer(brokers, eventBus)
+}
+
+func (p *Provider) ProvideCache(ctx context.Context) *database.Cache {
+	return database.NewCache(dbInfra.NewRedisClient("localhost:6379", "", ctx))
 }
 
 func (p *Provider) ProvideDb(ctx context.Context) (*database.Database, error) {

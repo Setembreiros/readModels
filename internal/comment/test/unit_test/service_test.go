@@ -2,7 +2,9 @@ package comment_test
 
 import (
 	"errors"
+	"fmt"
 	"readmodels/internal/comment"
+	"readmodels/internal/model"
 	"testing"
 	"time"
 
@@ -19,7 +21,7 @@ func setUpService(t *testing.T) {
 func TestCreateNewCommentWithService(t *testing.T) {
 	setUpService(t)
 	timeNow := time.Now().UTC()
-	data := &comment.Comment{
+	data := &model.Comment{
 		CommentId: uint64(123456),
 		Username:  "user123",
 		PostId:    "post123",
@@ -36,7 +38,7 @@ func TestCreateNewCommentWithService(t *testing.T) {
 func TestErrorOnCreateNewCommentWithService(t *testing.T) {
 	setUpService(t)
 	timeNow := time.Now().UTC()
-	data := &comment.Comment{
+	data := &model.Comment{
 		CommentId: uint64(123456),
 		Username:  "user123",
 		PostId:    "post123",
@@ -50,10 +52,60 @@ func TestErrorOnCreateNewCommentWithService(t *testing.T) {
 	assert.Contains(t, loggerOutput.String(), "Error adding comment with id 123456")
 }
 
+func TestGetCommentsByPostIdWithService(t *testing.T) {
+	setUpService(t)
+	postId := "post1"
+	expectedComments := []*model.Comment{
+		{
+			CommentId: uint64(5),
+			Username:  "username1",
+			PostId:    "post1",
+			Content:   "o meu comentario 1",
+			CreatedAt: time.Now(),
+		},
+		{
+			CommentId: uint64(6),
+			Username:  "username2",
+			PostId:    "post1",
+			Content:   "o meu comentario 2",
+			CreatedAt: time.Now(),
+		},
+		{
+			CommentId: uint64(7),
+			Username:  "username1",
+			PostId:    "post1",
+			Content:   "o meu comentario 3",
+			CreatedAt: time.Now(),
+		},
+	}
+	expectedLastCommentId := uint64(7)
+	repository.EXPECT().GetCommentsByPostId(postId, uint64(0), 12).Return(expectedComments, expectedLastCommentId, nil)
+
+	commets, lastCommentId, err := commentService.GetCommentsByPostId(postId, uint64(0), 12)
+	assert.Nil(t, err)
+	assert.ElementsMatch(t, expectedComments, commets)
+	assert.Equal(t, expectedLastCommentId, lastCommentId)
+}
+
+func TestErrorOnGetCommentsByPostIdWithService(t *testing.T) {
+	setUpService(t)
+	postId := "post1"
+	expectedComments := []*model.Comment{}
+	expectedLastCommentId := uint64(0)
+	repository.EXPECT().GetCommentsByPostId(postId, uint64(0), 12).Return(expectedComments, uint64(0), errors.New("some error"))
+
+	commets, lastCommentId, err := commentService.GetCommentsByPostId(postId, uint64(0), 12)
+
+	assert.Contains(t, loggerOutput.String(), fmt.Sprintf("Error getting  %s's comments", postId))
+	assert.NotNil(t, err)
+	assert.ElementsMatch(t, expectedComments, commets)
+	assert.Equal(t, expectedLastCommentId, lastCommentId)
+}
+
 func TestDeleteCommentWithService(t *testing.T) {
 	setUpService(t)
 	commentId := uint64(123456)
-	repository.EXPECT().DeleteComment(commentId)
+	repository.EXPECT().DeleteComment(commentId).Return(nil)
 
 	commentService.DeleteComment(commentId)
 

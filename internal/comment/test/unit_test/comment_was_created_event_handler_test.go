@@ -2,8 +2,8 @@ package comment_test
 
 import (
 	"encoding/json"
-	"readmodels/internal/comment"
 	comment_handler "readmodels/internal/comment/handler"
+	"readmodels/internal/model"
 	"testing"
 	"time"
 
@@ -30,7 +30,7 @@ func TestHandleCommentWasCreatedEvent(t *testing.T) {
 	}
 	event, _ := json.Marshal(data)
 	expectedTime, _ := time.Parse(timeLayout, timeNow)
-	expectedComment := &comment.Comment{
+	expectedComment := &model.Comment{
 		CommentId: uint64(123456),
 		Username:  "user123",
 		PostId:    "post123",

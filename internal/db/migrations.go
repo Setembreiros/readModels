@@ -71,27 +71,15 @@ func (db *Database) ApplyMigrations(ctx context.Context) error {
 			},
 		}
 		err := db.Client.CreateTable("readmodels.comments", &keys, ctx)
-		if err != nil {
-			return err
-		}
+
 		indexes := []TableAttributes{
 			{
 				Name:          "PostId",
 				AttributeType: "string",
 			},
 			{
-				Name:          "Username",
-				AttributeType: "string",
-			},
-		}
-		err = db.Client.CreateIndexesOnTable("readmodels.comments", "PostIdUsernameIndex", &indexes, ctx)
-		if err != nil {
-			return err
-		}
-		indexes = []TableAttributes{
-			{
-				Name:          "PostId",
-				AttributeType: "string",
+				Name:          "CommentId",
+				AttributeType: "number",
 			},
 		}
 		err = db.Client.CreateIndexesOnTable("readmodels.comments", "PostIdIndex", &indexes, ctx)

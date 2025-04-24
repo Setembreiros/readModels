@@ -9,6 +9,7 @@ import (
 	"time"
 
 	database "readmodels/internal/db"
+	"readmodels/internal/model"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
@@ -500,6 +501,60 @@ func (dc *DynamoDBClient) GetPostsByIndexUser(username string, lastPostId, lastP
 	return results, lastPostId, lastPostCreatedAt, nil
 }
 
+func (dc *DynamoDBClient) GetCommentsByIndexPostId(postID string, lastCommentId uint64, limit int) ([]*model.Comment, uint64, error) {
+	input := &dynamodb.QueryInput{
+		TableName:              aws.String("readmodels.comments"),
+		IndexName:              aws.String("PostIdIndex"),
+		KeyConditionExpression: aws.String("#postId = :postId"),
+		ExpressionAttributeNames: map[string]string{
+			"#postId": "PostId",
+		},
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":postId": &types.AttributeValueMemberS{Value: postID},
+		},
+		Limit: aws.Int32(int32(limit)),
+	}
+
+	if lastCommentId != 0 {
+		input.ExclusiveStartKey = map[string]types.AttributeValue{
+			"PostId":    &types.AttributeValueMemberS{Value: postID},
+			"CommentId": &types.AttributeValueMemberN{Value: strconv.FormatUint(lastCommentId, 10)},
+		}
+	}
+
+	response, err := dc.client.Query(context.TODO(), input)
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Couldn't get comments for post %s", postID)
+		return nil, 0, err
+	}
+
+	var results []*model.Comment
+	for _, item := range response.Items {
+		var result model.Comment
+		err = attributevalue.UnmarshalMap(item, &result)
+		if err != nil {
+			log.Error().Stack().Err(err).Msg("Couldn't unmarshal comment response")
+			return nil, 0, err
+		}
+
+		results = append(results, &result)
+	}
+
+	var nextLastCommentId uint64 = 0
+	if response.LastEvaluatedKey != nil {
+		if val, ok := response.LastEvaluatedKey["CommentId"]; ok {
+			if commentId, ok := val.(*types.AttributeValueMemberN); ok {
+				parsedId, parseErr := strconv.ParseUint(commentId.Value, 10, 64)
+				if parseErr == nil {
+					nextLastCommentId = parsedId
+				}
+			}
+		}
+	}
+
+	return results, nextLastCommentId, nil
+}
+
 func mapTableKeys(keys *[]database.TableAttributes) (*[]types.KeySchemaElement, *[]types.AttributeDefinition, error) {
 	var keySchemas []types.KeySchemaElement
 	var attributeDefinitions []types.AttributeDefinition
@@ -564,16 +619,4 @@ func validateIsPointerToSlice(results any) error {
 	}
 
 	return nil
-}
-
-func makeResultSlice(results any, lenght int) reflect.Value {
-	resultsVal := reflect.ValueOf(results)
-	sliceType := resultsVal.Elem().Type()
-	return reflect.MakeSlice(sliceType, 0, lenght)
-}
-
-func makeResultElement(results any) reflect.Type {
-	resultsVal := reflect.ValueOf(results)
-	sliceType := resultsVal.Elem().Type()
-	return sliceType.Elem()
 }

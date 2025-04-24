@@ -7,6 +7,7 @@ package mock_database
 import (
 	context "context"
 	database "readmodels/internal/db"
+	model "readmodels/internal/model"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -73,6 +74,22 @@ func (m *MockDatabaseClient) CreateTable(tableName string, keys *[]database.Tabl
 func (mr *MockDatabaseClientMockRecorder) CreateTable(tableName, keys, ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTable", reflect.TypeOf((*MockDatabaseClient)(nil).CreateTable), tableName, keys, ctx)
+}
+
+// GetCommentsByIndexPostId mocks base method.
+func (m *MockDatabaseClient) GetCommentsByIndexPostId(postID string, lastCommentId uint64, limit int) ([]*model.Comment, uint64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCommentsByIndexPostId", postID, lastCommentId, limit)
+	ret0, _ := ret[0].([]*model.Comment)
+	ret1, _ := ret[1].(uint64)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetCommentsByIndexPostId indicates an expected call of GetCommentsByIndexPostId.
+func (mr *MockDatabaseClientMockRecorder) GetCommentsByIndexPostId(postID, lastCommentId, limit interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCommentsByIndexPostId", reflect.TypeOf((*MockDatabaseClient)(nil).GetCommentsByIndexPostId), postID, lastCommentId, limit)
 }
 
 // GetData mocks base method.
