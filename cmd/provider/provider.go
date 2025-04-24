@@ -44,6 +44,7 @@ func (p *Provider) ProvideApiControllers(database *database.Database, cache *dat
 		post.NewPostController(post.NewPostService(post.PostRepository(*database))),
 		follow.NewFollowController(follow.FollowRepository(*database)),
 		comment.NewCommentController(comment.NewCommentRepository(database, cache)),
+		reaction.NewReactionController(reaction.NewReactionService(reaction.NewReactionRepository(database, cache))),
 	}
 }
 
