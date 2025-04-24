@@ -22,9 +22,10 @@ type DatabaseClient interface {
 	CreateTable(tableName string, keys *[]TableAttributes, ctx context.Context) error
 	CreateIndexesOnTable(tableName, indexName string, inndexes *[]TableAttributes, ctx context.Context) error
 	InsertData(tableName string, attributes any) error
+	InsertDataAndIncreaseCounter(tableName string, attributes any, counterTableName string, counterKey any, counterFieldName string) error
 	GetData(tableName string, key any, result any) error
 	GetMultipleData(tableName string, keys []any, results any) error
-	RemoveData(tableName string, key any) error
+	RemoveDataAndDecreaseCounter(tableName string, key any, counterTableName string, counterKey any, counterFieldName string) error
 	RemoveMultipleData(tableName string, keys []any) error
 	UpdateData(tableName string, key any, updateAttributes map[string]any) error
 	IncrementCounter(tableName string, key any, counterFieldName string, incrementValue int) error

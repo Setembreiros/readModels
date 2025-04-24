@@ -31,3 +31,23 @@ func AssertCommentDoesNotExist(t *testing.T, db *database.Database, expectedComm
 	assert.NotNil(t, err)
 	assert.Equal(t, fmt.Sprintf("Data in table readmodels.comments not found for key %v", commentKey), err.Error())
 }
+
+func AssertPostCommentsIncreased(t *testing.T, db *database.Database, postId string) {
+	postKey := &database.PostMetadataKey{
+		PostId: postId,
+	}
+	var post database.PostMetadata
+	err := db.Client.GetData("PostMetadata", postKey, &post)
+	assert.Nil(t, err)
+	assert.Equal(t, 1, post.Comments)
+}
+
+func AssertPostCommentsDecreased(t *testing.T, db *database.Database, postId string) {
+	postKey := &database.PostMetadataKey{
+		PostId: postId,
+	}
+	var post database.PostMetadata
+	err := db.Client.GetData("PostMetadata", postKey, &post)
+	assert.Nil(t, err)
+	assert.Equal(t, 0, post.Comments)
+}

@@ -27,9 +27,12 @@ func TestCreateCommentInRepository(t *testing.T) {
 		Content:   "Exemplo de content",
 		CreatedAt: timeNow,
 	}
-	client.EXPECT().InsertData("readmodels.comments", data).Return(nil)
+	expectedPostKey := &database.PostMetadataKey{
+		PostId: data.PostId,
+	}
+	client.EXPECT().InsertDataAndIncreaseCounter("readmodels.comments", data, "PostMetadata", expectedPostKey, "Comments").Return(nil)
 
-	err := commentRepository.AddNewComment(data)
+	err := commentRepository.CreateComment(data)
 
 	assert.Nil(t, err)
 }
@@ -160,15 +163,41 @@ func TestGetCommentsByPostIdInRepository_WhenCacheeturnsSuccess(t *testing.T) {
 	assert.Equal(t, expectedLastCommentId, lastCommentId)
 }
 
+func TestUpdateCommentInRepository(t *testing.T) {
+	setUpRepository(t)
+	timeNow := time.Now().UTC()
+	data := &model.Comment{
+		CommentId: uint64(123456),
+		Content:   "Exemplo de content",
+		UpdatedAt: timeNow,
+	}
+	expectedCommentKey := &database.CommentKey{
+		CommentId: data.CommentId,
+	}
+	updateAttributes := map[string]interface{}{
+		"Content":   data.Content,
+		"UpdatedAt": data.UpdatedAt,
+	}
+	client.EXPECT().UpdateData("readmodels.comments", expectedCommentKey, updateAttributes)
+
+	err := commentRepository.UpdateComment(data)
+
+	assert.Nil(t, err)
+}
+
 func TestDeleteCommentInRepository(t *testing.T) {
 	setUpRepository(t)
 	commentId := uint64(7)
+	postId := "post1"
 	expectedKey := &database.CommentKey{
 		CommentId: commentId,
 	}
-	client.EXPECT().RemoveData("readmodels.comments", expectedKey)
+	expectedPostKey := &database.PostMetadataKey{
+		PostId: postId,
+	}
+	client.EXPECT().RemoveDataAndDecreaseCounter("readmodels.comments", expectedKey, "PostMetadata", expectedPostKey, "Comments")
 
-	err := commentRepository.DeleteComment(commentId)
+	err := commentRepository.DeleteComment(postId, commentId)
 
 	assert.Nil(t, err)
 }

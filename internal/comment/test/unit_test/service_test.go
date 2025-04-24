@@ -28,11 +28,11 @@ func TestCreateNewCommentWithService(t *testing.T) {
 		Content:   "Exemplo de content",
 		CreatedAt: timeNow,
 	}
-	repository.EXPECT().AddNewComment(data)
+	repository.EXPECT().CreateComment(data)
 
-	commentService.CreateNewComment(data)
+	commentService.CreateComment(data)
 
-	assert.Contains(t, loggerOutput.String(), "Comment with id 123456 was added")
+	assert.Contains(t, loggerOutput.String(), "Comment with id 123456 in post post123 was created")
 }
 
 func TestErrorOnCreateNewCommentWithService(t *testing.T) {
@@ -45,11 +45,11 @@ func TestErrorOnCreateNewCommentWithService(t *testing.T) {
 		Content:   "Exemplo de content",
 		CreatedAt: timeNow,
 	}
-	repository.EXPECT().AddNewComment(data).Return(errors.New("some error"))
+	repository.EXPECT().CreateComment(data).Return(errors.New("some error"))
 
-	commentService.CreateNewComment(data)
+	commentService.CreateComment(data)
 
-	assert.Contains(t, loggerOutput.String(), "Error adding comment with id 123456")
+	assert.Contains(t, loggerOutput.String(), "Error creating comment with id 123456")
 }
 
 func TestGetCommentsByPostIdWithService(t *testing.T) {
@@ -102,22 +102,54 @@ func TestErrorOnGetCommentsByPostIdWithService(t *testing.T) {
 	assert.Equal(t, expectedLastCommentId, lastCommentId)
 }
 
+func TestUpdateCommentWithService(t *testing.T) {
+	setUpService(t)
+	timeNow := time.Now().UTC()
+	data := &model.Comment{
+		CommentId: uint64(123456),
+		Content:   "Exemplo de content",
+		UpdatedAt: timeNow,
+	}
+	repository.EXPECT().UpdateComment(data)
+
+	commentService.UpdateComment(data)
+
+	assert.Contains(t, loggerOutput.String(), "Comment with id 123456 was updated")
+}
+
+func TestErrorOnUpdateNewCommentWithService(t *testing.T) {
+	setUpService(t)
+	timeNow := time.Now().UTC()
+	data := &model.Comment{
+		CommentId: uint64(123456),
+		Content:   "Exemplo de content",
+		UpdatedAt: timeNow,
+	}
+	repository.EXPECT().UpdateComment(data).Return(errors.New("some error"))
+
+	commentService.UpdateComment(data)
+
+	assert.Contains(t, loggerOutput.String(), "Error updating comment with id 123456")
+}
+
 func TestDeleteCommentWithService(t *testing.T) {
 	setUpService(t)
 	commentId := uint64(123456)
-	repository.EXPECT().DeleteComment(commentId).Return(nil)
+	postId := "post1"
+	repository.EXPECT().DeleteComment(postId, commentId).Return(nil)
 
-	commentService.DeleteComment(commentId)
+	commentService.DeleteComment(postId, commentId)
 
-	assert.Contains(t, loggerOutput.String(), "Comment with id 123456 was deleted")
+	assert.Contains(t, loggerOutput.String(), "Comment with id 123456 in post post1 was deleted")
 }
 
 func TestErrorOnDeleteCommentWithService(t *testing.T) {
 	setUpService(t)
 	commentId := uint64(123456)
-	repository.EXPECT().DeleteComment(commentId).Return(errors.New("some error"))
+	posId := "post1"
+	repository.EXPECT().DeleteComment(posId, commentId).Return(errors.New("some error"))
 
-	commentService.DeleteComment(commentId)
+	commentService.DeleteComment(posId, commentId)
 
 	assert.Contains(t, loggerOutput.String(), "Error deleting comment with id 123456")
 }

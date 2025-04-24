@@ -8,8 +8,14 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+//go:generate mockgen -source=controller.go -destination=mock/controller.go
+
+type Service interface {
+	GetPostMetadatasByUser(username string, lastPostId, lastPostCreatedAt string, limit int) ([]*PostMetadata, string, string, error)
+}
+
 type PostController struct {
-	service *PostService
+	service Service
 }
 
 type GetPostMetadatasResponse struct {
@@ -19,9 +25,9 @@ type GetPostMetadatasResponse struct {
 	LastPostCreatedAt string          `json:"lastPostCreatedAt"`
 }
 
-func NewPostController(repository Repository) *PostController {
+func NewPostController(service Service) *PostController {
 	return &PostController{
-		service: NewPostService(repository),
+		service: service,
 	}
 }
 

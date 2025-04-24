@@ -3,6 +3,7 @@ package comment_test
 import (
 	"encoding/json"
 	comment_handler "readmodels/internal/comment/handler"
+	mock_comment_handler "readmodels/internal/comment/handler/test/mock"
 	"readmodels/internal/model"
 	"testing"
 	"time"
@@ -11,16 +12,17 @@ import (
 )
 
 var commentWasCreatedEventHandler *comment_handler.CommentWasCreatedEventHandler
+var commentWasCreatedEventService *mock_comment_handler.MockCommentWasCreatedEventService
 
 func setUpHandler(t *testing.T) {
 	SetUp(t)
-	commentWasCreatedEventHandler = comment_handler.NewCommentWasCreatedEventHandler(repository)
+	commentWasCreatedEventService = mock_comment_handler.NewMockCommentWasCreatedEventService(ctrl)
+	commentWasCreatedEventHandler = comment_handler.NewCommentWasCreatedEventHandler(commentWasCreatedEventService)
 }
 
 func TestHandleCommentWasCreatedEvent(t *testing.T) {
 	setUpHandler(t)
-	timeLayout := "2006-01-02T15:04:05.000000000Z"
-	timeNow := time.Now().UTC().Format(timeLayout)
+	timeNow := time.Now().UTC().Format(model.TimeLayout)
 	data := &comment_handler.CommentWasCreatedEvent{
 		CommentId: uint64(123456),
 		Username:  "user123",
@@ -29,7 +31,7 @@ func TestHandleCommentWasCreatedEvent(t *testing.T) {
 		CreatedAt: timeNow,
 	}
 	event, _ := json.Marshal(data)
-	expectedTime, _ := time.Parse(timeLayout, timeNow)
+	expectedTime, _ := time.Parse(model.TimeLayout, timeNow)
 	expectedComment := &model.Comment{
 		CommentId: uint64(123456),
 		Username:  "user123",
@@ -37,7 +39,7 @@ func TestHandleCommentWasCreatedEvent(t *testing.T) {
 		Content:   "Exemplo de content",
 		CreatedAt: expectedTime,
 	}
-	repository.EXPECT().AddNewComment(expectedComment)
+	commentWasCreatedEventService.EXPECT().CreateComment(expectedComment)
 
 	commentWasCreatedEventHandler.Handle(event)
 }

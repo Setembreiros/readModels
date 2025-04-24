@@ -1,13 +1,14 @@
 package comment_handler
 
 import (
-	"readmodels/internal/comment"
 	common_data "readmodels/internal/common/data"
 	"readmodels/internal/model"
 	"time"
 
 	"github.com/rs/zerolog/log"
 )
+
+//go:generate mockgen -source=comment_was_created_event_handler.go -destination=test/mock/comment_was_created_event_handler.go
 
 type CommentWasCreatedEvent struct {
 	CommentId uint64 `json:"commentId"`
@@ -18,16 +19,16 @@ type CommentWasCreatedEvent struct {
 }
 
 type CommentWasCreatedEventService interface {
-	CreateNewComment(data *model.Comment)
+	CreateComment(data *model.Comment)
 }
 
 type CommentWasCreatedEventHandler struct {
 	service CommentWasCreatedEventService
 }
 
-func NewCommentWasCreatedEventHandler(repository comment.Repository) *CommentWasCreatedEventHandler {
+func NewCommentWasCreatedEventHandler(service CommentWasCreatedEventService) *CommentWasCreatedEventHandler {
 	return &CommentWasCreatedEventHandler{
-		service: comment.NewCommentService(repository),
+		service: service,
 	}
 }
 
@@ -46,12 +47,11 @@ func (handler *CommentWasCreatedEventHandler) Handle(event []byte) {
 		return
 	}
 
-	handler.service.CreateNewComment(data)
+	handler.service.CreateComment(data)
 }
 
 func mapData(event CommentWasCreatedEvent) (*model.Comment, error) {
-	timeLayout := "2006-01-02T15:04:05.000000000Z"
-	parsedCreatedAt, err := time.Parse(timeLayout, event.CreatedAt)
+	parsedCreatedAt, err := time.Parse(model.TimeLayout, event.CreatedAt)
 	if err != nil {
 		log.Error().Stack().Err(err).Msg("Error parsing time CreatedAt")
 		return nil, err

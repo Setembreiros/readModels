@@ -3,9 +3,10 @@ package post_handler_test
 import (
 	"bytes"
 	"encoding/json"
+	"readmodels/internal/model"
 	"readmodels/internal/post"
 	post_handler "readmodels/internal/post/handler"
-	mock_post "readmodels/internal/post/mock"
+	mock_post "readmodels/internal/post/handler/mock"
 	"testing"
 	"time"
 
@@ -15,20 +16,19 @@ import (
 )
 
 var loggerOutput bytes.Buffer
-var repository *mock_post.MockRepository
+var service *mock_post.MockPostWasCreatedEventService
 var handler *post_handler.PostWasCreatedEventHandler
 
 func setUpHandler(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	repository = mock_post.NewMockRepository(ctrl)
+	service = mock_post.NewMockPostWasCreatedEventService(ctrl)
 	log.Logger = log.Output(&loggerOutput)
-	handler = post_handler.NewPostWasCreatedEventHandler(repository)
+	handler = post_handler.NewPostWasCreatedEventHandler(service)
 }
 
 func TestHandlePostWasCreatedEvent(t *testing.T) {
 	setUpHandler(t)
-	timeLayout := "2006-01-02T15:04:05.000000000Z"
-	timeNow := time.Now().UTC().Format(timeLayout)
+	timeNow := time.Now().UTC().Format(model.TimeLayout)
 	data := &post_handler.PostWasCreatedEvent{
 		PostId: "123456",
 		Metadata: post_handler.Metadata{
@@ -41,7 +41,7 @@ func TestHandlePostWasCreatedEvent(t *testing.T) {
 		},
 	}
 	event, _ := json.Marshal(data)
-	expectedTime, _ := time.Parse(timeLayout, timeNow)
+	expectedTime, _ := time.Parse(model.TimeLayout, timeNow)
 	expectedPostMetadata := &post.PostMetadata{
 		PostId:      "123456",
 		Username:    "user123",
@@ -51,7 +51,7 @@ func TestHandlePostWasCreatedEvent(t *testing.T) {
 		CreatedAt:   expectedTime,
 		LastUpdated: expectedTime,
 	}
-	repository.EXPECT().AddNewPostMetadata(expectedPostMetadata)
+	service.EXPECT().CreateNewPostMetadata(expectedPostMetadata)
 
 	handler.Handle(event)
 }

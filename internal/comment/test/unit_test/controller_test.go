@@ -32,9 +32,8 @@ func TestGetCommentsByPostIdWithController_WhenSuccess(t *testing.T) {
 	u.Add("lastCommentId", strconv.FormatUint(expectedLastCommentId, 10))
 	u.Add("limit", strconv.Itoa(expectedLimit))
 	ginContext.Request.URL.RawQuery = u.Encode()
-	timeLayout := "2006-01-02T15:04:05Z"
-	timeNowString := time.Now().UTC().Format(timeLayout)
-	timeNow, _ := time.Parse(timeLayout, timeNowString)
+	timeNowString := time.Now().UTC().Format(model.TimeLayout)
+	timeNow, _ := time.Parse(model.TimeLayout, timeNowString)
 	expectedComments := []*model.Comment{
 		{
 			CommentId: uint64(5),
@@ -42,6 +41,7 @@ func TestGetCommentsByPostIdWithController_WhenSuccess(t *testing.T) {
 			PostId:    "post1",
 			Content:   "o meu comentario 1",
 			CreatedAt: timeNow,
+			UpdatedAt: timeNow,
 		},
 		{
 			CommentId: uint64(6),
@@ -49,6 +49,7 @@ func TestGetCommentsByPostIdWithController_WhenSuccess(t *testing.T) {
 			PostId:    "post1",
 			Content:   "o meu comentario 2",
 			CreatedAt: timeNow,
+			UpdatedAt: timeNow,
 		},
 		{
 			CommentId: uint64(7),
@@ -56,6 +57,7 @@ func TestGetCommentsByPostIdWithController_WhenSuccess(t *testing.T) {
 			PostId:    "post1",
 			Content:   "o meu comentario 3",
 			CreatedAt: timeNow,
+			UpdatedAt: timeNow,
 		},
 	}
 	repository.EXPECT().GetCommentsByPostId(expectedPostId, expectedLastCommentId, expectedLimit).Return(expectedComments, uint64(7), nil)
@@ -69,21 +71,24 @@ func TestGetCommentsByPostIdWithController_WhenSuccess(t *testing.T) {
 				"postId":    "post1",
 				"username":  "username1",
 				"content": "o meu comentario 1",
-				"createdAt": "` + timeNowString + `"
+				"createdAt": "` + timeNowString + `",
+				"updatedAt": "` + timeNowString + `"
 			},
 			{
 				"commentId": 6,
 				"postId":    "post1",
 				"username":  "username2",
 				"content": "o meu comentario 2",
-				"createdAt": "` + timeNowString + `"
+				"createdAt": "` + timeNowString + `",
+				"updatedAt": "` + timeNowString + `"
 			},
 			{
 				"commentId": 7,
 				"postId":    "post1",
 				"username":  "username1",
 				"content": "o meu comentario 3",
-				"createdAt": "` + timeNowString + `"
+				"createdAt": "` + timeNowString + `",
+				"updatedAt": "` + timeNowString + `"
 			}
 			],
 			"lastCommentId":7
@@ -103,9 +108,8 @@ func TestGetCommentsByPostIdWithController_WhenSuccessWithDefaultPaginationParam
 	ginContext.Params = []gin.Param{{Key: "postId", Value: expectedPostId}}
 	expectedDefaultLastCommentId := uint64(0)
 	expectedDefaultLimit := 12
-	timeLayout := "2006-01-02T15:04:05Z"
-	timeNowString := time.Now().UTC().Format(timeLayout)
-	timeNow, _ := time.Parse(timeLayout, timeNowString)
+	timeNowString := time.Now().UTC().Format(model.TimeLayout)
+	timeNow, _ := time.Parse(model.TimeLayout, timeNowString)
 	expectedComments := []*model.Comment{
 		{
 			CommentId: uint64(5),
@@ -113,6 +117,7 @@ func TestGetCommentsByPostIdWithController_WhenSuccessWithDefaultPaginationParam
 			PostId:    "post1",
 			Content:   "o meu comentario 1",
 			CreatedAt: timeNow,
+			UpdatedAt: timeNow,
 		},
 		{
 			CommentId: uint64(6),
@@ -120,6 +125,7 @@ func TestGetCommentsByPostIdWithController_WhenSuccessWithDefaultPaginationParam
 			PostId:    "post1",
 			Content:   "o meu comentario 2",
 			CreatedAt: timeNow,
+			UpdatedAt: timeNow,
 		},
 		{
 			CommentId: uint64(7),
@@ -127,6 +133,7 @@ func TestGetCommentsByPostIdWithController_WhenSuccessWithDefaultPaginationParam
 			PostId:    "post1",
 			Content:   "o meu comentario 3",
 			CreatedAt: timeNow,
+			UpdatedAt: timeNow,
 		},
 	}
 	repository.EXPECT().GetCommentsByPostId(expectedPostId, expectedDefaultLastCommentId, expectedDefaultLimit).Return(expectedComments, uint64(7), nil)
@@ -140,21 +147,24 @@ func TestGetCommentsByPostIdWithController_WhenSuccessWithDefaultPaginationParam
 				"postId":    "post1",
 				"username":  "username1",
 				"content": "o meu comentario 1",
-				"createdAt": "` + timeNowString + `"
+				"createdAt": "` + timeNowString + `",
+				"updatedAt": "` + timeNowString + `"
 			},
 			{
 				"commentId": 6,
 				"postId":    "post1",
 				"username":  "username2",
 				"content": "o meu comentario 2",
-				"createdAt": "` + timeNowString + `"
+				"createdAt": "` + timeNowString + `",
+				"updatedAt": "` + timeNowString + `"
 			},
 			{
 				"commentId": 7,
 				"postId":    "post1",
 				"username":  "username1",
 				"content": "o meu comentario 3",
-				"createdAt": "` + timeNowString + `"
+				"createdAt": "` + timeNowString + `",
+				"updatedAt": "` + timeNowString + `"
 			}
 			],
 			"lastCommentId":7

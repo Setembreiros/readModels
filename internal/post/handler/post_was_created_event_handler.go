@@ -2,11 +2,14 @@ package post_handler
 
 import (
 	common_data "readmodels/internal/common/data"
+	"readmodels/internal/model"
 	"readmodels/internal/post"
 	"time"
 
 	"github.com/rs/zerolog/log"
 )
+
+//go:generate mockgen -source=post_was_created_event_handler.go -destination=mock/post_was_created_event_handler.go
 
 type Metadata struct {
 	Username    string `json:"username"`
@@ -30,9 +33,9 @@ type PostWasCreatedEventHandler struct {
 	service PostWasCreatedEventService
 }
 
-func NewPostWasCreatedEventHandler(repository post.Repository) *PostWasCreatedEventHandler {
+func NewPostWasCreatedEventHandler(service PostWasCreatedEventService) *PostWasCreatedEventHandler {
 	return &PostWasCreatedEventHandler{
-		service: post.NewPostService(repository),
+		service: service,
 	}
 }
 
@@ -55,13 +58,12 @@ func (handler *PostWasCreatedEventHandler) Handle(event []byte) {
 }
 
 func mapData(event PostWasCreatedEvent) (*post.PostMetadata, error) {
-	layout := "2006-01-02T15:04:05.000000000Z"
-	parsedCreatedAt, err := time.Parse(layout, event.Metadata.CreatedAt)
+	parsedCreatedAt, err := time.Parse(model.TimeLayout, event.Metadata.CreatedAt)
 	if err != nil {
 		log.Error().Stack().Err(err).Msg("Error parsing time CreatedAt")
 		return nil, err
 	}
-	parsedLastUpdatedAt, err := time.Parse(layout, event.Metadata.LastUpdated)
+	parsedLastUpdatedAt, err := time.Parse(model.TimeLayout, event.Metadata.LastUpdated)
 
 	if err != nil {
 		log.Error().Stack().Err(err).Msg("Error parsing time LastUpdated")

@@ -120,6 +120,21 @@ func (mr *MockDatabaseClientMockRecorder) GetMultipleData(tableName, keys, resul
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMultipleData", reflect.TypeOf((*MockDatabaseClient)(nil).GetMultipleData), tableName, keys, results)
 }
 
+// GetPostIdFromComment mocks base method.
+func (m *MockDatabaseClient) GetPostIdFromComment(commentId uint64) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPostIdFromComment", commentId)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPostIdFromComment indicates an expected call of GetPostIdFromComment.
+func (mr *MockDatabaseClientMockRecorder) GetPostIdFromComment(commentId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPostIdFromComment", reflect.TypeOf((*MockDatabaseClient)(nil).GetPostIdFromComment), commentId)
+}
+
 // GetPostsByIndexUser mocks base method.
 func (m *MockDatabaseClient) GetPostsByIndexUser(username, lastPostId, lastPostCreatedAt string, limit int) ([]*database.PostMetadata, string, string, error) {
 	m.ctrl.T.Helper()
@@ -165,18 +180,32 @@ func (mr *MockDatabaseClientMockRecorder) InsertData(tableName, attributes inter
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertData", reflect.TypeOf((*MockDatabaseClient)(nil).InsertData), tableName, attributes)
 }
 
-// RemoveData mocks base method.
-func (m *MockDatabaseClient) RemoveData(tableName string, key any) error {
+// InsertDataAndIncreaseCounter mocks base method.
+func (m *MockDatabaseClient) InsertDataAndIncreaseCounter(tableName string, attributes any, counterTableName string, counterKey any, counterFieldName string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RemoveData", tableName, key)
+	ret := m.ctrl.Call(m, "InsertDataAndIncreaseCounter", tableName, attributes, counterTableName, counterKey, counterFieldName)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// RemoveData indicates an expected call of RemoveData.
-func (mr *MockDatabaseClientMockRecorder) RemoveData(tableName, key interface{}) *gomock.Call {
+// InsertDataAndIncreaseCounter indicates an expected call of InsertDataAndIncreaseCounter.
+func (mr *MockDatabaseClientMockRecorder) InsertDataAndIncreaseCounter(tableName, attributes, counterTableName, counterKey, counterFieldName interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveData", reflect.TypeOf((*MockDatabaseClient)(nil).RemoveData), tableName, key)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertDataAndIncreaseCounter", reflect.TypeOf((*MockDatabaseClient)(nil).InsertDataAndIncreaseCounter), tableName, attributes, counterTableName, counterKey, counterFieldName)
+}
+
+// RemoveDataAndDecreaseCounter mocks base method.
+func (m *MockDatabaseClient) RemoveDataAndDecreaseCounter(tableName string, key any, counterTableName string, counterKey any, counterFieldName string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RemoveDataAndDecreaseCounter", tableName, key, counterTableName, counterKey, counterFieldName)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RemoveDataAndDecreaseCounter indicates an expected call of RemoveDataAndDecreaseCounter.
+func (mr *MockDatabaseClientMockRecorder) RemoveDataAndDecreaseCounter(tableName, key, counterTableName, counterKey, counterFieldName interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveDataAndDecreaseCounter", reflect.TypeOf((*MockDatabaseClient)(nil).RemoveDataAndDecreaseCounter), tableName, key, counterTableName, counterKey, counterFieldName)
 }
 
 // RemoveMultipleData mocks base method.
