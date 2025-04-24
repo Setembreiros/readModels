@@ -27,3 +27,8 @@ type PostMetadata struct {
 type CommentKey struct {
 	CommentId uint64
 }
+
+type LikePostKey struct {
+	PostId   string
+	Username string
+}
