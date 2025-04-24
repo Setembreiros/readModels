@@ -20,7 +20,7 @@ type ControllerService interface {
 }
 
 type GetPostLikeMetadataResponse struct {
-	Users        []*model.UserMetadata `json:"users"`
+	Users        []*model.UserMetadata `json:"postLikes"`
 	LastUsername string                `json:"lastUsername"`
 }
 

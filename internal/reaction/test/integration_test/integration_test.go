@@ -154,22 +154,22 @@ func TestGetPostLikesMetadata_WhenDatabaseReturnsSuccess(t *testing.T) {
 			"postLikes":[	
 			{
 				"username":  "username3",
-				"name": 	 "fullname3",
+				"name": 	 "fullname3"
 			},		
 			{
 				"username":  "username4",
-				"name": 	 "fullname4",
+				"name": 	 "fullname4"
 			},		
 			{
 				"username":  "username5",
-				"name": 	 "fullname5",
+				"name": 	 "fullname5"
 			},		
 			{
 				"username":  "username6",
-				"name": 	 "fullname6",
-			},	
+				"name": 	 "fullname6"
+			}
 			],
-			"lastCommentId":"username6"
+			"lastUsername":"username6"
 		}
 	}`
 
@@ -179,7 +179,7 @@ func TestGetPostLikesMetadata_WhenDatabaseReturnsSuccess(t *testing.T) {
 	integration_test_assert.AssertCachedPostLikesExists(t, cache, postId, lastUsername, limit, expectedPostLikes)
 }
 
-func TestGetCommentsByPostId_WhenCacheReturnsSuccess(t *testing.T) {
+func TestGetPostLikesMetadata_WhenCacheReturnsSuccess(t *testing.T) {
 	setUp(t)
 	defer tearDown()
 	postId := "post1"
@@ -216,22 +216,22 @@ func TestGetCommentsByPostId_WhenCacheReturnsSuccess(t *testing.T) {
 			"postLikes":[	
 			{
 				"username":  "username3",
-				"name": 	 "fullname3",
+				"name": 	 "fullname3"
 			},		
 			{
 				"username":  "username4",
-				"name": 	 "fullname4",
+				"name": 	 "fullname4"
 			},		
 			{
 				"username":  "username5",
-				"name": 	 "fullname5",
+				"name": 	 "fullname5"
 			},		
 			{
 				"username":  "username6",
-				"name": 	 "fullname6",
-			},	
+				"name": 	 "fullname6"
+			}
 			],
-			"lastCommentId":"username6"
+			"lastUsername":"username6"
 		}
 	}`
 

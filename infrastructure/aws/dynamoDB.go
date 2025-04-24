@@ -674,7 +674,7 @@ func (dc *DynamoDBClient) GetPostLikesByIndexPostId(postID string, lastUsername 
 	if lastUsername != "" {
 		input.ExclusiveStartKey = map[string]types.AttributeValue{
 			"PostId":   &types.AttributeValueMemberS{Value: postID},
-			"Username": &types.AttributeValueMemberN{Value: lastUsername},
+			"Username": &types.AttributeValueMemberS{Value: lastUsername},
 		}
 	}
 

@@ -53,7 +53,7 @@ func TestGetPostLikesMetadataWithController_WhenSuccess(t *testing.T) {
 		"error": false,
 		"message": "200 OK",
 		"content": {
-			"users":[	
+			"postLikes":[	
 			{
 					"username":  "username1",
 					"name":  "fullname1"
@@ -103,7 +103,7 @@ func TestGetGetPostLikesMetadataWithController_WhenSuccessWithDefaultPaginationP
 		"error": false,
 		"message": "200 OK",
 		"content": {
-			"users":[	
+			"postLikes":[	
 			{
 					"username":  "username1",
 					"name":  "fullname1"
