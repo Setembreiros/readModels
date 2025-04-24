@@ -100,3 +100,80 @@ func TestInternalServerErrorOnGetFollowersMetadata(t *testing.T) {
 	assert.Equal(t, apiResponse.Code, 500)
 	assert.Equal(t, removeSpace(apiResponse.Body.String()), removeSpace(expectedBodyResponse))
 }
+
+func TestGetFolloweesMetadata(t *testing.T) {
+	setUpController(t)
+	ginContext.Request, _ = http.NewRequest("GET", "/followees", nil)
+	followeeId1 := "USERA"
+	followeeId2 := "USERB"
+	followeeId3 := "USERC"
+	u := url.Values{}
+	u.Add("followeeId", followeeId1)
+	u.Add("followeeId", followeeId2)
+	u.Add("followeeId", followeeId3)
+	ginContext.Request.URL.RawQuery = u.Encode()
+	expectedData := &[]follow.FolloweeMetadata{
+		{
+			Username: followeeId1,
+			Name:     "fullname1",
+		},
+		{
+			Username: followeeId2,
+			Name:     "fullname2",
+		},
+		{
+			Username: followeeId3,
+			Name:     "fullname3",
+		},
+	}
+	repository.EXPECT().GetFolloweesMetadata([]string{followeeId1, followeeId2, followeeId3}).Return(expectedData, nil)
+	expectedBodyResponse := `{
+		"error": false,
+		"message": "200 OK",
+		"content": {"followees":[
+		{
+			"username":      "` + followeeId1 + `",
+			"fullname":   "` + (*expectedData)[0].Name + `"
+		},
+		{
+			"username":      "` + followeeId2 + `",
+			"fullname":   "` + (*expectedData)[1].Name + `"
+		},
+		{
+			"username":      "` + followeeId3 + `",
+			"fullname":   "` + (*expectedData)[2].Name + `"
+		}
+		]}
+	}`
+
+	controller.GetFolloweesMetadata(ginContext)
+
+	assert.Equal(t, apiResponse.Code, 200)
+	assert.Equal(t, removeSpace(apiResponse.Body.String()), removeSpace(expectedBodyResponse))
+}
+
+func TestInternalServerErrorOnGetFolloweesMetadata(t *testing.T) {
+	setUpController(t)
+	ginContext.Request, _ = http.NewRequest("GET", "/followees", nil)
+	followeeId1 := "USERA"
+	followeeId2 := "USERB"
+	followeeId3 := "USERC"
+	u := url.Values{}
+	u.Add("followeeId", followeeId1)
+	u.Add("followeeId", followeeId2)
+	u.Add("followeeId", followeeId3)
+	ginContext.Request.URL.RawQuery = u.Encode()
+	expectedData := &[]follow.FolloweeMetadata{}
+	expectedError := errors.New("some error")
+	repository.EXPECT().GetFolloweesMetadata([]string{followeeId1, followeeId2, followeeId3}).Return(expectedData, expectedError)
+	expectedBodyResponse := `{
+		"error": true,
+		"message": "` + expectedError.Error() + `",
+		"content":null
+	}`
+
+	controller.GetFolloweesMetadata(ginContext)
+
+	assert.Equal(t, apiResponse.Code, 500)
+	assert.Equal(t, removeSpace(apiResponse.Body.String()), removeSpace(expectedBodyResponse))
+}
