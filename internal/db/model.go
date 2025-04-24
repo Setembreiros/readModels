@@ -29,12 +29,24 @@ type CommentKey struct {
 	CommentId uint64
 }
 
-type LikePostKey struct {
+type PostLikeKey struct {
 	PostId   string
 	Username string
 }
 
-type SuperlikePostKey struct {
+type PostLikeMetadata struct {
 	PostId   string
 	Username string
+	Name     string
+}
+
+type PostSuperlikeKey struct {
+	PostId   string
+	Username string
+}
+
+type PostSuperlikeMetadata struct {
+	PostId   string
+	Username string
+	Name     string
 }

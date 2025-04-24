@@ -34,14 +34,14 @@ func (m *MockUserUnlikedPostEventService) EXPECT() *MockUserUnlikedPostEventServ
 	return m.recorder
 }
 
-// DeleteLikePost mocks base method.
-func (m *MockUserUnlikedPostEventService) DeleteLikePost(data *model.LikePost) {
+// DeletePostLike mocks base method.
+func (m *MockUserUnlikedPostEventService) DeletePostLike(data *model.PostLike) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "DeleteLikePost", data)
+	m.ctrl.Call(m, "DeletePostLike", data)
 }
 
-// DeleteLikePost indicates an expected call of DeleteLikePost.
-func (mr *MockUserUnlikedPostEventServiceMockRecorder) DeleteLikePost(data interface{}) *gomock.Call {
+// DeletePostLike indicates an expected call of DeletePostLike.
+func (mr *MockUserUnlikedPostEventServiceMockRecorder) DeletePostLike(data interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteLikePost", reflect.TypeOf((*MockUserUnlikedPostEventService)(nil).DeleteLikePost), data)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeletePostLike", reflect.TypeOf((*MockUserUnlikedPostEventService)(nil).DeletePostLike), data)
 }

@@ -34,14 +34,14 @@ func (m *MockUserSuperlikedPostEventService) EXPECT() *MockUserSuperlikedPostEve
 	return m.recorder
 }
 
-// CreateSuperlikePost mocks base method.
-func (m *MockUserSuperlikedPostEventService) CreateSuperlikePost(data *model.SuperlikePost) {
+// CreatePostSuperlike mocks base method.
+func (m *MockUserSuperlikedPostEventService) CreatePostSuperlike(data *model.PostSuperlike) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "CreateSuperlikePost", data)
+	m.ctrl.Call(m, "CreatePostSuperlike", data)
 }
 
-// CreateSuperlikePost indicates an expected call of CreateSuperlikePost.
-func (mr *MockUserSuperlikedPostEventServiceMockRecorder) CreateSuperlikePost(data interface{}) *gomock.Call {
+// CreatePostSuperlike indicates an expected call of CreatePostSuperlike.
+func (mr *MockUserSuperlikedPostEventServiceMockRecorder) CreatePostSuperlike(data interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSuperlikePost", reflect.TypeOf((*MockUserSuperlikedPostEventService)(nil).CreateSuperlikePost), data)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreatePostSuperlike", reflect.TypeOf((*MockUserSuperlikedPostEventService)(nil).CreatePostSuperlike), data)
 }

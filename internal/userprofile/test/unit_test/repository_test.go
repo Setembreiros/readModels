@@ -3,6 +3,7 @@ package userprofile_test
 import (
 	database "readmodels/internal/db"
 	mock_database "readmodels/internal/db/test/mock"
+	"readmodels/internal/model"
 	"readmodels/internal/userprofile"
 	"testing"
 
@@ -20,7 +21,7 @@ func setUp(t *testing.T) {
 
 func TestAddNewUserProfileInRepository(t *testing.T) {
 	setUp(t)
-	data := &userprofile.UserProfile{
+	data := &model.UserProfile{
 		Username: "username1",
 		Name:     "user name",
 		Bio:      "",
@@ -37,7 +38,7 @@ func TestUpdateUserProfileInRepository(t *testing.T) {
 	expectedUserProfileKey := &database.UserProfileKey{
 		Username: username,
 	}
-	data := &userprofile.UserProfile{
+	data := &model.UserProfile{
 		Username: username,
 		Name:     "user name",
 		Bio:      "O mellor usuario do mundo",
@@ -56,7 +57,7 @@ func TestUpdateUserProfileInRepository(t *testing.T) {
 func TestGetUserProfileFromRepository(t *testing.T) {
 	setUp(t)
 	username := "username1"
-	var userProfile userprofile.UserProfile
+	var userProfile model.UserProfile
 	expectedUserProfileKey := &database.UserProfileKey{
 		Username: username,
 	}

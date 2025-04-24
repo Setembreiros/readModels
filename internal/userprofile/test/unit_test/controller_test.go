@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http/httptest"
 	database "readmodels/internal/db"
+	"readmodels/internal/model"
 	"readmodels/internal/userprofile"
 	mock_userprofile "readmodels/internal/userprofile/test/mock"
 	"strings"
@@ -36,7 +37,7 @@ func TestGetUserProfile(t *testing.T) {
 	setUpHandler(t)
 	username := "username1"
 	ginContext.Params = []gin.Param{{Key: "username", Value: username}}
-	data := &userprofile.UserProfile{
+	data := &model.UserProfile{
 		Username:  "username1",
 		Name:      "user name",
 		Bio:       "",
@@ -68,7 +69,7 @@ func TestUserNotFoundOnGetUserProfile(t *testing.T) {
 	setUpHandler(t)
 	noExistingUsername := "noExistingUsername"
 	ginContext.Params = []gin.Param{{Key: "username", Value: noExistingUsername}}
-	expectedData := &userprofile.UserProfile{
+	expectedData := &model.UserProfile{
 		Username:  "",
 		Name:      "",
 		Bio:       "",
@@ -94,7 +95,7 @@ func TestInternalServerErrorOnGetUserProfile(t *testing.T) {
 	setUpHandler(t)
 	username := "username1"
 	ginContext.Params = []gin.Param{{Key: "username", Value: username}}
-	expectedData := &userprofile.UserProfile{
+	expectedData := &model.UserProfile{
 		Username:  "",
 		Name:      "",
 		Bio:       "",

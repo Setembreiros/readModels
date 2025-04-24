@@ -15,7 +15,7 @@ type UserLikedPostEvent struct {
 }
 
 type UserLikedPostEventService interface {
-	CreateLikePost(data *model.LikePost)
+	CreatePostLike(data *model.PostLike)
 }
 
 type UserLikedPostEventHandler struct {
@@ -43,12 +43,14 @@ func (handler *UserLikedPostEventHandler) Handle(event []byte) {
 		return
 	}
 
-	handler.service.CreateLikePost(data)
+	handler.service.CreatePostLike(data)
 }
 
-func mapUserLikedPostEvent(event UserLikedPostEvent) (*model.LikePost, error) {
-	return &model.LikePost{
-		Username: event.Username,
-		PostId:   event.PostId,
+func mapUserLikedPostEvent(event UserLikedPostEvent) (*model.PostLike, error) {
+	return &model.PostLike{
+		User: &model.UserMetadata{
+			Username: event.Username,
+		},
+		PostId: event.PostId,
 	}, nil
 }

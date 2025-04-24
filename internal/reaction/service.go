@@ -9,10 +9,11 @@ import (
 //go:generate mockgen -source=service.go -destination=test/mock/service.go
 
 type Repository interface {
-	CreateLikePost(data *model.LikePost) error
-	CreateSuperlikePost(data *model.SuperlikePost) error
-	DeleteLikePost(data *model.LikePost) error
-	DeleteSuperlikePost(data *model.SuperlikePost) error
+	CreatePostLike(data *model.PostLike) error
+	CreatePostSuperlike(data *model.PostSuperlike) error
+	GetPostLikesMetadata(postId, lastUsername string, limit int) ([]*model.UserMetadata, string, error)
+	DeletePostLike(data *model.PostLike) error
+	DeletePostSuperlike(data *model.PostSuperlike) error
 }
 
 type ReactionService struct {
@@ -25,42 +26,52 @@ func NewReactionService(repository Repository) *ReactionService {
 	}
 }
 
-func (s *ReactionService) CreateLikePost(data *model.LikePost) {
-	err := s.repository.CreateLikePost(data)
+func (s *ReactionService) CreatePostLike(data *model.PostLike) {
+	err := s.repository.CreatePostLike(data)
 	if err != nil {
-		log.Error().Stack().Err(err).Msgf("Error creating likePost, username: %s -> postId: %s", data.Username, data.PostId)
+		log.Error().Stack().Err(err).Msgf("Error creating postLike, username: %s -> postId: %s", data.User.Username, data.PostId)
 		return
 	}
 
-	log.Info().Msgf("LikePost was created, username: %s -> postId: %s", data.Username, data.PostId)
+	log.Info().Msgf("PostLike was created, username: %s -> postId: %s", data.User.Username, data.PostId)
 }
 
-func (s *ReactionService) CreateSuperlikePost(data *model.SuperlikePost) {
-	err := s.repository.CreateSuperlikePost(data)
+func (s *ReactionService) CreatePostSuperlike(data *model.PostSuperlike) {
+	err := s.repository.CreatePostSuperlike(data)
 	if err != nil {
-		log.Error().Stack().Err(err).Msgf("Error creating superlikePost, username: %s -> postId: %s", data.Username, data.PostId)
+		log.Error().Stack().Err(err).Msgf("Error creating postSuperlike, username: %s -> postId: %s", data.User.Username, data.PostId)
 		return
 	}
 
-	log.Info().Msgf("SuperlikePost was created, username: %s -> postId: %s", data.Username, data.PostId)
+	log.Info().Msgf("PostSuperlike was created, username: %s -> postId: %s", data.User.Username, data.PostId)
 }
 
-func (s *ReactionService) DeleteLikePost(data *model.LikePost) {
-	err := s.repository.DeleteLikePost(data)
+func (s *ReactionService) GetPostLikesMetadata(postId, lastUsername string, limit int) ([]*model.UserMetadata, string, error) {
+	users, lastUsername, err := s.repository.GetPostLikesMetadata(postId, lastUsername, limit)
 	if err != nil {
-		log.Error().Stack().Err(err).Msgf("Error deleting likePost, username: %s -> postId: %s", data.Username, data.PostId)
-		return
+		log.Error().Stack().Err(err).Msgf("Error getting post %s's likes", postId)
+		return users, lastUsername, err
 	}
 
-	log.Info().Msgf("LikePost was deleted, username: %s -> postId: %s", data.Username, data.PostId)
+	return users, lastUsername, nil
 }
 
-func (s *ReactionService) DeleteSuperlikePost(data *model.SuperlikePost) {
-	err := s.repository.DeleteSuperlikePost(data)
+func (s *ReactionService) DeletePostLike(data *model.PostLike) {
+	err := s.repository.DeletePostLike(data)
 	if err != nil {
-		log.Error().Stack().Err(err).Msgf("Error deleting superlikePost, username: %s -> postId: %s", data.Username, data.PostId)
+		log.Error().Stack().Err(err).Msgf("Error deleting postLike, username: %s -> postId: %s", data.User.Username, data.PostId)
 		return
 	}
 
-	log.Info().Msgf("SuperlikePost was deleted, username: %s -> postId: %s", data.Username, data.PostId)
+	log.Info().Msgf("PostLike was deleted, username: %s -> postId: %s", data.User.Username, data.PostId)
+}
+
+func (s *ReactionService) DeletePostSuperlike(data *model.PostSuperlike) {
+	err := s.repository.DeletePostSuperlike(data)
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Error deleting postSuperlike, username: %s -> postId: %s", data.User.Username, data.PostId)
+		return
+	}
+
+	log.Info().Msgf("PostSuperlike was deleted, username: %s -> postId: %s", data.User.Username, data.PostId)
 }

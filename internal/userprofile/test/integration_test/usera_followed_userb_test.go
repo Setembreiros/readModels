@@ -8,6 +8,7 @@ import (
 
 	"readmodels/cmd/provider"
 	database "readmodels/internal/db"
+	"readmodels/internal/model"
 	"readmodels/internal/userprofile"
 	userprofile_handler "readmodels/internal/userprofile/handlers"
 
@@ -36,13 +37,13 @@ func tearDown() {
 func TestHandlingUserAFollowedUserBEvent_WhenItReturnsSuccess(t *testing.T) {
 	setUpUserAFollowedUserBEventHandler(t)
 	defer tearDown()
-	userA := &userprofile.UserProfile{
+	userA := &model.UserProfile{
 		Username: "usernameA",
 		Name:     "user name A",
 		Bio:      "",
 		Link:     "",
 	}
-	userB := &userprofile.UserProfile{
+	userB := &model.UserProfile{
 		Username: "usernameB",
 		Name:     "user name B",
 		Bio:      "",
@@ -62,7 +63,7 @@ func TestHandlingUserAFollowedUserBEvent_WhenItReturnsSuccess(t *testing.T) {
 	assertFolloweesIncreased(t, userA.Username)
 }
 
-func AddUserProfileToDatabase(t *testing.T, user *userprofile.UserProfile) {
+func AddUserProfileToDatabase(t *testing.T, user *model.UserProfile) {
 	err := db.Client.InsertData("UserProfile", user)
 	assert.Nil(t, err)
 }
@@ -84,7 +85,7 @@ func assertFollowersIncreased(t *testing.T, username string) {
 	userProfileKey := &database.UserProfileKey{
 		Username: username,
 	}
-	var userProfile userprofile.UserProfile
+	var userProfile model.UserProfile
 	err := db.Client.GetData("UserProfile", userProfileKey, &userProfile)
 	assert.Nil(t, err)
 	assert.Equal(t, userProfile.Followees, 0)
@@ -95,7 +96,7 @@ func assertFolloweesIncreased(t *testing.T, username string) {
 	userProfileKey := &database.UserProfileKey{
 		Username: username,
 	}
-	var userProfile userprofile.UserProfile
+	var userProfile model.UserProfile
 	err := db.Client.GetData("UserProfile", userProfileKey, &userProfile)
 	assert.Nil(t, err)
 	assert.Equal(t, userProfile.Followers, 0)

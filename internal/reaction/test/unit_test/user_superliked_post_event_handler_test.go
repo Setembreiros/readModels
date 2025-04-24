@@ -26,11 +26,13 @@ func TestHandleUserSuperlikedPostEvent(t *testing.T) {
 		PostId:   "post123",
 	}
 	event, _ := json.Marshal(data)
-	expectedSuperlikePost := &model.SuperlikePost{
-		Username: "user123",
-		PostId:   "post123",
+	expectedPostSuperlike := &model.PostSuperlike{
+		User: &model.UserMetadata{
+			Username: "user123",
+		},
+		PostId: "post123",
 	}
-	userSuperlikedPostEventService.EXPECT().CreateSuperlikePost(expectedSuperlikePost)
+	userSuperlikedPostEventService.EXPECT().CreatePostSuperlike(expectedPostSuperlike)
 
 	userSuperlikedPostEventHandler.Handle(event)
 }

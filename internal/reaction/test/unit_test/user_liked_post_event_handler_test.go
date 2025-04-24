@@ -26,11 +26,13 @@ func TestHandleUserLikedPostEvent(t *testing.T) {
 		PostId:   "post123",
 	}
 	event, _ := json.Marshal(data)
-	expectedLikePost := &model.LikePost{
-		Username: "user123",
-		PostId:   "post123",
+	expectedPostLike := &model.PostLike{
+		User: &model.UserMetadata{
+			Username: "user123",
+		},
+		PostId: "post123",
 	}
-	userLikedPostEventService.EXPECT().CreateLikePost(expectedLikePost)
+	userLikedPostEventService.EXPECT().CreatePostLike(expectedPostLike)
 
 	userLikedPostEventHandler.Handle(event)
 }

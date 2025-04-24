@@ -658,6 +658,56 @@ func (dc *DynamoDBClient) GetCommentsByIndexPostId(postID string, lastCommentId 
 	return results, nextLastCommentId, nil
 }
 
+func (dc *DynamoDBClient) GetPostLikesByIndexPostId(postID string, lastUsername string, limit int) ([]*model.UserMetadata, string, error) {
+	input := &dynamodb.QueryInput{
+		TableName:              aws.String("readmodels.postLikes"),
+		KeyConditionExpression: aws.String("#postId = :postId"),
+		ExpressionAttributeNames: map[string]string{
+			"#postId": "PostId",
+		},
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":postId": &types.AttributeValueMemberS{Value: postID},
+		},
+		Limit: aws.Int32(int32(limit)),
+	}
+
+	if lastUsername != "" {
+		input.ExclusiveStartKey = map[string]types.AttributeValue{
+			"PostId":   &types.AttributeValueMemberS{Value: postID},
+			"Username": &types.AttributeValueMemberS{Value: lastUsername},
+		}
+	}
+
+	response, err := dc.client.Query(context.TODO(), input)
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Couldn't get postLikes for post %s", postID)
+		return nil, "", err
+	}
+
+	var results []*model.UserMetadata
+	for _, item := range response.Items {
+		var result model.UserMetadata
+		err = attributevalue.UnmarshalMap(item, &result)
+		if err != nil {
+			log.Error().Stack().Err(err).Msg("Couldn't unmarshal postLike response")
+			return nil, "", err
+		}
+
+		results = append(results, &result)
+	}
+
+	nextLastUsername := ""
+	if response.LastEvaluatedKey != nil {
+		if val, ok := response.LastEvaluatedKey["Username"]; ok {
+			if username, ok := val.(*types.AttributeValueMemberS); ok {
+				nextLastUsername = username.Value
+			}
+		}
+	}
+
+	return results, nextLastUsername, nil
+}
+
 func mapTableKeys(keys *[]database.TableAttributes) (*[]types.KeySchemaElement, *[]types.AttributeDefinition, error) {
 	var keySchemas []types.KeySchemaElement
 	var attributeDefinitions []types.AttributeDefinition

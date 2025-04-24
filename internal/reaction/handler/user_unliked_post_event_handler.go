@@ -15,7 +15,7 @@ type UserUnlikedPostEvent struct {
 }
 
 type UserUnlikedPostEventService interface {
-	DeleteLikePost(data *model.LikePost)
+	DeletePostLike(data *model.PostLike)
 }
 
 type UserUnlikedPostEventHandler struct {
@@ -43,12 +43,14 @@ func (handler *UserUnlikedPostEventHandler) Handle(event []byte) {
 		return
 	}
 
-	handler.service.DeleteLikePost(data)
+	handler.service.DeletePostLike(data)
 }
 
-func mapUserUnlikedPostEvent(event UserUnlikedPostEvent) (*model.LikePost, error) {
-	return &model.LikePost{
-		Username: event.Username,
-		PostId:   event.PostId,
+func mapUserUnlikedPostEvent(event UserUnlikedPostEvent) (*model.PostLike, error) {
+	return &model.PostLike{
+		User: &model.UserMetadata{
+			Username: event.Username,
+		},
+		PostId: event.PostId,
 	}, nil
 }

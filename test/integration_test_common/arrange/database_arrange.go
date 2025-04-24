@@ -5,7 +5,6 @@ import (
 	"readmodels/cmd/provider"
 	database "readmodels/internal/db"
 	"readmodels/internal/model"
-	"readmodels/internal/userprofile"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -18,13 +17,13 @@ func CreateTestDatabase(t *testing.T, ctx context.Context) *database.Database {
 	return db
 }
 
-func AddUserProfileToDatabase(t *testing.T, db *database.Database, data *userprofile.UserProfile) {
+func AddUserProfileToDatabase(t *testing.T, db *database.Database, data *model.UserProfile) {
 	err := db.Client.InsertData("UserProfile", data)
 	assert.Nil(t, err)
 	userProfileKey := &database.UserProfileKey{
 		Username: data.Username,
 	}
-	var userProfile userprofile.UserProfile
+	var userProfile model.UserProfile
 	err = db.Client.GetData("UserProfile", userProfileKey, &userProfile)
 	assert.Nil(t, err)
 	assert.Equal(t, userProfile.Username, data.Username)
@@ -80,4 +79,19 @@ func AddPostToDatabase(t *testing.T, db *database.Database, data *database.PostM
 	assert.Equal(t, data.Description, post.Description)
 	assert.Equal(t, data.Comments, post.Comments)
 	assert.Equal(t, data.Likes, post.Likes)
+}
+
+func AddPostLikeToDatabase(t *testing.T, db *database.Database, data *database.PostLikeMetadata) {
+	err := db.Client.InsertData("readmodels.postLikes", data)
+	assert.Nil(t, err)
+	likeKey := &database.PostLikeKey{
+		PostId:   data.PostId,
+		Username: data.Username,
+	}
+	var postLike database.PostLikeMetadata
+	err = db.Client.GetData("readmodels.postLikes", likeKey, &postLike)
+	assert.Nil(t, err)
+	assert.Equal(t, postLike.PostId, data.PostId)
+	assert.Equal(t, postLike.Username, data.Username)
+	assert.Equal(t, postLike.Name, data.Name)
 }

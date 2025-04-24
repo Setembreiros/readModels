@@ -1,7 +1,9 @@
 package integration_test_reaction
 
 import (
-	"context"
+	"net/http"
+	"net/http/httptest"
+	"net/url"
 	database "readmodels/internal/db"
 	"readmodels/internal/model"
 	"readmodels/internal/reaction"
@@ -9,23 +11,32 @@ import (
 	integration_test_arrange "readmodels/test/integration_test_common/arrange"
 	integration_test_assert "readmodels/test/integration_test_common/assert"
 	"readmodels/test/test_common"
+	"strconv"
 	"testing"
+
+	"github.com/gin-gonic/gin"
 )
 
 var db *database.Database
 var cache *database.Cache
+var controller *reaction.ReactionController
 var userLikedPostEventHandler *reaction_handler.UserLikedPostEventHandler
 var userSuperlikedPostEventHandler *reaction_handler.UserSuperlikedPostEventHandler
 var userUnlikedPostEventHandler *reaction_handler.UserUnlikedPostEventHandler
 var userUnsuperlikedPostEventHandler *reaction_handler.UserUnsuperlikedPostEventHandler
+var apiResponse *httptest.ResponseRecorder
+var ginContext *gin.Context
 
 func setUp(t *testing.T) {
+	apiResponse = httptest.NewRecorder()
+	ginContext, _ = gin.CreateTestContext(apiResponse)
+
 	// Real infrastructure and services
-	ctx := context.TODO()
-	db = integration_test_arrange.CreateTestDatabase(t, ctx)
-	cache = integration_test_arrange.CreateTestCache(t, ctx)
+	db = integration_test_arrange.CreateTestDatabase(t, ginContext)
+	cache = integration_test_arrange.CreateTestCache(t, ginContext)
 	repository := reaction.NewReactionRepository(db, cache)
 	service := reaction.NewReactionService(repository)
+	controller = reaction.NewReactionController(service)
 	userLikedPostEventHandler = reaction_handler.NewUserLikedPostEventHandler(service)
 	userSuperlikedPostEventHandler = reaction_handler.NewUserSuperlikedPostEventHandler(service)
 	userUnlikedPostEventHandler = reaction_handler.NewUserUnlikedPostEventHandler(service)
@@ -37,7 +48,7 @@ func tearDown() {
 	cache.Client.Clean()
 }
 
-func TestCreateLikePost_WhenDatabaseReturnsSuccess(t *testing.T) {
+func TestCreatePostLike_WhenDatabaseReturnsSuccess(t *testing.T) {
 	setUp(t)
 	defer tearDown()
 	existingPost := &database.PostMetadata{
@@ -46,24 +57,32 @@ func TestCreateLikePost_WhenDatabaseReturnsSuccess(t *testing.T) {
 		Type:     "TEXT",
 		Likes:    0,
 	}
+	existingUserProfile := &model.UserProfile{
+		Username: "user123",
+		Name:     "fullname123",
+	}
 	integration_test_arrange.AddPostToDatabase(t, db, existingPost)
+	integration_test_arrange.AddUserProfileToDatabase(t, db, existingUserProfile)
 	data := &reaction_handler.UserLikedPostEvent{
 		Username: "user123",
 		PostId:   existingPost.PostId,
 	}
 	event, _ := test_common.SerializeData(data)
-	expectedLike := &model.LikePost{
-		Username: data.Username,
-		PostId:   data.PostId,
+	expectedLike := &model.PostLike{
+		User: &model.UserMetadata{
+			Username: data.Username,
+			Name:     existingUserProfile.Name,
+		},
+		PostId: data.PostId,
 	}
 
 	userLikedPostEventHandler.Handle(event)
 
-	integration_test_assert.AssertLikePostExists(t, db, expectedLike)
+	integration_test_assert.AssertPostLikeExists(t, db, expectedLike)
 	integration_test_assert.AssertPostLikesIncreased(t, db, existingPost.PostId)
 }
 
-func TestCreateSuperlikePost_WhenDatabaseReturnsSuccess(t *testing.T) {
+func TestCreatePostSuperlike_WhenDatabaseReturnsSuccess(t *testing.T) {
 	setUp(t)
 	defer tearDown()
 	existingPost := &database.PostMetadata{
@@ -72,24 +91,156 @@ func TestCreateSuperlikePost_WhenDatabaseReturnsSuccess(t *testing.T) {
 		Type:       "TEXT",
 		Superlikes: 0,
 	}
+	existingUserProfile := &model.UserProfile{
+		Username: "user123",
+		Name:     "fullname123",
+	}
 	integration_test_arrange.AddPostToDatabase(t, db, existingPost)
+	integration_test_arrange.AddUserProfileToDatabase(t, db, existingUserProfile)
 	data := &reaction_handler.UserSuperlikedPostEvent{
 		Username: "user123",
 		PostId:   existingPost.PostId,
 	}
 	event, _ := test_common.SerializeData(data)
-	expectedSuperlike := &model.SuperlikePost{
-		Username: data.Username,
-		PostId:   data.PostId,
+	expectedSuperlike := &model.PostSuperlike{
+		User: &model.UserMetadata{
+			Username: data.Username,
+			Name:     existingUserProfile.Name,
+		},
+		PostId: data.PostId,
 	}
 
 	userSuperlikedPostEventHandler.Handle(event)
 
-	integration_test_assert.AssertSuperlikePostExists(t, db, expectedSuperlike)
+	integration_test_assert.AssertPostSuperlikeExists(t, db, expectedSuperlike)
 	integration_test_assert.AssertPostSuperlikesIncreased(t, db, existingPost.PostId)
 }
 
-func TestDeleteLikePost_WhenDatabaseReturnsSuccess(t *testing.T) {
+func TestGetPostLikesMetadata_WhenDatabaseReturnsSuccess(t *testing.T) {
+	setUp(t)
+	defer tearDown()
+	populateDb(t)
+	postId := "post1"
+	lastUsername := "username2"
+	limit := 4
+	ginContext.Request, _ = http.NewRequest("GET", "/postLikes", nil)
+	ginContext.Params = []gin.Param{{Key: "postId", Value: postId}}
+	u := url.Values{}
+	u.Add("lastUsername", lastUsername)
+	u.Add("limit", strconv.Itoa(limit))
+	ginContext.Request.URL.RawQuery = u.Encode()
+	expectedPostLikes := []*model.UserMetadata{
+		{
+			Username: "username3",
+			Name:     "fullname3",
+		},
+		{
+			Username: "username4",
+			Name:     "fullname4",
+		},
+		{
+			Username: "username5",
+			Name:     "fullname5",
+		},
+		{
+			Username: "username6",
+			Name:     "fullname6",
+		},
+	}
+	expectedBodyResponse := `{
+		"error": false,
+		"message": "200 OK",
+		"content": {
+			"postLikes":[	
+			{
+				"username":  "username3",
+				"name": 	 "fullname3"
+			},		
+			{
+				"username":  "username4",
+				"name": 	 "fullname4"
+			},		
+			{
+				"username":  "username5",
+				"name": 	 "fullname5"
+			},		
+			{
+				"username":  "username6",
+				"name": 	 "fullname6"
+			}
+			],
+			"lastUsername":"username6"
+		}
+	}`
+
+	controller.GetPostLikesMetadata(ginContext)
+
+	integration_test_assert.AssertSuccessResult(t, apiResponse, expectedBodyResponse)
+	integration_test_assert.AssertCachedPostLikesExists(t, cache, postId, lastUsername, limit, expectedPostLikes)
+}
+
+func TestGetPostLikesMetadata_WhenCacheReturnsSuccess(t *testing.T) {
+	setUp(t)
+	defer tearDown()
+	postId := "post1"
+	lastUsername := "username2"
+	limit := 4
+	populateCache(t, postId, lastUsername, limit, []*model.UserMetadata{
+		{
+			Username: "username3",
+			Name:     "fullname3",
+		},
+		{
+			Username: "username4",
+			Name:     "fullname4",
+		},
+		{
+			Username: "username5",
+			Name:     "fullname5",
+		},
+		{
+			Username: "username6",
+			Name:     "fullname6",
+		},
+	})
+	ginContext.Request, _ = http.NewRequest("GET", "/postLikes", nil)
+	ginContext.Params = []gin.Param{{Key: "postId", Value: postId}}
+	u := url.Values{}
+	u.Add("lastUsername", lastUsername)
+	u.Add("limit", strconv.Itoa(limit))
+	ginContext.Request.URL.RawQuery = u.Encode()
+	expectedBodyResponse := `{
+		"error": false,
+		"message": "200 OK",
+		"content": {
+			"postLikes":[	
+			{
+				"username":  "username3",
+				"name": 	 "fullname3"
+			},		
+			{
+				"username":  "username4",
+				"name": 	 "fullname4"
+			},		
+			{
+				"username":  "username5",
+				"name": 	 "fullname5"
+			},		
+			{
+				"username":  "username6",
+				"name": 	 "fullname6"
+			}
+			],
+			"lastUsername":"username6"
+		}
+	}`
+
+	controller.GetPostLikesMetadata(ginContext)
+
+	integration_test_assert.AssertSuccessResult(t, apiResponse, expectedBodyResponse)
+}
+
+func TestDeletePostLike_WhenDatabaseReturnsSuccess(t *testing.T) {
 	setUp(t)
 	defer tearDown()
 	existingPost := &database.PostMetadata{
@@ -104,18 +255,20 @@ func TestDeleteLikePost_WhenDatabaseReturnsSuccess(t *testing.T) {
 		PostId:   existingPost.PostId,
 	}
 	event, _ := test_common.SerializeData(data)
-	expectedLike := &model.LikePost{
-		Username: data.Username,
-		PostId:   data.PostId,
+	expectedLike := &model.PostLike{
+		User: &model.UserMetadata{
+			Username: data.Username,
+		},
+		PostId: data.PostId,
 	}
 
 	userUnlikedPostEventHandler.Handle(event)
 
-	integration_test_assert.AssertLikePostDoesNotExists(t, db, expectedLike)
+	integration_test_assert.AssertPostLikeDoesNotExists(t, db, expectedLike)
 	integration_test_assert.AssertPostLikesDecreased(t, db, existingPost.PostId)
 }
 
-func TestDeleteSuperlikePost_WhenDatabaseReturnsSuccess(t *testing.T) {
+func TestDeletePostSuperlike_WhenDatabaseReturnsSuccess(t *testing.T) {
 	setUp(t)
 	defer tearDown()
 	existingPost := &database.PostMetadata{
@@ -130,13 +283,88 @@ func TestDeleteSuperlikePost_WhenDatabaseReturnsSuccess(t *testing.T) {
 		PostId:   existingPost.PostId,
 	}
 	event, _ := test_common.SerializeData(data)
-	expectedSuperlike := &model.SuperlikePost{
-		Username: data.Username,
-		PostId:   data.PostId,
+	expectedSuperlike := &model.PostSuperlike{
+		User: &model.UserMetadata{
+			Username: data.Username,
+		},
+		PostId: data.PostId,
 	}
 
 	userUnsuperlikedPostEventHandler.Handle(event)
 
-	integration_test_assert.AssertSuperlikePostDoesNotExists(t, db, expectedSuperlike)
+	integration_test_assert.AssertPostSuperlikeDoesNotExists(t, db, expectedSuperlike)
 	integration_test_assert.AssertPostSuperlikesDecreased(t, db, existingPost.PostId)
+}
+
+func populateDb(t *testing.T) {
+	existingPostLikes := []*database.PostLikeMetadata{
+		{
+			PostId:   "post1",
+			Username: "username1",
+			Name:     "fullname1",
+		},
+		{
+			PostId:   "post2",
+			Username: "username1",
+			Name:     "fullname1",
+		},
+		{
+			PostId:   "post3",
+			Username: "username1",
+			Name:     "fullname1",
+		},
+		{
+			PostId:   "post1",
+			Username: "username2",
+			Name:     "fullname2",
+		},
+		{
+			PostId:   "post1",
+			Username: "username3",
+			Name:     "fullname3",
+		},
+		{
+			PostId:   "post2",
+			Username: "username1",
+			Name:     "fullname1",
+		},
+		{
+			PostId:   "post2",
+			Username: "username1",
+			Name:     "fullname1",
+		},
+		{
+			PostId:   "post1",
+			Username: "username4",
+			Name:     "fullname4",
+		},
+		{
+			PostId:   "post1",
+			Username: "username5",
+			Name:     "fullname5",
+		},
+		{
+			PostId:   "post3",
+			Username: "username1",
+			Name:     "fullname1",
+		},
+		{
+			PostId:   "post1",
+			Username: "username6",
+			Name:     "fullname6",
+		},
+		{
+			PostId:   "post1",
+			Username: "username7",
+			Name:     "fullname7",
+		},
+	}
+
+	for _, existingPostLike := range existingPostLikes {
+		integration_test_arrange.AddPostLikeToDatabase(t, db, existingPostLike)
+	}
+}
+
+func populateCache(t *testing.T, postId string, lastUsername string, limit int, postLikes []*model.UserMetadata) {
+	integration_test_arrange.AddCachedPostLikesToCache(t, cache, postId, lastUsername, limit, postLikes)
 }

@@ -34,14 +34,14 @@ func (m *MockUserUnsuperlikedPostEventService) EXPECT() *MockUserUnsuperlikedPos
 	return m.recorder
 }
 
-// DeleteSuperlikePost mocks base method.
-func (m *MockUserUnsuperlikedPostEventService) DeleteSuperlikePost(data *model.SuperlikePost) {
+// DeletePostSuperlike mocks base method.
+func (m *MockUserUnsuperlikedPostEventService) DeletePostSuperlike(data *model.PostSuperlike) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "DeleteSuperlikePost", data)
+	m.ctrl.Call(m, "DeletePostSuperlike", data)
 }
 
-// DeleteSuperlikePost indicates an expected call of DeleteSuperlikePost.
-func (mr *MockUserUnsuperlikedPostEventServiceMockRecorder) DeleteSuperlikePost(data interface{}) *gomock.Call {
+// DeletePostSuperlike indicates an expected call of DeletePostSuperlike.
+func (mr *MockUserUnsuperlikedPostEventServiceMockRecorder) DeletePostSuperlike(data interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSuperlikePost", reflect.TypeOf((*MockUserUnsuperlikedPostEventService)(nil).DeleteSuperlikePost), data)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeletePostSuperlike", reflect.TypeOf((*MockUserUnsuperlikedPostEventService)(nil).DeletePostSuperlike), data)
 }

@@ -5,7 +5,7 @@
 package mock_userprofile
 
 import (
-	userprofile "readmodels/internal/userprofile"
+	model "readmodels/internal/model"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -35,7 +35,7 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 }
 
 // AddNewUserProfile mocks base method.
-func (m *MockRepository) AddNewUserProfile(data *userprofile.UserProfile) error {
+func (m *MockRepository) AddNewUserProfile(data *model.UserProfile) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AddNewUserProfile", data)
 	ret0, _ := ret[0].(error)
@@ -77,10 +77,10 @@ func (mr *MockRepositoryMockRecorder) DecreaseFollowers(username interface{}) *g
 }
 
 // GetUserProfile mocks base method.
-func (m *MockRepository) GetUserProfile(username string) (*userprofile.UserProfile, error) {
+func (m *MockRepository) GetUserProfile(username string) (*model.UserProfile, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserProfile", username)
-	ret0, _ := ret[0].(*userprofile.UserProfile)
+	ret0, _ := ret[0].(*model.UserProfile)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -120,7 +120,7 @@ func (mr *MockRepositoryMockRecorder) IncreaseFollowers(username interface{}) *g
 }
 
 // UpdateUserProfile mocks base method.
-func (m *MockRepository) UpdateUserProfile(data *userprofile.UserProfile) error {
+func (m *MockRepository) UpdateUserProfile(data *model.UserProfile) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateUserProfile", data)
 	ret0, _ := ret[0].(error)

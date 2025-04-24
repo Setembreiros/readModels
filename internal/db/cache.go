@@ -11,7 +11,9 @@ type Cache struct {
 type CacheClient interface {
 	Clean()
 	SetPostComments(postId string, lastCommentId uint64, limit int, comments []*model.Comment)
+	SetPostLikes(postId string, lastUsername string, limit int, postLikes []*model.UserMetadata)
 	GetPostComments(postId string, lastCommentId uint64, limit int) ([]*model.Comment, uint64, bool)
+	GetPostLikes(postId string, lastUsername string, limit int) ([]*model.UserMetadata, string, bool)
 }
 
 func NewCache(client CacheClient) *Cache {

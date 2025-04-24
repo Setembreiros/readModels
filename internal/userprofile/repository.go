@@ -1,24 +1,27 @@
 package userprofile
 
-import database "readmodels/internal/db"
+import (
+	database "readmodels/internal/db"
+	"readmodels/internal/model"
+)
 
 type UserProfileRepository database.Database
 
-func (r UserProfileRepository) GetUserProfile(username string) (*UserProfile, error) {
+func (r UserProfileRepository) GetUserProfile(username string) (*model.UserProfile, error) {
 	userProfileKey := &database.UserProfileKey{
 		Username: username,
 	}
-	var userProfile UserProfile
+	var userProfile model.UserProfile
 	err := r.Client.GetData("UserProfile", userProfileKey, &userProfile)
 
 	return &userProfile, err
 }
 
-func (r UserProfileRepository) AddNewUserProfile(data *UserProfile) error {
+func (r UserProfileRepository) AddNewUserProfile(data *model.UserProfile) error {
 	return r.Client.InsertData("UserProfile", data)
 }
 
-func (r UserProfileRepository) UpdateUserProfile(data *UserProfile) error {
+func (r UserProfileRepository) UpdateUserProfile(data *model.UserProfile) error {
 	userProfileKey := &database.UserProfileKey{
 		Username: data.Username,
 	}
