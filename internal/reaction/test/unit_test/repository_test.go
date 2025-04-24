@@ -32,6 +32,22 @@ func TestCreateLikePostInRepository(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+func TestCreateSuperlikePostInRepository(t *testing.T) {
+	setUpRepository(t)
+	data := &model.SuperlikePost{
+		Username: "user123",
+		PostId:   "post123",
+	}
+	expectedPostKey := &database.PostMetadataKey{
+		PostId: data.PostId,
+	}
+	client.EXPECT().InsertDataAndIncreaseCounter("readmodels.superlikePosts", data, "PostMetadata", expectedPostKey, "Superlikes").Return(nil)
+
+	err := reactionRepository.CreateSuperlikePost(data)
+
+	assert.Nil(t, err)
+}
+
 func TestDeleteLikePostInRepository(t *testing.T) {
 	setUpRepository(t)
 	data := &model.LikePost{

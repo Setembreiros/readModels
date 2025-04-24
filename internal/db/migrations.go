@@ -108,5 +108,22 @@ func (db *Database) ApplyMigrations(ctx context.Context) error {
 		}
 	}
 
+	if !db.Client.TableExists("readmodels.superlikePosts") {
+		keys := []TableAttributes{
+			{
+				Name:          "PostId",
+				AttributeType: "string",
+			},
+			{
+				Name:          "Username",
+				AttributeType: "string",
+			},
+		}
+		err := db.Client.CreateTable("readmodels.superlikePosts", &keys, ctx)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }

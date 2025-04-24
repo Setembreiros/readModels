@@ -29,7 +29,7 @@ func TestCreateLikePostWithService(t *testing.T) {
 
 	reactionService.CreateLikePost(data)
 
-	assert.Contains(t, loggerOutput.String(), "Like was created, username: user123 -> postId: post123")
+	assert.Contains(t, loggerOutput.String(), "LikePost was created, username: user123 -> postId: post123")
 }
 
 func TestErrorOnCreateLikePostWithService(t *testing.T) {
@@ -42,7 +42,33 @@ func TestErrorOnCreateLikePostWithService(t *testing.T) {
 
 	reactionService.CreateLikePost(data)
 
-	assert.Contains(t, loggerOutput.String(), "Error creating like, username: user123 -> postId: post123")
+	assert.Contains(t, loggerOutput.String(), "Error creating likePost, username: user123 -> postId: post123")
+}
+
+func TestCreateSuperlikePostWithService(t *testing.T) {
+	setUpService(t)
+	data := &model.SuperlikePost{
+		Username: "user123",
+		PostId:   "post123",
+	}
+	repositoryService.EXPECT().CreateSuperlikePost(data)
+
+	reactionService.CreateSuperlikePost(data)
+
+	assert.Contains(t, loggerOutput.String(), "SuperlikePost was created, username: user123 -> postId: post123")
+}
+
+func TestErrorOnCreateSuperlikePostWithService(t *testing.T) {
+	setUpService(t)
+	data := &model.SuperlikePost{
+		Username: "user123",
+		PostId:   "post123",
+	}
+	repositoryService.EXPECT().CreateSuperlikePost(data).Return(errors.New("some error"))
+
+	reactionService.CreateSuperlikePost(data)
+
+	assert.Contains(t, loggerOutput.String(), "Error creating superlikePost, username: user123 -> postId: post123")
 }
 
 func TestDeleteLikePostWithService(t *testing.T) {
@@ -55,7 +81,7 @@ func TestDeleteLikePostWithService(t *testing.T) {
 
 	reactionService.DeleteLikePost(data)
 
-	assert.Contains(t, loggerOutput.String(), "Like was deleted, username: user123 -> postId: post123")
+	assert.Contains(t, loggerOutput.String(), "LikePost was deleted, username: user123 -> postId: post123")
 }
 
 func TestErrorOnDeleteLikePostWithService(t *testing.T) {
@@ -68,5 +94,5 @@ func TestErrorOnDeleteLikePostWithService(t *testing.T) {
 
 	reactionService.DeleteLikePost(data)
 
-	assert.Contains(t, loggerOutput.String(), "Error deleting like, username: user123 -> postId: post123")
+	assert.Contains(t, loggerOutput.String(), "Error deleting likePost, username: user123 -> postId: post123")
 }

@@ -24,9 +24,23 @@ func (r ReactionRepository) CreateLikePost(data *model.LikePost) error {
 	return r.database.Client.InsertDataAndIncreaseCounter("readmodels.likePosts", data, "PostMetadata", postKey, "Likes")
 }
 
+func (r ReactionRepository) CreateSuperlikePost(data *model.SuperlikePost) error {
+	postKey := &database.PostMetadataKey{
+		PostId: data.PostId,
+	}
+	return r.database.Client.InsertDataAndIncreaseCounter("readmodels.superlikePosts", data, "PostMetadata", postKey, "Superlikes")
+}
+
 func (r ReactionRepository) DeleteLikePost(data *model.LikePost) error {
 	postKey := &database.PostMetadataKey{
 		PostId: data.PostId,
 	}
 	return r.database.Client.RemoveDataAndDecreaseCounter("readmodels.likePosts", data, "PostMetadata", postKey, "Likes")
+}
+
+func (r ReactionRepository) DeleteSuperlikePost(data *model.SuperlikePost) error {
+	postKey := &database.PostMetadataKey{
+		PostId: data.PostId,
+	}
+	return r.database.Client.RemoveDataAndDecreaseCounter("readmodels.superlikePosts", data, "PostMetadata", postKey, "Superlikes")
 }
