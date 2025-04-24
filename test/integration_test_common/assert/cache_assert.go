@@ -21,3 +21,10 @@ func AssertCachedPostLikesExists(t *testing.T, db *database.Cache, postId string
 	assert.Equal(t, expectedPostLikes, cachedPostLikes)
 	assert.Equal(t, expectedPostLikes[len(expectedPostLikes)-1].Username, cachedLastUsername)
 }
+
+func AssertCachedPostSuperlikesExists(t *testing.T, db *database.Cache, postId string, lastUsername string, limit int, expectedPostSuperlikes []*model.UserMetadata) {
+	cachedPostSuperlikes, cachedLastUsername, found := db.Client.GetPostSuperlikes(postId, lastUsername, limit)
+	assert.Equal(t, true, found)
+	assert.Equal(t, expectedPostSuperlikes, cachedPostSuperlikes)
+	assert.Equal(t, expectedPostSuperlikes[len(expectedPostSuperlikes)-1].Username, cachedLastUsername)
+}

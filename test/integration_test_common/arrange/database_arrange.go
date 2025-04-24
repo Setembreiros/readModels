@@ -95,3 +95,18 @@ func AddPostLikeToDatabase(t *testing.T, db *database.Database, data *database.P
 	assert.Equal(t, postLike.Username, data.Username)
 	assert.Equal(t, postLike.Name, data.Name)
 }
+
+func AddPostSuperlikeToDatabase(t *testing.T, db *database.Database, data *database.PostSuperlikeMetadata) {
+	err := db.Client.InsertData("readmodels.postSuperlikes", data)
+	assert.Nil(t, err)
+	likeKey := &database.PostSuperlikeKey{
+		PostId:   data.PostId,
+		Username: data.Username,
+	}
+	var postSuperlike database.PostSuperlikeMetadata
+	err = db.Client.GetData("readmodels.postSuperlikes", likeKey, &postSuperlike)
+	assert.Nil(t, err)
+	assert.Equal(t, postSuperlike.PostId, data.PostId)
+	assert.Equal(t, postSuperlike.Username, data.Username)
+	assert.Equal(t, postSuperlike.Name, data.Name)
+}

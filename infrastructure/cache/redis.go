@@ -26,6 +26,11 @@ type PostLikesData struct {
 	LastUsername string                `json:"lastUsername"`
 }
 
+type PostSuperlikesData struct {
+	PostSuperlikes []*model.UserMetadata `json:"postSuperlikes"`
+	LastUsername   string                `json:"lastUsername"`
+}
+
 func NewRedisClient(cacheUri, cachePassword string, ctx context.Context) *RedisCacheClient {
 	redisConfig := &redis.Options{
 		Addr:     cacheUri,
@@ -118,6 +123,31 @@ func (c *RedisCacheClient) SetPostLikes(postId string, lastUsername string, limi
 	}
 }
 
+func (c *RedisCacheClient) SetPostSuperlikes(postId string, lastUsername string, limit int, postSuperlikes []*model.UserMetadata) {
+	cacheKey := generatePostSuperlikesCacheKey(postId, lastUsername, limit)
+
+	newLastUsername := ""
+	if len(postSuperlikes) > 0 {
+		newLastUsername = postSuperlikes[len(postSuperlikes)-1].Username
+	}
+
+	data := PostSuperlikesData{
+		PostSuperlikes: postSuperlikes,
+		LastUsername:   newLastUsername,
+	}
+
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		log.Warn().Stack().Err(err).Msg("Failed to serialize postSuperlikes data")
+		return
+	}
+
+	err = c.client.Set(c.ctx, cacheKey, jsonData, 5*time.Minute).Err()
+	if err != nil {
+		log.Warn().Stack().Err(err).Msg("Failed to set postSuperlikes in cache")
+	}
+}
+
 func (c *RedisCacheClient) GetPostComments(postId string, lastCommentId uint64, limit int) ([]*model.Comment, uint64, bool) {
 	cacheKey := generateCommentsCacheKey(postId, lastCommentId, limit)
 
@@ -168,10 +198,39 @@ func (c *RedisCacheClient) GetPostLikes(postId string, lastUsername string, limi
 	return data.PostLikes, data.LastUsername, true
 }
 
+func (c *RedisCacheClient) GetPostSuperlikes(postId string, lastUsername string, limit int) ([]*model.UserMetadata, string, bool) {
+	cacheKey := generatePostSuperlikesCacheKey(postId, lastUsername, limit)
+
+	jsonData, err := c.client.Get(c.ctx, cacheKey).Bytes()
+	if err != nil {
+		if err == redis.Nil {
+			return []*model.UserMetadata{}, "", false
+		}
+
+		log.Warn().Stack().Err(err).Msg("Failed to retrieve postSuperlikes from cache")
+		return []*model.UserMetadata{}, "", false
+	}
+
+	var data PostSuperlikesData
+	err = json.Unmarshal(jsonData, &data)
+	if err != nil {
+		log.Warn().Stack().Err(err).Msg("Failed to deserialize postSuperlikes data")
+		return []*model.UserMetadata{}, "", false
+	}
+
+	log.Info().Msgf("Data retrieve from cache for key %s", cacheKey)
+
+	return data.PostSuperlikes, data.LastUsername, true
+}
+
 func generateCommentsCacheKey(postId string, lastCommentId uint64, limit int) string {
 	return fmt.Sprintf("comments:%s:%d:%d", postId, lastCommentId, limit)
 }
 
 func generatePostLikesCacheKey(postId string, lastUsername string, limit int) string {
 	return fmt.Sprintf("postLikes:%s:%s:%d", postId, lastUsername, limit)
+}
+
+func generatePostSuperlikesCacheKey(postId string, lastUsername string, limit int) string {
+	return fmt.Sprintf("postSuperlikes:%s:%s:%d", postId, lastUsername, limit)
 }
