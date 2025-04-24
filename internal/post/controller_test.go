@@ -23,7 +23,7 @@ var controllerRepository *mock_post.MockRepository
 var controller *post.PostController
 var apiResponse *httptest.ResponseRecorder
 var ginContext *gin.Context
-var timeLayout string = "2006-01-02T15:04:05.0000000Z"
+var timeLayout string = "2006-01-02T15:04:05.00Z"
 
 func setUpHandler(t *testing.T) {
 	ctrl := gomock.NewController(t)
@@ -53,14 +53,14 @@ func TestGetPostMetadatasByUser(t *testing.T) {
 	u.Add("lastPostCreatedAt", lastPostCreatedAt)
 	u.Add("limit", limit)
 	ginContext.Request.URL.RawQuery = u.Encode()
-	timeNow := time.Now().UTC()
+	timeNow, _ := time.Parse(timeLayout, time.Now().UTC().Format(timeLayout))
 	data := []*post.PostMetadata{
 		{
 			PostId:      "123456",
 			Username:    username,
 			Type:        "TEXT",
 			Title:       "Exemplo de Título",
-			Description: "Exemplo de Descrição",
+			Description: "Exemplo de Descrición",
 			CreatedAt:   timeNow,
 			LastUpdated: timeNow,
 		},
@@ -69,7 +69,7 @@ func TestGetPostMetadatasByUser(t *testing.T) {
 			Username:    username,
 			Type:        "IMAGE",
 			Title:       "Exemplo de Título 2",
-			Description: "Exemplo de Descrição 2",
+			Description: "Exemplo de Descrición 2",
 			CreatedAt:   timeNow,
 			LastUpdated: timeNow,
 		},
@@ -84,7 +84,7 @@ func TestGetPostMetadatasByUser(t *testing.T) {
 			"username":   "username1",
 			"type":        "TEXT",
 			"title":       "Exemplo de Título",
-			"description": "Exemplo de Descrição",
+			"description": "Exemplo de Descrición",
 			"created_at":   "` + timeNow.Format(timeLayout) + `",
 			"last_updated": "` + timeNow.Format(timeLayout) + `"
 		},
@@ -93,7 +93,7 @@ func TestGetPostMetadatasByUser(t *testing.T) {
 			"username":    "username1",
 			"type":        "IMAGE",
 			"title":       "Exemplo de Título 2",
-			"description": "Exemplo de Descrição 2",
+			"description": "Exemplo de Descrición 2",
 			"created_at":   "` + timeNow.Format(timeLayout) + `",
 			"last_updated": "` + timeNow.Format(timeLayout) + `"
 		}
@@ -110,14 +110,14 @@ func TestGetPostMetadatasByUserWithDefaultPaginationParameters(t *testing.T) {
 	setUpHandler(t)
 	username := "username1"
 	ginContext.Params = []gin.Param{{Key: "username", Value: username}}
-	timeNow := time.Now().UTC()
+	timeNow, _ := time.Parse(timeLayout, time.Now().UTC().Format(timeLayout))
 	data := []*post.PostMetadata{
 		{
 			PostId:      "123456",
 			Username:    username,
 			Type:        "TEXT",
 			Title:       "Exemplo de Título",
-			Description: "Exemplo de Descrição",
+			Description: "Exemplo de Descrición",
 			CreatedAt:   timeNow,
 			LastUpdated: timeNow,
 		},
@@ -126,7 +126,7 @@ func TestGetPostMetadatasByUserWithDefaultPaginationParameters(t *testing.T) {
 			Username:    username,
 			Type:        "IMAGE",
 			Title:       "Exemplo de Título 2",
-			Description: "Exemplo de Descrição 2",
+			Description: "Exemplo de Descrición 2",
 			CreatedAt:   timeNow,
 			LastUpdated: timeNow,
 		},
@@ -144,7 +144,7 @@ func TestGetPostMetadatasByUserWithDefaultPaginationParameters(t *testing.T) {
 			"username":   "username1",
 			"type":        "TEXT",
 			"title":       "Exemplo de Título",
-			"description": "Exemplo de Descrição",
+			"description": "Exemplo de Descrición",
 			"created_at":   "` + timeNow.Format(timeLayout) + `",
 			"last_updated": "` + timeNow.Format(timeLayout) + `"
 		},
@@ -153,7 +153,7 @@ func TestGetPostMetadatasByUserWithDefaultPaginationParameters(t *testing.T) {
 			"username":    "username1",
 			"type":        "IMAGE",
 			"title":       "Exemplo de Título 2",
-			"description": "Exemplo de Descrição 2",
+			"description": "Exemplo de Descrición 2",
 			"created_at":   "` + timeNow.Format(timeLayout) + `",
 			"last_updated": "` + timeNow.Format(timeLayout) + `"
 		}

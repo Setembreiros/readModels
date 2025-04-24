@@ -34,7 +34,7 @@ func TestAddNewUserProfileInRepository(t *testing.T) {
 func TestUpdateUserProfileInRepository(t *testing.T) {
 	setUp(t)
 	username := "username1"
-	expectedUserProfileKey := &userprofile.UserProfileKey{
+	expectedUserProfileKey := &database.UserProfileKey{
 		Username: username,
 	}
 	data := &userprofile.UserProfile{
@@ -57,7 +57,7 @@ func TestGetUserProfileFromRepository(t *testing.T) {
 	setUp(t)
 	username := "username1"
 	var userProfile userprofile.UserProfile
-	expectedUserProfileKey := &userprofile.UserProfileKey{
+	expectedUserProfileKey := &database.UserProfileKey{
 		Username: username,
 	}
 	client.EXPECT().GetData("UserProfile", expectedUserProfileKey, &userProfile)
@@ -68,7 +68,7 @@ func TestGetUserProfileFromRepository(t *testing.T) {
 func TestIncreaseFollowersFromRepository(t *testing.T) {
 	setUp(t)
 	username := "username1"
-	expectedUserProfileKey := &userprofile.UserProfileKey{
+	expectedUserProfileKey := &database.UserProfileKey{
 		Username: username,
 	}
 	client.EXPECT().IncrementCounter("UserProfile", expectedUserProfileKey, "Followers", 1)
@@ -79,7 +79,7 @@ func TestIncreaseFollowersFromRepository(t *testing.T) {
 func TestIncreaseFolloweesFromRepository(t *testing.T) {
 	setUp(t)
 	username := "username1"
-	expectedUserProfileKey := &userprofile.UserProfileKey{
+	expectedUserProfileKey := &database.UserProfileKey{
 		Username: username,
 	}
 	client.EXPECT().IncrementCounter("UserProfile", expectedUserProfileKey, "Followees", 1)
@@ -90,7 +90,7 @@ func TestIncreaseFolloweesFromRepository(t *testing.T) {
 func TestDecreaseFollowersFromRepository(t *testing.T) {
 	setUp(t)
 	username := "username1"
-	expectedUserProfileKey := &userprofile.UserProfileKey{
+	expectedUserProfileKey := &database.UserProfileKey{
 		Username: username,
 	}
 	client.EXPECT().IncrementCounter("UserProfile", expectedUserProfileKey, "Followers", -1)
@@ -101,7 +101,7 @@ func TestDecreaseFollowersFromRepository(t *testing.T) {
 func TestDecreaseFolloweesFromRepository(t *testing.T) {
 	setUp(t)
 	username := "username1"
-	expectedUserProfileKey := &userprofile.UserProfileKey{
+	expectedUserProfileKey := &database.UserProfileKey{
 		Username: username,
 	}
 	client.EXPECT().IncrementCounter("UserProfile", expectedUserProfileKey, "Followees", -1)

@@ -81,7 +81,7 @@ func serializeData(data any) ([]byte, error) {
 }
 
 func assertFollowersIncreased(t *testing.T, username string) {
-	userProfileKey := &userprofile.UserProfileKey{
+	userProfileKey := &database.UserProfileKey{
 		Username: username,
 	}
 	var userProfile userprofile.UserProfile
@@ -92,7 +92,7 @@ func assertFollowersIncreased(t *testing.T, username string) {
 }
 
 func assertFolloweesIncreased(t *testing.T, username string) {
-	userProfileKey := &userprofile.UserProfileKey{
+	userProfileKey := &database.UserProfileKey{
 		Username: username,
 	}
 	var userProfile userprofile.UserProfile
