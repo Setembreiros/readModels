@@ -53,6 +53,22 @@ func (r ReactionRepository) CreatePostSuperlike(postSuperlike *model.PostSuperli
 	return r.database.Client.InsertDataAndIncreaseCounter("readmodels.postSuperlikes", postSuperlikeMetadata, "PostMetadata", postKey, "Superlikes")
 }
 
+func (r ReactionRepository) GetPostLikesMetadata(postId string, lastUsername string, limit int) ([]*model.UserMetadata, string, error) {
+	likes, newLastUsername, found := r.cache.Client.GetPostLikes(postId, lastUsername, limit)
+	if found {
+		return likes, newLastUsername, nil
+	}
+
+	likes, newLastUsername, err := r.database.Client.GetPostLikesByIndexPostId(postId, lastUsername, limit)
+	if err != nil {
+		return []*model.UserMetadata{}, "", err
+	}
+
+	r.cache.Client.SetPostLikes(postId, lastUsername, limit, likes)
+
+	return likes, newLastUsername, nil
+}
+
 func (r ReactionRepository) DeletePostLike(postLike *model.PostLike) error {
 	postKey := &database.PostMetadataKey{
 		PostId: postLike.PostId,

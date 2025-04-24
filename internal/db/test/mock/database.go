@@ -120,6 +120,22 @@ func (mr *MockDatabaseClientMockRecorder) GetMultipleData(tableName, keys, resul
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMultipleData", reflect.TypeOf((*MockDatabaseClient)(nil).GetMultipleData), tableName, keys, results)
 }
 
+// GetPostLikesByIndexPostId mocks base method.
+func (m *MockDatabaseClient) GetPostLikesByIndexPostId(postID, lastUsername string, limit int) ([]*model.UserMetadata, string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPostLikesByIndexPostId", postID, lastUsername, limit)
+	ret0, _ := ret[0].([]*model.UserMetadata)
+	ret1, _ := ret[1].(string)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetPostLikesByIndexPostId indicates an expected call of GetPostLikesByIndexPostId.
+func (mr *MockDatabaseClientMockRecorder) GetPostLikesByIndexPostId(postID, lastUsername, limit interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPostLikesByIndexPostId", reflect.TypeOf((*MockDatabaseClient)(nil).GetPostLikesByIndexPostId), postID, lastUsername, limit)
+}
+
 // GetPostsByIndexUser mocks base method.
 func (m *MockDatabaseClient) GetPostsByIndexUser(username, lastPostId, lastPostCreatedAt string, limit int) ([]*database.PostMetadata, string, string, error) {
 	m.ctrl.T.Helper()

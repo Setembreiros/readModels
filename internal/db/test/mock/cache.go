@@ -62,6 +62,22 @@ func (mr *MockCacheClientMockRecorder) GetPostComments(postId, lastCommentId, li
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPostComments", reflect.TypeOf((*MockCacheClient)(nil).GetPostComments), postId, lastCommentId, limit)
 }
 
+// GetPostLikes mocks base method.
+func (m *MockCacheClient) GetPostLikes(postId, lastUsername string, limit int) ([]*model.UserMetadata, string, bool) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPostLikes", postId, lastUsername, limit)
+	ret0, _ := ret[0].([]*model.UserMetadata)
+	ret1, _ := ret[1].(string)
+	ret2, _ := ret[2].(bool)
+	return ret0, ret1, ret2
+}
+
+// GetPostLikes indicates an expected call of GetPostLikes.
+func (mr *MockCacheClientMockRecorder) GetPostLikes(postId, lastUsername, limit interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPostLikes", reflect.TypeOf((*MockCacheClient)(nil).GetPostLikes), postId, lastUsername, limit)
+}
+
 // SetPostComments mocks base method.
 func (m *MockCacheClient) SetPostComments(postId string, lastCommentId uint64, limit int, comments []*model.Comment) {
 	m.ctrl.T.Helper()
@@ -72,4 +88,16 @@ func (m *MockCacheClient) SetPostComments(postId string, lastCommentId uint64, l
 func (mr *MockCacheClientMockRecorder) SetPostComments(postId, lastCommentId, limit, comments interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetPostComments", reflect.TypeOf((*MockCacheClient)(nil).SetPostComments), postId, lastCommentId, limit, comments)
+}
+
+// SetPostLikes mocks base method.
+func (m *MockCacheClient) SetPostLikes(postId, lastUsername string, limit int, postLikes []*model.UserMetadata) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "SetPostLikes", postId, lastUsername, limit, postLikes)
+}
+
+// SetPostLikes indicates an expected call of SetPostLikes.
+func (mr *MockCacheClientMockRecorder) SetPostLikes(postId, lastUsername, limit, postLikes interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetPostLikes", reflect.TypeOf((*MockCacheClient)(nil).SetPostLikes), postId, lastUsername, limit, postLikes)
 }

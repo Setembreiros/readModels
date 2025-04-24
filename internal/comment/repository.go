@@ -40,16 +40,14 @@ func (r CommentRepository) GetCommentsByPostId(postId string, lastCommentId uint
 	return comments, newLastCommentId, nil
 }
 
-type postIdFromCommentData struct {
-	PostId string `json:"postId"`
-}
-
 func (r CommentRepository) GetPostIdFromComment(commentId uint64) (string, error) {
 	commentKey := &database.CommentKey{
 		CommentId: commentId,
 	}
 
-	data := &postIdFromCommentData{}
+	data := &struct {
+		PostId string `json:"postId"`
+	}{}
 	err := r.database.Client.GetData("readmodels.comments", commentKey, data)
 	if err != nil {
 		return "", err
