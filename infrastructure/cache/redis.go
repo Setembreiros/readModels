@@ -7,7 +7,7 @@ import (
 	"readmodels/internal/model"
 	"time"
 
-	"github.com/redis/go-redis/v9"
+	"github.com/go-redis/redis/v8"
 	"github.com/rs/zerolog/log"
 )
 
@@ -36,7 +36,6 @@ func NewRedisClient(cacheUri, cachePassword string, ctx context.Context) *RedisC
 		Addr:     cacheUri,
 		Password: cachePassword,
 		DB:       0, // Use default DB
-		Protocol: 2, // Connection protocol
 	}
 	client := &RedisCacheClient{
 		ctx:    ctx,
