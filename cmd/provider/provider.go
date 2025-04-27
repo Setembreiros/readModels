@@ -3,7 +3,6 @@ package provider
 import (
 	"context"
 	awsClients "readmodels/infrastructure/aws"
-	dbInfra "readmodels/infrastructure/cache"
 	"readmodels/infrastructure/kafka"
 	"readmodels/internal/api"
 	"readmodels/internal/bus"
@@ -34,17 +33,17 @@ func NewProvider(env string) *Provider {
 	}
 }
 
-func (p *Provider) ProvideApiEndpoint(database *database.Database, cache *database.Cache) *api.Api {
-	return api.NewApiEndpoint(p.env, p.ProvideApiControllers(database, cache))
+func (p *Provider) ProvideApiEndpoint(database *database.Database) *api.Api {
+	return api.NewApiEndpoint(p.env, p.ProvideApiControllers(database))
 }
 
-func (p *Provider) ProvideApiControllers(database *database.Database, cache *database.Cache) []api.Controller {
+func (p *Provider) ProvideApiControllers(database *database.Database) []api.Controller {
 	return []api.Controller{
 		userprofile.NewUserProfileController(userprofile.UserProfileRepository(*database)),
 		post.NewPostController(post.NewPostService(post.PostRepository(*database))),
 		follow.NewFollowController(follow.FollowRepository(*database)),
-		comment.NewCommentController(comment.NewCommentRepository(database, cache)),
-		reaction.NewReactionController(reaction.NewReactionService(reaction.NewReactionRepository(database, cache))),
+		comment.NewCommentController(comment.NewCommentRepository(database)),
+		reaction.NewReactionController(reaction.NewReactionService(reaction.NewReactionRepository(database))),
 	}
 }
 
@@ -54,7 +53,7 @@ func (p *Provider) ProvideEventBus() *bus.EventBus {
 	return eventBus
 }
 
-func (p *Provider) ProvideSubscriptions(database *database.Database, cache *database.Cache) *[]bus.EventSubscription {
+func (p *Provider) ProvideSubscriptions(database *database.Database) *[]bus.EventSubscription {
 	return &[]bus.EventSubscription{
 		{
 			EventType: "UserWasRegisteredEvent",
@@ -82,31 +81,31 @@ func (p *Provider) ProvideSubscriptions(database *database.Database, cache *data
 		},
 		{
 			EventType: "CommentWasCreatedEvent",
-			Handler:   comment_handler.NewCommentWasCreatedEventHandler(comment.NewCommentService(comment.NewCommentRepository(database, cache))),
+			Handler:   comment_handler.NewCommentWasCreatedEventHandler(comment.NewCommentService(comment.NewCommentRepository(database))),
 		},
 		{
 			EventType: "CommentWasUpdatedEvent",
-			Handler:   comment_handler.NewCommentWasUpdatedEventHandler(comment.NewCommentRepository(database, cache)),
+			Handler:   comment_handler.NewCommentWasUpdatedEventHandler(comment.NewCommentRepository(database)),
 		},
 		{
 			EventType: "CommentWasDeletedEvent",
-			Handler:   comment_handler.NewCommentWasDeletedEventHandler(comment.NewCommentService(comment.NewCommentRepository(database, cache))),
+			Handler:   comment_handler.NewCommentWasDeletedEventHandler(comment.NewCommentService(comment.NewCommentRepository(database))),
 		},
 		{
 			EventType: "UserLikedPostEvent",
-			Handler:   reaction_handler.NewUserLikedPostEventHandler(reaction.NewReactionService(reaction.NewReactionRepository(database, cache))),
+			Handler:   reaction_handler.NewUserLikedPostEventHandler(reaction.NewReactionService(reaction.NewReactionRepository(database))),
 		},
 		{
 			EventType: "UserUnlikedPostEvent",
-			Handler:   reaction_handler.NewUserUnlikedPostEventHandler(reaction.NewReactionService(reaction.NewReactionRepository(database, cache))),
+			Handler:   reaction_handler.NewUserUnlikedPostEventHandler(reaction.NewReactionService(reaction.NewReactionRepository(database))),
 		},
 		{
 			EventType: "UserSuperlikedPostEvent",
-			Handler:   reaction_handler.NewUserSuperlikedPostEventHandler(reaction.NewReactionService(reaction.NewReactionRepository(database, cache))),
+			Handler:   reaction_handler.NewUserSuperlikedPostEventHandler(reaction.NewReactionService(reaction.NewReactionRepository(database))),
 		},
 		{
 			EventType: "UserUnsuperlikedPostEvent",
-			Handler:   reaction_handler.NewUserUnsuperlikedPostEventHandler(reaction.NewReactionService(reaction.NewReactionRepository(database, cache))),
+			Handler:   reaction_handler.NewUserUnsuperlikedPostEventHandler(reaction.NewReactionService(reaction.NewReactionRepository(database))),
 		},
 	}
 }
@@ -127,11 +126,6 @@ func (p *Provider) ProvideKafkaConsumer(eventBus *bus.EventBus) (*kafka.KafkaCon
 
 	return kafka.NewKafkaConsumer(brokers, eventBus)
 }
-
-func (p *Provider) ProvideCache(ctx context.Context) *database.Cache {
-	return database.NewCache(dbInfra.NewRedisClient("localhost:6379", "", ctx))
-}
-
 func (p *Provider) ProvideDb(ctx context.Context) (*database.Database, error) {
 	var cfg aws.Config
 	var err error

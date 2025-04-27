@@ -13,7 +13,7 @@ var reactionRepository *reaction.ReactionRepository
 
 func setUpRepository(t *testing.T) {
 	SetUp(t)
-	reactionRepository = reaction.NewReactionRepository(database.NewDatabase(client), database.NewCache(cacheClient))
+	reactionRepository = reaction.NewReactionRepository(database.NewDatabase(client))
 }
 
 func TestCreatePostLikeInRepository(t *testing.T) {
@@ -94,38 +94,7 @@ func TestGetPostLikesMetadataInRepository_WhenDatabaseReturnsSuccess(t *testing.
 		},
 	}
 	expectedLastUsername := "username3"
-	cacheClient.EXPECT().GetPostLikes(postId, lastUsername, limit).Return([]*model.UserMetadata{}, "", false)
 	client.EXPECT().GetPostLikesByIndexPostId(postId, lastUsername, limit).Return(expectedResult, expectedLastUsername, nil)
-	cacheClient.EXPECT().SetPostLikes(postId, lastUsername, limit, expectedResult)
-
-	result, lastUsername, err := reactionRepository.GetPostLikesMetadata(postId, lastUsername, limit)
-
-	assert.Nil(t, err)
-	assert.Equal(t, expectedResult, result)
-	assert.Equal(t, expectedLastUsername, lastUsername)
-}
-
-func TestGetPostLikesMetadataInRepository_WhenCacheReturnsSuccess(t *testing.T) {
-	setUpRepository(t)
-	postId := "post2"
-	lastUsername := "username0"
-	limit := 3
-	expectedResult := []*model.UserMetadata{
-		{
-			Username: "username1",
-			Name:     "fullname1",
-		},
-		{
-			Username: "username2",
-			Name:     "fullname2",
-		},
-		{
-			Username: "username3",
-			Name:     "fullname3",
-		},
-	}
-	expectedLastUsername := "username3"
-	cacheClient.EXPECT().GetPostLikes(postId, lastUsername, limit).Return(expectedResult, expectedLastUsername, true)
 
 	result, lastUsername, err := reactionRepository.GetPostLikesMetadata(postId, lastUsername, limit)
 
@@ -154,38 +123,7 @@ func TestGetPostSuperlikesMetadataInRepository_WhenDatabaseReturnsSuccess(t *tes
 		},
 	}
 	expectedLastUsername := "username3"
-	cacheClient.EXPECT().GetPostSuperlikes(postId, lastUsername, limit).Return([]*model.UserMetadata{}, "", false)
 	client.EXPECT().GetPostSuperlikesByIndexPostId(postId, lastUsername, limit).Return(expectedResult, expectedLastUsername, nil)
-	cacheClient.EXPECT().SetPostSuperlikes(postId, lastUsername, limit, expectedResult)
-
-	result, lastUsername, err := reactionRepository.GetPostSuperlikesMetadata(postId, lastUsername, limit)
-
-	assert.Nil(t, err)
-	assert.Equal(t, expectedResult, result)
-	assert.Equal(t, expectedLastUsername, lastUsername)
-}
-
-func TestGetPostSuperlikesMetadataInRepository_WhenCacheReturnsSuccess(t *testing.T) {
-	setUpRepository(t)
-	postId := "post2"
-	lastUsername := "username0"
-	limit := 3
-	expectedResult := []*model.UserMetadata{
-		{
-			Username: "username1",
-			Name:     "fullname1",
-		},
-		{
-			Username: "username2",
-			Name:     "fullname2",
-		},
-		{
-			Username: "username3",
-			Name:     "fullname3",
-		},
-	}
-	expectedLastUsername := "username3"
-	cacheClient.EXPECT().GetPostSuperlikes(postId, lastUsername, limit).Return(expectedResult, expectedLastUsername, true)
 
 	result, lastUsername, err := reactionRepository.GetPostSuperlikesMetadata(postId, lastUsername, limit)
 

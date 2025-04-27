@@ -19,7 +19,6 @@ import (
 )
 
 var db *database.Database
-var cache *database.Cache
 var controller *comment.CommentController
 var commentWasCreatedEventHandler *comment_handler.CommentWasCreatedEventHandler
 var commentWasUpdatedEventHandler *comment_handler.CommentWasUpdatedEventHandler
@@ -33,8 +32,7 @@ func setUp(t *testing.T) {
 
 	// Real infrastructure and services
 	db = integration_test_arrange.CreateTestDatabase(t, ginContext)
-	cache = integration_test_arrange.CreateTestCache(t, ginContext)
-	repository := comment.NewCommentRepository(db, cache)
+	repository := comment.NewCommentRepository(db)
 	service := comment.NewCommentService(repository)
 	controller = comment.NewCommentController(repository)
 	commentWasCreatedEventHandler = comment_handler.NewCommentWasCreatedEventHandler(service)
@@ -44,7 +42,6 @@ func setUp(t *testing.T) {
 
 func tearDown() {
 	db.Client.Truncate()
-	cache.Client.Clean()
 }
 
 func TestCreateNewComment_WhenDatabaseReturnsSuccess(t *testing.T) {
@@ -93,136 +90,6 @@ func TestGetCommentsByPostId_WhenDatabaseReturnsSuccess(t *testing.T) {
 	ginContext.Params = []gin.Param{{Key: "postId", Value: postId}}
 	u := url.Values{}
 	u.Add("lastCommentId", strconv.FormatUint(lastCommentId, 10))
-	u.Add("limit", strconv.Itoa(limit))
-	ginContext.Request.URL.RawQuery = u.Encode()
-	expectedComments := []*model.Comment{
-		{
-			CommentId: uint64(3),
-			Username:  "username1",
-			PostId:    "post1",
-			Content:   "o meu comentario 3",
-			CreatedAt: timeNow,
-			UpdatedAt: timeNow,
-		},
-		{
-			CommentId: uint64(6),
-			Username:  "username2",
-			PostId:    "post1",
-			Content:   "o meu comentario 6",
-			CreatedAt: timeNow,
-			UpdatedAt: timeNow,
-		},
-		{
-			CommentId: uint64(8),
-			Username:  "username3",
-			PostId:    "post1",
-			Content:   "o meu comentario 8",
-			CreatedAt: timeNow,
-			UpdatedAt: timeNow,
-		},
-		{
-			CommentId: uint64(9),
-			Username:  "username1",
-			PostId:    "post1",
-			Content:   "o meu comentario 9",
-			CreatedAt: timeNow,
-			UpdatedAt: timeNow,
-		},
-	}
-	expectedBodyResponse := `{
-		"error": false,
-		"message": "200 OK",
-		"content": {
-			"comments":[	
-			{
-				"commentId": 3,
-				"postId":    "post1",
-				"username":  "username1",
-				"content": 	 "o meu comentario 3",
-				"createdAt": "` + timeNowString + `",
-				"updatedAt": "` + timeNowString + `"
-			},	
-			{
-				"commentId": 6,
-				"postId":    "post1",
-				"username":  "username2",
-				"content": 	 "o meu comentario 6",
-				"createdAt": "` + timeNowString + `",
-				"updatedAt": "` + timeNowString + `"
-			},	
-			{
-				"commentId": 8,
-				"postId":    "post1",
-				"username":  "username3",
-				"content": 	 "o meu comentario 8",
-				"createdAt": "` + timeNowString + `",
-				"updatedAt": "` + timeNowString + `"
-			},
-			{
-				"commentId": 9,
-				"postId":    "post1",
-				"username":  "username1",
-				"content": 	 "o meu comentario 9",
-				"createdAt": "` + timeNowString + `",
-				"updatedAt": "` + timeNowString + `"
-			}
-			],
-			"lastCommentId":9
-		}
-	}`
-
-	controller.GetCommentsByPostId(ginContext)
-
-	integration_test_assert.AssertSuccessResult(t, apiResponse, expectedBodyResponse)
-	integration_test_assert.AssertCachedPostCommentsExists(t, cache, postId, lastCommentId, limit, expectedComments)
-}
-
-func TestGetCommentsByPostId_WhenCacheReturnsSuccess(t *testing.T) {
-	setUp(t)
-	defer tearDown()
-	timeNowString := time.Now().UTC().Format(model.TimeLayout)
-	timeNow, _ := time.Parse(model.TimeLayout, timeNowString)
-	postId := "post1"
-	lastCommentId := uint64(2)
-	limit := 4
-	populateCache(t, postId, lastCommentId, limit, []*model.Comment{
-		{
-			CommentId: uint64(3),
-			Username:  "username1",
-			PostId:    "post1",
-			Content:   "o meu comentario 3",
-			CreatedAt: timeNow,
-			UpdatedAt: timeNow,
-		},
-		{
-			CommentId: uint64(6),
-			Username:  "username2",
-			PostId:    "post1",
-			Content:   "o meu comentario 6",
-			CreatedAt: timeNow,
-			UpdatedAt: timeNow,
-		},
-		{
-			CommentId: uint64(8),
-			Username:  "username3",
-			PostId:    "post1",
-			Content:   "o meu comentario 8",
-			CreatedAt: timeNow,
-			UpdatedAt: timeNow,
-		},
-		{
-			CommentId: uint64(9),
-			Username:  "username1",
-			PostId:    "post1",
-			Content:   "o meu comentario 9",
-			CreatedAt: timeNow,
-			UpdatedAt: timeNow,
-		},
-	})
-	ginContext.Request, _ = http.NewRequest("GET", "/comments", nil)
-	ginContext.Params = []gin.Param{{Key: "postId", Value: postId}}
-	u := url.Values{}
-	u.Add("lastCommentId", "2")
 	u.Add("limit", strconv.Itoa(limit))
 	ginContext.Request.URL.RawQuery = u.Encode()
 	expectedBodyResponse := `{
@@ -422,8 +289,4 @@ func populateDb(t *testing.T, time time.Time) {
 	for _, existingComment := range existingComments {
 		integration_test_arrange.AddCommentToDatabase(t, db, existingComment)
 	}
-}
-
-func populateCache(t *testing.T, postId string, lastFolloweeId uint64, limit int, comments []*model.Comment) {
-	integration_test_arrange.AddCachedCommentsToCache(t, cache, postId, lastFolloweeId, limit, comments)
 }

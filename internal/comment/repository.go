@@ -6,13 +6,11 @@ import (
 )
 
 type CommentRepository struct {
-	cache    *database.Cache
 	database *database.Database
 }
 
-func NewCommentRepository(database *database.Database, cache *database.Cache) *CommentRepository {
+func NewCommentRepository(database *database.Database) *CommentRepository {
 	return &CommentRepository{
-		cache:    cache,
 		database: database,
 	}
 }
@@ -25,17 +23,10 @@ func (r CommentRepository) CreateComment(data *model.Comment) error {
 }
 
 func (r CommentRepository) GetCommentsByPostId(postId string, lastCommentId uint64, limit int) ([]*model.Comment, uint64, error) {
-	comments, newLastCommentId, found := r.cache.Client.GetPostComments(postId, lastCommentId, limit)
-	if found {
-		return comments, newLastCommentId, nil
-	}
-
 	comments, newLastCommentId, err := r.database.Client.GetCommentsByIndexPostId(postId, lastCommentId, limit)
 	if err != nil {
 		return []*model.Comment{}, uint64(0), err
 	}
-
-	r.cache.Client.SetPostComments(postId, lastCommentId, limit, comments)
 
 	return comments, newLastCommentId, nil
 }

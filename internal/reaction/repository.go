@@ -6,13 +6,11 @@ import (
 )
 
 type ReactionRepository struct {
-	cache    *database.Cache
 	database *database.Database
 }
 
-func NewReactionRepository(database *database.Database, cache *database.Cache) *ReactionRepository {
+func NewReactionRepository(database *database.Database) *ReactionRepository {
 	return &ReactionRepository{
-		cache:    cache,
 		database: database,
 	}
 }
@@ -54,33 +52,19 @@ func (r *ReactionRepository) CreatePostSuperlike(postSuperlike *model.PostSuperl
 }
 
 func (r *ReactionRepository) GetPostLikesMetadata(postId string, lastUsername string, limit int) ([]*model.UserMetadata, string, error) {
-	likes, newLastUsername, found := r.cache.Client.GetPostLikes(postId, lastUsername, limit)
-	if found {
-		return likes, newLastUsername, nil
-	}
-
 	likes, newLastUsername, err := r.database.Client.GetPostLikesByIndexPostId(postId, lastUsername, limit)
 	if err != nil {
 		return []*model.UserMetadata{}, "", err
 	}
 
-	r.cache.Client.SetPostLikes(postId, lastUsername, limit, likes)
-
 	return likes, newLastUsername, nil
 }
 
 func (r *ReactionRepository) GetPostSuperlikesMetadata(postId string, lastUsername string, limit int) ([]*model.UserMetadata, string, error) {
-	superlikes, newLastUsername, found := r.cache.Client.GetPostSuperlikes(postId, lastUsername, limit)
-	if found {
-		return superlikes, newLastUsername, nil
-	}
-
 	superlikes, newLastUsername, err := r.database.Client.GetPostSuperlikesByIndexPostId(postId, lastUsername, limit)
 	if err != nil {
 		return []*model.UserMetadata{}, "", err
 	}
-
-	r.cache.Client.SetPostSuperlikes(postId, lastUsername, limit, superlikes)
 
 	return superlikes, newLastUsername, nil
 }
