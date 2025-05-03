@@ -358,12 +358,13 @@ func (dc *DynamoDBClient) InsertDataAndIncreaseCounter(tableName string, attribu
 		Update: &types.Update{
 			TableName:        aws.String(counterTableName),
 			Key:              counterK,
-			UpdateExpression: aws.String("set #field = #field + :val"),
+			UpdateExpression: aws.String("set #field = if_not_exists(#field, :zero) + :val"),
 			ExpressionAttributeNames: map[string]string{
 				"#field": counterFieldName,
 			},
 			ExpressionAttributeValues: map[string]types.AttributeValue{
-				":val": &types.AttributeValueMemberN{Value: strconv.Itoa(1)},
+				":val":  &types.AttributeValueMemberN{Value: strconv.Itoa(1)},
+				":zero": &types.AttributeValueMemberN{Value: strconv.Itoa(0)},
 			},
 		},
 	}
