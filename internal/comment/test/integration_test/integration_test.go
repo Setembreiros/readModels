@@ -84,7 +84,7 @@ func TestGetCommentsByPostId_WhenDatabaseReturnsSuccess(t *testing.T) {
 	timeNow, _ := time.Parse(model.TimeLayout, timeNowString)
 	populateDb(t, timeNow)
 	postId := "post1"
-	lastCommentId := uint64(2)
+	lastCommentId := uint64(13)
 	limit := 4
 	ginContext.Request, _ = http.NewRequest("GET", "/comments", nil)
 	ginContext.Params = []gin.Param{{Key: "postId", Value: postId}}
@@ -98,18 +98,18 @@ func TestGetCommentsByPostId_WhenDatabaseReturnsSuccess(t *testing.T) {
 		"content": {
 			"comments":[	
 			{
-				"commentId": 3,
+				"commentId": 11,
 				"postId":    "post1",
-				"username":  "username1",
-				"content": 	 "o meu comentario 3",
+				"username":  "user123",
+				"content": 	 "o meu comentario 11",
 				"createdAt": "` + timeNowString + `",
 				"updatedAt": "` + timeNowString + `"
 			},	
 			{
-				"commentId": 6,
+				"commentId": 9,
 				"postId":    "post1",
-				"username":  "username2",
-				"content": 	 "o meu comentario 6",
+				"username":  "username1",
+				"content": 	 "o meu comentario 9",
 				"createdAt": "` + timeNowString + `",
 				"updatedAt": "` + timeNowString + `"
 			},	
@@ -122,15 +122,15 @@ func TestGetCommentsByPostId_WhenDatabaseReturnsSuccess(t *testing.T) {
 				"updatedAt": "` + timeNowString + `"
 			},
 			{
-				"commentId": 9,
+				"commentId": 6,
 				"postId":    "post1",
-				"username":  "username1",
-				"content": 	 "o meu comentario 9",
+				"username":  "username2",
+				"content": 	 "o meu comentario 6",
 				"createdAt": "` + timeNowString + `",
 				"updatedAt": "` + timeNowString + `"
 			}
 			],
-			"lastCommentId":9
+			"lastCommentId":6
 		}
 	}`
 
@@ -281,6 +281,30 @@ func populateDb(t *testing.T, time time.Time) {
 			Username:  "user123",
 			PostId:    "post1",
 			Content:   "o meu comentario 11",
+			CreatedAt: time,
+			UpdatedAt: time,
+		},
+		{
+			CommentId: uint64(12),
+			Username:  "user123",
+			PostId:    "post2",
+			Content:   "o meu comentario 12",
+			CreatedAt: time,
+			UpdatedAt: time,
+		},
+		{
+			CommentId: uint64(13),
+			Username:  "user123",
+			PostId:    "post1",
+			Content:   "o meu comentario 13",
+			CreatedAt: time,
+			UpdatedAt: time,
+		},
+		{
+			CommentId: uint64(14),
+			Username:  "user123",
+			PostId:    "post1",
+			Content:   "o meu comentario 14",
 			CreatedAt: time,
 			UpdatedAt: time,
 		},

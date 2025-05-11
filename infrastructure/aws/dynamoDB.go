@@ -739,7 +739,8 @@ func (dc *DynamoDBClient) GetCommentsByIndexPostId(postID string, lastCommentId 
 		ExpressionAttributeValues: map[string]types.AttributeValue{
 			":postId": &types.AttributeValueMemberS{Value: postID},
 		},
-		Limit: aws.Int32(int32(limit)),
+		ScanIndexForward: aws.Bool(false), // Orde descendente (do máis novo ao máis antigo)
+		Limit:            aws.Int32(int32(limit)),
 	}
 
 	if lastCommentId != 0 {
@@ -763,7 +764,6 @@ func (dc *DynamoDBClient) GetCommentsByIndexPostId(postID string, lastCommentId 
 			log.Error().Stack().Err(err).Msg("Couldn't unmarshal comment response")
 			return nil, 0, err
 		}
-
 		results = append(results, &result)
 	}
 
