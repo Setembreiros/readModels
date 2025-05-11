@@ -37,15 +37,17 @@ func (r PostRepository) RemovePostMetadata(postIds []string) error {
 
 func mapToDomain(data *database.PostMetadata) *PostMetadata {
 	return &PostMetadata{
-		PostId:      data.PostId,
-		Username:    data.Username,
-		Type:        data.Type,
-		Title:       data.Title,
-		Description: data.Description,
-		Comments:    data.Comments,
-		Likes:       data.Likes,
-		Superlikes:  data.Superlikes,
-		CreatedAt:   data.CreatedAt,
-		LastUpdated: data.LastUpdated,
+		PostId:                    data.PostId,
+		Username:                  data.Username,
+		Type:                      data.Type,
+		Title:                     data.Title,
+		Description:               data.Description,
+		Comments:                  data.Comments,
+		Likes:                     data.Likes,
+		IsLikedByCurrentUser:      data.IsLikedByCurrentUser,
+		Superlikes:                data.Superlikes,
+		IsSuperLikedByCurrentUser: data.IsSuperLikedByCurrentUser,
+		CreatedAt:                 data.CreatedAt,
+		LastUpdated:               data.LastUpdated,
 	}
 }
