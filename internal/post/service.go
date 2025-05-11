@@ -28,7 +28,7 @@ type PostMetadata struct {
 	Likes                     int       `json:"likes"`
 	IsLikedByCurrentUser      bool      `json:"isLikedByCurrentUser"`
 	Superlikes                int       `json:"superlikes"`
-	IsSuperLikedByCurrentUser bool      `json:"isSuperLikedByCurrentUser"`
+	IsSuperlikedByCurrentUser bool      `json:"isSuperlikedByCurrentUser"`
 	CreatedAt                 time.Time `json:"created_at"`
 	LastUpdated               time.Time `json:"last_updated"`
 }

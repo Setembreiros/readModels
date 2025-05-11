@@ -66,7 +66,7 @@ func TestGetPostMetadatasByUser(t *testing.T) {
 			Likes:                     2,
 			IsLikedByCurrentUser:      true,
 			Superlikes:                3,
-			IsSuperLikedByCurrentUser: true,
+			IsSuperlikedByCurrentUser: true,
 			CreatedAt:                 timeNow,
 			LastUpdated:               timeNow,
 		},
@@ -80,7 +80,7 @@ func TestGetPostMetadatasByUser(t *testing.T) {
 			Likes:                     2,
 			IsLikedByCurrentUser:      true,
 			Superlikes:                3,
-			IsSuperLikedByCurrentUser: true,
+			IsSuperlikedByCurrentUser: true,
 			CreatedAt:                 timeNow,
 			LastUpdated:               timeNow,
 		},
@@ -100,7 +100,7 @@ func TestGetPostMetadatasByUser(t *testing.T) {
 			"likes": 2,
 			"isLikedByCurrentUser": true,
 			"superlikes": 3,
-			"isSuperLikedByCurrentUser": true,
+			"isSuperlikedByCurrentUser": true,
 			"created_at":   "` + timeNow.Format(model.TimeLayout) + `",
 			"last_updated": "` + timeNow.Format(model.TimeLayout) + `"
 		},
@@ -114,7 +114,7 @@ func TestGetPostMetadatasByUser(t *testing.T) {
 			"likes": 2,
 			"isLikedByCurrentUser": true,
 			"superlikes": 3,
-			"isSuperLikedByCurrentUser": true,
+			"isSuperlikedByCurrentUser": true,
 			"created_at":   "` + timeNow.Format(model.TimeLayout) + `",
 			"last_updated": "` + timeNow.Format(model.TimeLayout) + `"
 		}
@@ -171,7 +171,7 @@ func TestGetPostMetadatasByUserWithDefaultPaginationParameters(t *testing.T) {
 			"likes": 0,
 			"isLikedByCurrentUser": false,
 			"superlikes": 0,
-			"isSuperLikedByCurrentUser": false,
+			"isSuperlikedByCurrentUser": false,
 			"created_at":   "` + timeNow.Format(model.TimeLayout) + `",
 			"last_updated": "` + timeNow.Format(model.TimeLayout) + `"
 		},
@@ -185,7 +185,7 @@ func TestGetPostMetadatasByUserWithDefaultPaginationParameters(t *testing.T) {
 			"likes": 0,
 			"isLikedByCurrentUser": false,
 			"superlikes": 0,
-			"isSuperLikedByCurrentUser": false,
+			"isSuperlikedByCurrentUser": false,
 			"created_at":   "` + timeNow.Format(model.TimeLayout) + `",
 			"last_updated": "` + timeNow.Format(model.TimeLayout) + `"
 		}

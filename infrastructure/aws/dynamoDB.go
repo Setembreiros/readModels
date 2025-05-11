@@ -713,6 +713,13 @@ func (dc *DynamoDBClient) GetPostsByIndexUser(username string, currentUsername s
 			isLiked = false
 		}
 		result.IsLikedByCurrentUser = isLiked
+
+		isSuperliked, err := dc.checkUserPostSuperlikeExist(result.PostId, currentUsername)
+		if err != nil {
+			log.Error().Stack().Err(err).Msgf("Error checking superlike status for post %s", result.PostId)
+			isLiked = false
+		}
+		result.IsSuperlikedByCurrentUser = isSuperliked
 		results = append(results, &result)
 	}
 
@@ -749,6 +756,27 @@ func (dc DynamoDBClient) checkUserPostLikeExist(postId string, username string) 
 	response, err := dc.client.Query(context.TODO(), input)
 	if err != nil {
 		log.Error().Stack().Err(err).Msgf("Error checking if user %s liked post %s", username, postId)
+		return false, err
+	}
+
+	return len(response.Items) > 0, nil
+}
+
+// CheckUserPostSuperlikeExist verifica se un usuario específico deu like a un post
+func (dc DynamoDBClient) checkUserPostSuperlikeExist(postId string, username string) (bool, error) {
+	input := &dynamodb.QueryInput{
+		TableName:              aws.String("readmodels.postSuperlikes"),
+		KeyConditionExpression: aws.String("PostId = :postId AND Username = :username"),
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":postId":   &types.AttributeValueMemberS{Value: postId},
+			":username": &types.AttributeValueMemberS{Value: username},
+		},
+		Limit: aws.Int32(1),
+	}
+
+	response, err := dc.client.Query(context.TODO(), input)
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Error checking if user %s superliked post %s", username, postId)
 		return false, err
 	}
 
