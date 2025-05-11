@@ -38,6 +38,7 @@ func setUpHandler(t *testing.T) {
 func TestGetPostMetadatasByUser(t *testing.T) {
 	setUpHandler(t)
 	username := "username1"
+	currentUsername := "username1"
 	lastPostId := "post4"
 	lastPostCreatedAt := "0001-01-03T00:00:00Z"
 	limit := "4"
@@ -47,7 +48,7 @@ func TestGetPostMetadatasByUser(t *testing.T) {
 	}
 	ginContext.Request.Method = "GET"
 	ginContext.Request.Header.Set("Content-Type", "application/json")
-	ginContext.Params = []gin.Param{{Key: "username", Value: username}}
+	ginContext.Params = []gin.Param{{Key: "username", Value: username}, {Key: "currentUsername", Value: currentUsername}}
 	u := url.Values{}
 	u.Add("lastPostId", lastPostId)
 	u.Add("lastPostCreatedAt", lastPostCreatedAt)
@@ -56,31 +57,35 @@ func TestGetPostMetadatasByUser(t *testing.T) {
 	timeNow, _ := time.Parse(model.TimeLayout, time.Now().UTC().Format(model.TimeLayout))
 	data := []*post.PostMetadata{
 		{
-			PostId:      "123456",
-			Username:    username,
-			Type:        "TEXT",
-			Title:       "Exemplo de Título",
-			Description: "Exemplo de Descrición",
-			Comments:    1,
-			Likes:       2,
-			Superlikes:  3,
-			CreatedAt:   timeNow,
-			LastUpdated: timeNow,
+			PostId:                    "123456",
+			Username:                  username,
+			Type:                      "TEXT",
+			Title:                     "Exemplo de Título",
+			Description:               "Exemplo de Descrición",
+			Comments:                  1,
+			Likes:                     2,
+			IsLikedByCurrentUser:      true,
+			Superlikes:                3,
+			IsSuperLikedByCurrentUser: true,
+			CreatedAt:                 timeNow,
+			LastUpdated:               timeNow,
 		},
 		{
-			PostId:      "abcdef",
-			Username:    username,
-			Type:        "IMAGE",
-			Title:       "Exemplo de Título 2",
-			Description: "Exemplo de Descrición 2",
-			Comments:    1,
-			Likes:       2,
-			Superlikes:  3,
-			CreatedAt:   timeNow,
-			LastUpdated: timeNow,
+			PostId:                    "abcdef",
+			Username:                  username,
+			Type:                      "IMAGE",
+			Title:                     "Exemplo de Título 2",
+			Description:               "Exemplo de Descrición 2",
+			Comments:                  1,
+			Likes:                     2,
+			IsLikedByCurrentUser:      true,
+			Superlikes:                3,
+			IsSuperLikedByCurrentUser: true,
+			CreatedAt:                 timeNow,
+			LastUpdated:               timeNow,
 		},
 	}
-	controllerService.EXPECT().GetPostMetadatasByUser(username, lastPostId, lastPostCreatedAt, 4).Return(data, "post7", "0001-01-06T00:00:00Z", nil)
+	controllerService.EXPECT().GetPostMetadatasByUser(username, currentUsername, lastPostId, lastPostCreatedAt, 4).Return(data, "post7", "0001-01-06T00:00:00Z", nil)
 	expectedBodyResponse := `{
 		"error": false,
 		"message": "200 OK",
@@ -93,7 +98,9 @@ func TestGetPostMetadatasByUser(t *testing.T) {
 			"description": "Exemplo de Descrición",
 			"comments": 1,
 			"likes": 2,
+			"isLikedByCurrentUser": true,
 			"superlikes": 3,
+			"isSuperLikedByCurrentUser": true,
 			"created_at":   "` + timeNow.Format(model.TimeLayout) + `",
 			"last_updated": "` + timeNow.Format(model.TimeLayout) + `"
 		},
@@ -105,7 +112,9 @@ func TestGetPostMetadatasByUser(t *testing.T) {
 			"description": "Exemplo de Descrición 2",
 			"comments": 1,
 			"likes": 2,
+			"isLikedByCurrentUser": true,
 			"superlikes": 3,
+			"isSuperLikedByCurrentUser": true,
 			"created_at":   "` + timeNow.Format(model.TimeLayout) + `",
 			"last_updated": "` + timeNow.Format(model.TimeLayout) + `"
 		}
@@ -121,7 +130,8 @@ func TestGetPostMetadatasByUser(t *testing.T) {
 func TestGetPostMetadatasByUserWithDefaultPaginationParameters(t *testing.T) {
 	setUpHandler(t)
 	username := "username1"
-	ginContext.Params = []gin.Param{{Key: "username", Value: username}}
+	currentUsername := "username2"
+	ginContext.Params = []gin.Param{{Key: "username", Value: username}, {Key: "currentUsername", Value: currentUsername}}
 	timeNow, _ := time.Parse(model.TimeLayout, time.Now().UTC().Format(model.TimeLayout))
 	data := []*post.PostMetadata{
 		{
@@ -146,7 +156,7 @@ func TestGetPostMetadatasByUserWithDefaultPaginationParameters(t *testing.T) {
 	expectedDefaultLastPostId := ""
 	expectedDefaultLastPostCreatedAt := ""
 	expectedDefaultLimit := 6
-	controllerService.EXPECT().GetPostMetadatasByUser(username, expectedDefaultLastPostId, expectedDefaultLastPostCreatedAt, expectedDefaultLimit).Return(data, "post7", "0001-01-06T00:00:00Z", nil)
+	controllerService.EXPECT().GetPostMetadatasByUser(username, currentUsername, expectedDefaultLastPostId, expectedDefaultLastPostCreatedAt, expectedDefaultLimit).Return(data, "post7", "0001-01-06T00:00:00Z", nil)
 	expectedBodyResponse := `{
 		"error": false,
 		"message": "200 OK",
@@ -159,7 +169,9 @@ func TestGetPostMetadatasByUserWithDefaultPaginationParameters(t *testing.T) {
 			"description": "Exemplo de Descrición",
 			"comments": 0,
 			"likes": 0,
+			"isLikedByCurrentUser": false,
 			"superlikes": 0,
+			"isSuperLikedByCurrentUser": false,
 			"created_at":   "` + timeNow.Format(model.TimeLayout) + `",
 			"last_updated": "` + timeNow.Format(model.TimeLayout) + `"
 		},
@@ -171,7 +183,9 @@ func TestGetPostMetadatasByUserWithDefaultPaginationParameters(t *testing.T) {
 			"description": "Exemplo de Descrición 2",
 			"comments": 0,
 			"likes": 0,
+			"isLikedByCurrentUser": false,
 			"superlikes": 0,
+			"isSuperLikedByCurrentUser": false,
 			"created_at":   "` + timeNow.Format(model.TimeLayout) + `",
 			"last_updated": "` + timeNow.Format(model.TimeLayout) + `"
 		}
@@ -187,6 +201,7 @@ func TestGetPostMetadatasByUserWithDefaultPaginationParameters(t *testing.T) {
 func TestInternalServerErrorOnGetPostMetadatasByUser(t *testing.T) {
 	setUpHandler(t)
 	username := "username1"
+	currentUsername := "username1"
 	lastPostId := "post4"
 	lastPostCreatedAt := "0001-01-03T00:00:00Z"
 	limit := "4"
@@ -196,7 +211,7 @@ func TestInternalServerErrorOnGetPostMetadatasByUser(t *testing.T) {
 	}
 	ginContext.Request.Method = "GET"
 	ginContext.Request.Header.Set("Content-Type", "application/json")
-	ginContext.Params = []gin.Param{{Key: "username", Value: username}}
+	ginContext.Params = []gin.Param{{Key: "username", Value: username}, {Key: "currentUsername", Value: currentUsername}}
 	u := url.Values{}
 	u.Add("lastPostId", lastPostId)
 	u.Add("lastPostCreatedAt", lastPostCreatedAt)
@@ -204,7 +219,7 @@ func TestInternalServerErrorOnGetPostMetadatasByUser(t *testing.T) {
 	ginContext.Request.URL.RawQuery = u.Encode()
 	expectedData := []*post.PostMetadata{}
 	expectedError := errors.New("some error")
-	controllerService.EXPECT().GetPostMetadatasByUser(username, lastPostId, lastPostCreatedAt, 4).Return(expectedData, "", "", expectedError)
+	controllerService.EXPECT().GetPostMetadatasByUser(username, currentUsername, lastPostId, lastPostCreatedAt, 4).Return(expectedData, "", "", expectedError)
 	expectedBodyResponse := `{
 		"error": true,
 		"message": "` + expectedError.Error() + `",
@@ -220,6 +235,7 @@ func TestInternalServerErrorOnGetPostMetadatasByUser(t *testing.T) {
 func TestBadRequestErrorOnGetUserPostsWhenLimitSmallerThanZero(t *testing.T) {
 	setUpHandler(t)
 	username := "username1"
+	currentUsername := "username1"
 	lastPostId := "post4"
 	lastPostCreatedAt := "0001-01-03T00:00:00Z"
 	wrongLimit := "0"
@@ -229,7 +245,7 @@ func TestBadRequestErrorOnGetUserPostsWhenLimitSmallerThanZero(t *testing.T) {
 	}
 	ginContext.Request.Method = "GET"
 	ginContext.Request.Header.Set("Content-Type", "application/json")
-	ginContext.Params = []gin.Param{{Key: "username", Value: username}}
+	ginContext.Params = []gin.Param{{Key: "username", Value: username}, {Key: "currentUsername", Value: currentUsername}}
 	u := url.Values{}
 	u.Add("lastPostId", lastPostId)
 	u.Add("lastPostCreatedAt", lastPostCreatedAt)
@@ -251,6 +267,7 @@ func TestBadRequestErrorOnGetUserPostsWhenLimitSmallerThanZero(t *testing.T) {
 func TestBadRequestErrorOnGetUserPostsWhenLastPostIdIsNotEmptyButLastPostCreatedAtIsEmpty(t *testing.T) {
 	setUpHandler(t)
 	username := "username1"
+	currentUsername := "username1"
 	lastPostId := "post4"
 	lastPostCreatedAt := ""
 	wrongLimit := "2"
@@ -260,7 +277,7 @@ func TestBadRequestErrorOnGetUserPostsWhenLastPostIdIsNotEmptyButLastPostCreated
 	}
 	ginContext.Request.Method = "GET"
 	ginContext.Request.Header.Set("Content-Type", "application/json")
-	ginContext.Params = []gin.Param{{Key: "username", Value: username}}
+	ginContext.Params = []gin.Param{{Key: "username", Value: username}, {Key: "currentUsername", Value: currentUsername}}
 	u := url.Values{}
 	u.Add("lastPostId", lastPostId)
 	u.Add("lastPostCreatedAt", lastPostCreatedAt)

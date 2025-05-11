@@ -26,7 +26,7 @@ type DatabaseClient interface {
 	InsertDataAndIncreaseCounter(tableName string, attributes any, counterTableName string, counterKey any, counterFieldName string) error
 	GetData(tableName string, key any, result any) error
 	GetMultipleData(tableName string, keys []any, results any) error
-	GetPostsByIndexUser(username string, lastPostId, lastPostCreatedAt string, limit int) ([]*PostMetadata, string, string, error)
+	GetPostsByIndexUser(username string, currentUsername string, lastPostId, lastPostCreatedAt string, limit int) ([]*PostMetadata, string, string, error)
 	GetCommentsByIndexPostId(postID string, lastCommentId uint64, limit int) ([]*model.Comment, uint64, error)
 	GetPostLikesByIndexPostId(postID string, lastUsername string, limit int) ([]*model.UserMetadata, string, error)
 	GetPostSuperlikesByIndexPostId(postID string, lastUsername string, limit int) ([]*model.UserMetadata, string, error)

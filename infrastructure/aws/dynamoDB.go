@@ -669,7 +669,7 @@ func (dc *DynamoDBClient) IncrementCounter(tableName string, key any, counterFie
 	return nil
 }
 
-func (dc *DynamoDBClient) GetPostsByIndexUser(username string, lastPostId, lastPostCreatedAt string, limit int) ([]*database.PostMetadata, string, string, error) {
+func (dc *DynamoDBClient) GetPostsByIndexUser(username string, currentUsername string, lastPostId, lastPostCreatedAt string, limit int) ([]*database.PostMetadata, string, string, error) {
 	input := &dynamodb.QueryInput{
 		TableName:              aws.String("PostMetadata"),
 		IndexName:              aws.String("UserIndex"),
@@ -707,6 +707,12 @@ func (dc *DynamoDBClient) GetPostsByIndexUser(username string, lastPostId, lastP
 			return nil, "", "", err
 		}
 
+		isLiked, err := dc.checkUserPostLikeExist(result.PostId, currentUsername)
+		if err != nil {
+			log.Error().Stack().Err(err).Msgf("Error checking like status for post %s", result.PostId)
+			isLiked = false
+		}
+		result.IsLikedByCurrentUser = isLiked
 		results = append(results, &result)
 	}
 
@@ -726,6 +732,27 @@ func (dc *DynamoDBClient) GetPostsByIndexUser(username string, lastPostId, lastP
 	}
 
 	return results, lastPostId, lastPostCreatedAt, nil
+}
+
+// CheckUserPostLikeExist verifica se un usuario específico deu like a un post
+func (dc DynamoDBClient) checkUserPostLikeExist(postId string, username string) (bool, error) {
+	input := &dynamodb.QueryInput{
+		TableName:              aws.String("readmodels.postLikes"),
+		KeyConditionExpression: aws.String("postId = :postId AND Username = :username"),
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":postId":   &types.AttributeValueMemberS{Value: postId},
+			":username": &types.AttributeValueMemberS{Value: username},
+		},
+		Limit: aws.Int32(1),
+	}
+
+	response, err := dc.client.Query(context.TODO(), input)
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Error checking if user %s liked post %s", username, postId)
+		return false, err
+	}
+
+	return len(response.Items) > 0, nil
 }
 
 func (dc *DynamoDBClient) GetCommentsByIndexPostId(postID string, lastCommentId uint64, limit int) ([]*model.Comment, uint64, error) {

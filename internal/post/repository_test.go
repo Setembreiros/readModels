@@ -40,6 +40,7 @@ func TestAddNewPostMetadataInRepository(t *testing.T) {
 func TestGetPostMetadatasByUserInRepository(t *testing.T) {
 	setUp(t)
 	username := "username1"
+	currentUsername := "username1"
 	lastPostId := "post4"
 	lastPostCreatedAt := "0001-01-03T00:00:00Z"
 	limit := 3
@@ -86,9 +87,9 @@ func TestGetPostMetadatasByUserInRepository(t *testing.T) {
 	}
 	expectedLastPostId := "post7"
 	expectedLastPostCreatedAt := "0001-01-06T00:00:00Z"
-	client.EXPECT().GetPostsByIndexUser(username, lastPostId, lastPostCreatedAt, limit).Return(data, expectedLastPostId, expectedLastPostCreatedAt, nil)
+	client.EXPECT().GetPostsByIndexUser(username, currentUsername, lastPostId, lastPostCreatedAt, limit).Return(data, expectedLastPostId, expectedLastPostCreatedAt, nil)
 
-	result, lastPostId, lastPostCreatedAt, _ := postRepository.GetPostMetadatasByUser(username, lastPostId, lastPostCreatedAt, limit)
+	result, lastPostId, lastPostCreatedAt, _ := postRepository.GetPostMetadatasByUser(username, currentUsername, lastPostId, lastPostCreatedAt, limit)
 
 	assert.Equal(t, expectedResult, result)
 	assert.Equal(t, expectedLastPostId, lastPostId)

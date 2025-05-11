@@ -8,8 +8,8 @@ func (r PostRepository) AddNewPostMetadata(data *PostMetadata) error {
 	return r.Client.InsertData("PostMetadata", data)
 }
 
-func (r PostRepository) GetPostMetadatasByUser(username string, lastPostId, lastPostCreatedAt string, limit int) ([]*PostMetadata, string, string, error) {
-	data, lastPostId, lastPostCreatedAt, err := r.Client.GetPostsByIndexUser(username, lastPostId, lastPostCreatedAt, limit)
+func (r PostRepository) GetPostMetadatasByUser(username string, currentUsername string, lastPostId, lastPostCreatedAt string, limit int) ([]*PostMetadata, string, string, error) {
+	data, lastPostId, lastPostCreatedAt, err := r.Client.GetPostsByIndexUser(username, currentUsername, lastPostId, lastPostCreatedAt, limit)
 	if err != nil {
 		return []*PostMetadata{}, "", "", err
 	}

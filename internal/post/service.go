@@ -10,7 +10,7 @@ import (
 
 type Repository interface {
 	AddNewPostMetadata(data *PostMetadata) error
-	GetPostMetadatasByUser(username string, lastPostId, lastPostCreatedAt string, limit int) ([]*PostMetadata, string, string, error)
+	GetPostMetadatasByUser(username string, currentUsername string, lastPostId, lastPostCreatedAt string, limit int) ([]*PostMetadata, string, string, error)
 	RemovePostMetadata(postIds []string) error
 }
 
@@ -19,16 +19,18 @@ type PostService struct {
 }
 
 type PostMetadata struct {
-	PostId      string    `json:"post_id"`
-	Username    string    `json:"username"`
-	Type        string    `json:"type"`
-	Title       string    `json:"title"`
-	Description string    `json:"description"`
-	Comments    int       `json:"comments"`
-	Likes       int       `json:"likes"`
-	Superlikes  int       `json:"superlikes"`
-	CreatedAt   time.Time `json:"created_at"`
-	LastUpdated time.Time `json:"last_updated"`
+	PostId                    string    `json:"post_id"`
+	Username                  string    `json:"username"`
+	Type                      string    `json:"type"`
+	Title                     string    `json:"title"`
+	Description               string    `json:"description"`
+	Comments                  int       `json:"comments"`
+	Likes                     int       `json:"likes"`
+	IsLikedByCurrentUser      bool      `json:"isLikedByCurrentUser"`
+	Superlikes                int       `json:"superlikes"`
+	IsSuperLikedByCurrentUser bool      `json:"isSuperLikedByCurrentUser"`
+	CreatedAt                 time.Time `json:"created_at"`
+	LastUpdated               time.Time `json:"last_updated"`
 }
 
 func NewPostService(repository Repository) *PostService {
@@ -47,8 +49,8 @@ func (s *PostService) CreateNewPostMetadata(data *PostMetadata) {
 	log.Info().Msgf("Post metadata for id %s was added", data.PostId)
 }
 
-func (s *PostService) GetPostMetadatasByUser(username string, lastPostId, lastPostCreatedAt string, limit int) ([]*PostMetadata, string, string, error) {
-	postMetadatas, lastPostId, lastPostCreatedAt, err := s.repository.GetPostMetadatasByUser(username, lastPostId, lastPostCreatedAt, limit)
+func (s *PostService) GetPostMetadatasByUser(username string, currentUsername string, lastPostId, lastPostCreatedAt string, limit int) ([]*PostMetadata, string, string, error) {
+	postMetadatas, lastPostId, lastPostCreatedAt, err := s.repository.GetPostMetadatasByUser(username, currentUsername, lastPostId, lastPostCreatedAt, limit)
 	if err != nil {
 		log.Error().Stack().Err(err).Msgf("Error getting post metadatas for username %s", username)
 		return postMetadatas, lastPostId, lastPostCreatedAt, err

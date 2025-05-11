@@ -11,7 +11,7 @@ import (
 //go:generate mockgen -source=controller.go -destination=mock/controller.go
 
 type Service interface {
-	GetPostMetadatasByUser(username string, lastPostId, lastPostCreatedAt string, limit int) ([]*PostMetadata, string, string, error)
+	GetPostMetadatasByUser(username string, currentUsername string, lastPostId, lastPostCreatedAt string, limit int) ([]*PostMetadata, string, string, error)
 }
 
 type PostController struct {
@@ -32,12 +32,13 @@ func NewPostController(service Service) *PostController {
 }
 
 func (controller *PostController) Routes(routerGroup *gin.RouterGroup) {
-	routerGroup.GET("/user-posts/:username", controller.GetPostMetadatasByUser)
+	routerGroup.GET("/user-posts/:username/:currentUsername", controller.GetPostMetadatasByUser)
 }
 
 func (controller *PostController) GetPostMetadatasByUser(c *gin.Context) {
 	log.Info().Msg("Handling Request GET UserProfile")
 	username := c.Param("username")
+	currentUsername := c.Param("currentUsername")
 	lastPostId := c.DefaultQuery("lastPostId", "")
 	lastPostCreatedAt := c.DefaultQuery("lastPostCreatedAt", "")
 	limit, err := strconv.Atoi(c.DefaultQuery("limit", "6"))
@@ -52,7 +53,7 @@ func (controller *PostController) GetPostMetadatasByUser(c *gin.Context) {
 		return
 	}
 
-	postMetadatas, lastPostId, lastPostCreatedAt, err := controller.service.GetPostMetadatasByUser(username, lastPostId, lastPostCreatedAt, limit)
+	postMetadatas, lastPostId, lastPostCreatedAt, err := controller.service.GetPostMetadatasByUser(username, currentUsername, lastPostId, lastPostCreatedAt, limit)
 	if err != nil {
 		api.SendInternalServerError(c, err.Error())
 		return

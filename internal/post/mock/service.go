@@ -49,9 +49,9 @@ func (mr *MockRepositoryMockRecorder) AddNewPostMetadata(data interface{}) *gomo
 }
 
 // GetPostMetadatasByUser mocks base method.
-func (m *MockRepository) GetPostMetadatasByUser(username, lastPostId, lastPostCreatedAt string, limit int) ([]*post.PostMetadata, string, string, error) {
+func (m *MockRepository) GetPostMetadatasByUser(username, currentUsername, lastPostId, lastPostCreatedAt string, limit int) ([]*post.PostMetadata, string, string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetPostMetadatasByUser", username, lastPostId, lastPostCreatedAt, limit)
+	ret := m.ctrl.Call(m, "GetPostMetadatasByUser", username, currentUsername, lastPostId, lastPostCreatedAt, limit)
 	ret0, _ := ret[0].([]*post.PostMetadata)
 	ret1, _ := ret[1].(string)
 	ret2, _ := ret[2].(string)
@@ -60,9 +60,9 @@ func (m *MockRepository) GetPostMetadatasByUser(username, lastPostId, lastPostCr
 }
 
 // GetPostMetadatasByUser indicates an expected call of GetPostMetadatasByUser.
-func (mr *MockRepositoryMockRecorder) GetPostMetadatasByUser(username, lastPostId, lastPostCreatedAt, limit interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) GetPostMetadatasByUser(username, currentUsername, lastPostId, lastPostCreatedAt, limit interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPostMetadatasByUser", reflect.TypeOf((*MockRepository)(nil).GetPostMetadatasByUser), username, lastPostId, lastPostCreatedAt, limit)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPostMetadatasByUser", reflect.TypeOf((*MockRepository)(nil).GetPostMetadatasByUser), username, currentUsername, lastPostId, lastPostCreatedAt, limit)
 }
 
 // RemovePostMetadata mocks base method.
