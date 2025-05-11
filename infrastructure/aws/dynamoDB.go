@@ -738,7 +738,7 @@ func (dc *DynamoDBClient) GetPostsByIndexUser(username string, currentUsername s
 func (dc DynamoDBClient) checkUserPostLikeExist(postId string, username string) (bool, error) {
 	input := &dynamodb.QueryInput{
 		TableName:              aws.String("readmodels.postLikes"),
-		KeyConditionExpression: aws.String("postId = :postId AND Username = :username"),
+		KeyConditionExpression: aws.String("PostId = :postId AND Username = :username"),
 		ExpressionAttributeValues: map[string]types.AttributeValue{
 			":postId":   &types.AttributeValueMemberS{Value: postId},
 			":username": &types.AttributeValueMemberS{Value: username},
