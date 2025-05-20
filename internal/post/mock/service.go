@@ -66,15 +66,15 @@ func (mr *MockRepositoryMockRecorder) GetPostMetadatasByUser(username, currentUs
 }
 
 // RemovePostMetadata mocks base method.
-func (m *MockRepository) RemovePostMetadata(postIds []string) error {
+func (m *MockRepository) RemovePostMetadata(username string, postIds []string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RemovePostMetadata", postIds)
+	ret := m.ctrl.Call(m, "RemovePostMetadata", username, postIds)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // RemovePostMetadata indicates an expected call of RemovePostMetadata.
-func (mr *MockRepositoryMockRecorder) RemovePostMetadata(postIds interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) RemovePostMetadata(username, postIds interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemovePostMetadata", reflect.TypeOf((*MockRepository)(nil).RemovePostMetadata), postIds)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemovePostMetadata", reflect.TypeOf((*MockRepository)(nil).RemovePostMetadata), username, postIds)
 }

@@ -16,7 +16,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var db *database.Database
+var userAFollowedUserBEventDb *database.Database
 var userAFollowedUserBEventLoggerOutput bytes.Buffer
 var userAFollowedUserBEventRepository *userprofile.UserProfileRepository
 var userAFollowedUserBEventHandler *userprofile_handler.UserAFollowedUserBEventHandler
@@ -24,19 +24,19 @@ var userAFollowedUserBEventHandler *userprofile_handler.UserAFollowedUserBEventH
 func setUpUserAFollowedUserBEventHandler(t *testing.T) {
 	ctx, _ := context.WithCancel(context.Background())
 	provider := provider.NewProvider("test")
-	db, _ = provider.ProvideDb(ctx)
-	db.ApplyMigrations(ctx)
+	userAFollowedUserBEventDb, _ = provider.ProvideDb(ctx)
+	userAFollowedUserBEventDb.ApplyMigrations(ctx)
 	log.Logger = log.Output(&userAFollowedUserBEventLoggerOutput)
-	userAFollowedUserBEventHandler = userprofile_handler.NewUserAFollowedUserBEventHandler(userprofile.UserProfileRepository(*db))
+	userAFollowedUserBEventHandler = userprofile_handler.NewUserAFollowedUserBEventHandler(userprofile.UserProfileRepository(*userAFollowedUserBEventDb))
 }
 
-func tearDown() {
-	db.Client.Truncate()
+func tearDownUserFollowedUserBEvent() {
+	userAFollowedUserBEventDb.Client.Truncate()
 }
 
 func TestHandlingUserAFollowedUserBEvent_WhenItReturnsSuccess(t *testing.T) {
 	setUpUserAFollowedUserBEventHandler(t)
-	defer tearDown()
+	defer tearDownUserFollowedUserBEvent()
 	userA := &model.UserProfile{
 		Username: "usernameA",
 		Name:     "user name A",
@@ -64,7 +64,7 @@ func TestHandlingUserAFollowedUserBEvent_WhenItReturnsSuccess(t *testing.T) {
 }
 
 func AddUserProfileToDatabase(t *testing.T, user *model.UserProfile) {
-	err := db.Client.InsertData("UserProfile", user)
+	err := userAFollowedUserBEventDb.Client.InsertData("UserProfile", user)
 	assert.Nil(t, err)
 }
 
@@ -86,10 +86,10 @@ func assertFollowersIncreased(t *testing.T, username string) {
 		Username: username,
 	}
 	var userProfile model.UserProfile
-	err := db.Client.GetData("UserProfile", userProfileKey, &userProfile)
+	err := userAFollowedUserBEventDb.Client.GetData("UserProfile", userProfileKey, &userProfile)
 	assert.Nil(t, err)
-	assert.Equal(t, userProfile.Followees, 0)
-	assert.Equal(t, userProfile.Followers, 1)
+	assert.Equal(t, userProfile.FolloweesAmount, 0)
+	assert.Equal(t, userProfile.FollowersAmount, 1)
 }
 
 func assertFolloweesIncreased(t *testing.T, username string) {
@@ -97,8 +97,8 @@ func assertFolloweesIncreased(t *testing.T, username string) {
 		Username: username,
 	}
 	var userProfile model.UserProfile
-	err := db.Client.GetData("UserProfile", userProfileKey, &userProfile)
+	err := userAFollowedUserBEventDb.Client.GetData("UserProfile", userProfileKey, &userProfile)
 	assert.Nil(t, err)
-	assert.Equal(t, userProfile.Followers, 0)
-	assert.Equal(t, userProfile.Followees, 1)
+	assert.Equal(t, userProfile.FollowersAmount, 0)
+	assert.Equal(t, userProfile.FolloweesAmount, 1)
 }

@@ -8,12 +8,13 @@ import (
 )
 
 type PostsWereDeletedEvent struct {
-	PostIds []string `json:"post_ids"`
+	Username string   `json:"username"`
+	PostIds  []string `json:"postIds"`
 }
 
 type PostsWereDeletedEventService interface {
 	CreateNewPostMetadata(data *post.PostMetadata)
-	RemovePostMetadata(postIds []string)
+	RemovePostMetadata(username string, postIds []string)
 }
 
 type PostsWereDeletedEventHandler struct {
@@ -36,5 +37,5 @@ func (handler *PostsWereDeletedEventHandler) Handle(event []byte) {
 		return
 	}
 
-	handler.service.RemovePostMetadata(postsWereDeletedEvent.PostIds)
+	handler.service.RemovePostMetadata(postsWereDeletedEvent.Username, postsWereDeletedEvent.PostIds)
 }

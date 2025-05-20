@@ -11,7 +11,7 @@ import (
 type Repository interface {
 	AddNewPostMetadata(data *PostMetadata) error
 	GetPostMetadatasByUser(username string, currentUsername string, lastPostId, lastPostCreatedAt string, limit int) ([]*PostMetadata, string, string, error)
-	RemovePostMetadata(postIds []string) error
+	RemovePostMetadata(username string, postIds []string) error
 }
 
 type PostService struct {
@@ -59,12 +59,12 @@ func (s *PostService) GetPostMetadatasByUser(username string, currentUsername st
 	return postMetadatas, lastPostId, lastPostCreatedAt, nil
 }
 
-func (s *PostService) RemovePostMetadata(postIds []string) {
-	err := s.repository.RemovePostMetadata(postIds)
+func (s *PostService) RemovePostMetadata(username string, postIds []string) {
+	err := s.repository.RemovePostMetadata(username, postIds)
 	if err != nil {
-		log.Error().Stack().Err(err).Msgf("Error removing post metadatas for id %v", postIds)
+		log.Error().Stack().Err(err).Msgf("Error removing %s's post metadatas for ids %v", username, postIds)
 		return
 	}
 
-	log.Info().Msgf("Post metadatas for ids %v were removed", postIds)
+	log.Info().Msgf("%s's post metadatas for ids %v were removed", username, postIds)
 }

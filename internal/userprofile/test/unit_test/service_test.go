@@ -27,12 +27,12 @@ func setUpService(t *testing.T) {
 func TestCreateNewUserProfileWithService(t *testing.T) {
 	setUpService(t)
 	data := &model.UserProfile{
-		Username:  "username1",
-		Name:      "user name",
-		Bio:       "",
-		Link:      "",
-		Followers: 0,
-		Followees: 0,
+		Username:        "username1",
+		Name:            "user name",
+		Bio:             "",
+		Link:            "",
+		FollowersAmount: 0,
+		FolloweesAmount: 0,
 	}
 	serviceRepository.EXPECT().AddNewUserProfile(data)
 
@@ -44,12 +44,12 @@ func TestCreateNewUserProfileWithService(t *testing.T) {
 func TestErrorOnCreateNewUserProfileWithService(t *testing.T) {
 	setUpService(t)
 	data := &model.UserProfile{
-		Username:  "username1",
-		Name:      "user name",
-		Bio:       "",
-		Link:      "",
-		Followers: 0,
-		Followees: 0,
+		Username:        "username1",
+		Name:            "user name",
+		Bio:             "",
+		Link:            "",
+		FollowersAmount: 0,
+		FolloweesAmount: 0,
 	}
 	serviceRepository.EXPECT().AddNewUserProfile(data).Return(errors.New("some error"))
 
@@ -61,12 +61,12 @@ func TestErrorOnCreateNewUserProfileWithService(t *testing.T) {
 func TestUpdateUserProfileWithService(t *testing.T) {
 	setUpService(t)
 	data := &model.UserProfile{
-		Username:  "username1",
-		Name:      "user name",
-		Bio:       "O mellor usuario do mundo",
-		Link:      "www.exemplo.com",
-		Followers: 10,
-		Followees: 20,
+		Username:        "username1",
+		Name:            "user name",
+		Bio:             "O mellor usuario do mundo",
+		Link:            "www.exemplo.com",
+		FollowersAmount: 10,
+		FolloweesAmount: 20,
 	}
 	serviceRepository.EXPECT().UpdateUserProfile(data)
 
@@ -78,12 +78,12 @@ func TestUpdateUserProfileWithService(t *testing.T) {
 func TestErrorOnUpdateUserProfileWithService(t *testing.T) {
 	setUpService(t)
 	data := &model.UserProfile{
-		Username:  "username1",
-		Name:      "user name",
-		Bio:       "O mellor usuario do mundo",
-		Link:      "www.exemplo.com",
-		Followers: 10,
-		Followees: 20,
+		Username:        "username1",
+		Name:            "user name",
+		Bio:             "O mellor usuario do mundo",
+		Link:            "www.exemplo.com",
+		FollowersAmount: 10,
+		FolloweesAmount: 20,
 	}
 	serviceRepository.EXPECT().UpdateUserProfile(data).Return(errors.New("some error"))
 
@@ -96,12 +96,12 @@ func TestGetUserProfileWithService(t *testing.T) {
 	setUpService(t)
 	username := "username1"
 	expectedData := &model.UserProfile{
-		Username:  "username1",
-		Name:      "user name",
-		Bio:       "",
-		Link:      "",
-		Followers: 10,
-		Followees: 20,
+		Username:        "username1",
+		Name:            "user name",
+		Bio:             "",
+		Link:            "",
+		FollowersAmount: 10,
+		FolloweesAmount: 20,
 	}
 	serviceRepository.EXPECT().GetUserProfile(username).Return(expectedData, nil)
 

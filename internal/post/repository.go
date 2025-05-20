@@ -5,7 +5,10 @@ import database "readmodels/internal/db"
 type PostRepository database.Database
 
 func (r PostRepository) AddNewPostMetadata(data *PostMetadata) error {
-	return r.Client.InsertData("PostMetadata", data)
+	userprofileKey := &database.UserProfileKey{
+		Username: data.Username,
+	}
+	return r.Client.InsertDataAndIncreaseCounter("PostMetadata", data, "UserProfile", userprofileKey, "PostsAmount")
 }
 
 func (r PostRepository) GetPostMetadatasByUser(username string, currentUsername string, lastPostId, lastPostCreatedAt string, limit int) ([]*PostMetadata, string, string, error) {
@@ -22,7 +25,7 @@ func (r PostRepository) GetPostMetadatasByUser(username string, currentUsername 
 	return posts, lastPostId, lastPostCreatedAt, nil
 }
 
-func (r PostRepository) RemovePostMetadata(postIds []string) error {
+func (r PostRepository) RemovePostMetadata(username string, postIds []string) error {
 	postKeys := make([]any, len(postIds))
 	for i, v := range postIds {
 		postKeys[i] = &database.PostMetadataKey{
@@ -30,9 +33,11 @@ func (r PostRepository) RemovePostMetadata(postIds []string) error {
 		}
 	}
 
-	err := r.Client.RemoveMultipleData("PostMetadata", postKeys)
+	userprofileKey := &database.UserProfileKey{
+		Username: username,
+	}
 
-	return err
+	return r.Client.RemoveMultipleDataAndDecreaseCounter("PostMetadata", postKeys, "UserProfile", userprofileKey, "PostsAmount")
 }
 
 func mapToDomain(data *database.PostMetadata) *PostMetadata {

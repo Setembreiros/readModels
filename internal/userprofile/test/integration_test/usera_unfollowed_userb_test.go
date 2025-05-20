@@ -37,20 +37,20 @@ func TestHandlingUserAUnfollowedUserBEvent_WhenItReturnsSuccess(t *testing.T) {
 	setUpUserAUnfollowedUserBEventHandler()
 	defer tearDownUserAUnfollowedUserBEvent()
 	userA := &model.UserProfile{
-		Username:  "usernameA",
-		Name:      "user name A",
-		Bio:       "",
-		Link:      "",
-		Followers: 1,
-		Followees: 1,
+		Username:        "usernameA",
+		Name:            "user name A",
+		Bio:             "",
+		Link:            "",
+		FollowersAmount: 1,
+		FolloweesAmount: 1,
 	}
 	userB := &model.UserProfile{
-		Username:  "usernameB",
-		Name:      "user name B",
-		Bio:       "",
-		Link:      "",
-		Followers: 1,
-		Followees: 1,
+		Username:        "usernameB",
+		Name:            "user name B",
+		Bio:             "",
+		Link:            "",
+		FollowersAmount: 1,
+		FolloweesAmount: 1,
 	}
 	AddUserProfileTouserAUnfollowedUserBEventDatabase(t, userA)
 	AddUserProfileTouserAUnfollowedUserBEventDatabase(t, userB)
@@ -88,8 +88,8 @@ func assertFollowersDecreased(t *testing.T, username string) {
 	var userProfile model.UserProfile
 	err := userAUnfollowedUserBEventDb.Client.GetData("UserProfile", userProfileKey, &userProfile)
 	assert.Nil(t, err)
-	assert.Equal(t, userProfile.Followees, 1)
-	assert.Equal(t, userProfile.Followers, 0)
+	assert.Equal(t, userProfile.FolloweesAmount, 1)
+	assert.Equal(t, userProfile.FollowersAmount, 0)
 }
 
 func assertFolloweesDecreased(t *testing.T, username string) {
@@ -99,6 +99,6 @@ func assertFolloweesDecreased(t *testing.T, username string) {
 	var userProfile model.UserProfile
 	err := userAUnfollowedUserBEventDb.Client.GetData("UserProfile", userProfileKey, &userProfile)
 	assert.Nil(t, err)
-	assert.Equal(t, userProfile.Followers, 1)
-	assert.Equal(t, userProfile.Followees, 0)
+	assert.Equal(t, userProfile.FollowersAmount, 1)
+	assert.Equal(t, userProfile.FolloweesAmount, 0)
 }

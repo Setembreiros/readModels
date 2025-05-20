@@ -113,20 +113,22 @@ func TestErrorOnGetPostMetadatasByUserWithService(t *testing.T) {
 
 func TestRemovePostMetadataWithService(t *testing.T) {
 	setUpService(t)
+	username := "username1"
 	postIds := []string{"123456", "abcdef", "1a2b3e"}
-	serviceRepository.EXPECT().RemovePostMetadata(postIds)
+	serviceRepository.EXPECT().RemovePostMetadata(username, postIds)
 
-	postService.RemovePostMetadata(postIds)
+	postService.RemovePostMetadata(username, postIds)
 
-	assert.Contains(t, serviceLoggerOutput.String(), fmt.Sprintf("Post metadatas for ids %v were removed", postIds))
+	assert.Contains(t, serviceLoggerOutput.String(), fmt.Sprintf("%s's post metadatas for ids %v were removed", username, postIds))
 }
 
 func TestRemovePostMetadataWithService_Error(t *testing.T) {
 	setUpService(t)
+	username := "username1"
 	postIds := []string{"123456", "abcdef", "1a2b3e"}
-	serviceRepository.EXPECT().RemovePostMetadata(postIds).Return(errors.New("some error"))
+	serviceRepository.EXPECT().RemovePostMetadata(username, postIds).Return(errors.New("some error"))
 
-	postService.RemovePostMetadata(postIds)
+	postService.RemovePostMetadata(username, postIds)
 
-	assert.Contains(t, serviceLoggerOutput.String(), fmt.Sprintf("Error removing post metadatas for id %v", postIds))
+	assert.Contains(t, serviceLoggerOutput.String(), fmt.Sprintf("Error removing %s's post metadatas for ids %v", username, postIds))
 }

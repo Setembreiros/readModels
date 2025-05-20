@@ -23,7 +23,7 @@ var controller *userprofile.UserProfileController
 var apiResponse *httptest.ResponseRecorder
 var ginContext *gin.Context
 
-func setUpHandler(t *testing.T) {
+func setUpController(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	controllerRepository = mock_userprofile.NewMockRepository(ctrl)
 	log.Logger = log.Output(&controllerLoggerOutput)
@@ -34,16 +34,17 @@ func setUpHandler(t *testing.T) {
 }
 
 func TestGetUserProfile(t *testing.T) {
-	setUpHandler(t)
+	setUpController(t)
 	username := "username1"
 	ginContext.Params = []gin.Param{{Key: "username", Value: username}}
 	data := &model.UserProfile{
-		Username:  "username1",
-		Name:      "user name",
-		Bio:       "",
-		Link:      "",
-		Followers: 10,
-		Followees: 20,
+		Username:        "username1",
+		Name:            "user name",
+		Bio:             "",
+		Link:            "",
+		FollowersAmount: 10,
+		FolloweesAmount: 20,
+		PostsAmount:     60,
 	}
 	controllerRepository.EXPECT().GetUserProfile(username).Return(data, nil)
 	expectedBodyResponse := `{
@@ -54,8 +55,9 @@ func TestGetUserProfile(t *testing.T) {
 			"name": "user name",
 			"bio": "",
 			"link": "",
-			"followers": 10,
-			"followees": 20
+			"followersAmount": 10,
+			"followeesAmount": 20,
+			"postsAmount": 60
 		}
 	}`
 
@@ -66,16 +68,16 @@ func TestGetUserProfile(t *testing.T) {
 }
 
 func TestUserNotFoundOnGetUserProfile(t *testing.T) {
-	setUpHandler(t)
+	setUpController(t)
 	noExistingUsername := "noExistingUsername"
 	ginContext.Params = []gin.Param{{Key: "username", Value: noExistingUsername}}
 	expectedData := &model.UserProfile{
-		Username:  "",
-		Name:      "",
-		Bio:       "",
-		Link:      "",
-		Followers: 10,
-		Followees: 20,
+		Username:        "",
+		Name:            "",
+		Bio:             "",
+		Link:            "",
+		FollowersAmount: 10,
+		FolloweesAmount: 20,
 	}
 	expectedNotFoundError := &database.NotFoundError{}
 	controllerRepository.EXPECT().GetUserProfile(noExistingUsername).Return(expectedData, expectedNotFoundError)
@@ -92,16 +94,16 @@ func TestUserNotFoundOnGetUserProfile(t *testing.T) {
 }
 
 func TestInternalServerErrorOnGetUserProfile(t *testing.T) {
-	setUpHandler(t)
+	setUpController(t)
 	username := "username1"
 	ginContext.Params = []gin.Param{{Key: "username", Value: username}}
 	expectedData := &model.UserProfile{
-		Username:  "",
-		Name:      "",
-		Bio:       "",
-		Link:      "",
-		Followers: 10,
-		Followees: 20,
+		Username:        "",
+		Name:            "",
+		Bio:             "",
+		Link:            "",
+		FollowersAmount: 10,
+		FolloweesAmount: 20,
 	}
 	expectedError := errors.New("some error")
 	controllerRepository.EXPECT().GetUserProfile(username).Return(expectedData, expectedError)

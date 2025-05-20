@@ -555,6 +555,82 @@ func (dc *DynamoDBClient) RemoveDataAndDecreaseCounter(tableName string, key any
 	return nil
 }
 
+func (dc *DynamoDBClient) RemoveMultipleDataAndDecreaseCounter(tableName string, keys []any, counterTableName string, counterKey any, counterFieldName string) error {
+	if len(keys) == 0 {
+		return nil
+	}
+
+	// Marshal counter key
+	counterK, err := attributevalue.MarshalMap(counterKey)
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Couldn't map %v key to AttributeValues", counterKey)
+		return err
+	}
+
+	// Create DynamoDB transaction items
+	transactItems := make([]types.TransactWriteItem, 0, len(keys)+1)
+
+	// Add delete requests for each key
+	for _, key := range keys {
+		k, err := attributevalue.MarshalMap(key)
+		if err != nil {
+			log.Error().Stack().Err(err).Msgf("Couldn't map %v key to AttributeValues", key)
+			return err
+		}
+
+		deleteItem := types.TransactWriteItem{
+			Delete: &types.Delete{
+				TableName: aws.String(tableName),
+				Key:       k,
+			},
+		}
+		transactItems = append(transactItems, deleteItem)
+	}
+
+	// Add update request for the counter - decrement by the number of items being deleted
+	totalDecrement := len(keys)
+	updateItem := types.TransactWriteItem{
+		Update: &types.Update{
+			TableName:        aws.String(counterTableName),
+			Key:              counterK,
+			UpdateExpression: aws.String("set #field = #field + :val"),
+			ExpressionAttributeNames: map[string]string{
+				"#field": counterFieldName,
+			},
+			ExpressionAttributeValues: map[string]types.AttributeValue{
+				":val": &types.AttributeValueMemberN{Value: strconv.Itoa(-totalDecrement)},
+			},
+		},
+	}
+	transactItems = append(transactItems, updateItem)
+
+	// DynamoDB transactions are limited to 100 items
+	if len(transactItems) > 100 {
+		log.Error().Msgf("Transaction exceeds maximum item limit (100). Attempting to delete %d items.", len(keys))
+		return fmt.Errorf("transaction exceeds maximum item limit (100)")
+	}
+
+	// Execute transaction
+	transactionInput := &dynamodb.TransactWriteItemsInput{
+		TransactItems: transactItems,
+	}
+
+	_, err = dc.client.TransactWriteItems(context.TODO(), transactionInput)
+	if err != nil {
+		var tce *types.TransactionCanceledException
+		if errors.As(err, &tce) {
+			log.Error().Stack().Err(err).Msgf("Transaction canceled: %v", tce.CancellationReasons)
+		} else {
+			log.Error().Stack().Err(err).Msgf("Failed to execute transaction")
+		}
+		return err
+	}
+
+	log.Info().Msgf("Successfully executed transaction: removed %d items from %s and decreased counter %s in %s by %d",
+		len(keys), tableName, counterFieldName, counterTableName, totalDecrement)
+	return nil
+}
+
 func (dc *DynamoDBClient) RemoveMultipleData(tableName string, keys []any) error {
 	writeRequests := make([]types.WriteRequest, len(keys))
 	for i, key := range keys {

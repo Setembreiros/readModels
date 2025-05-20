@@ -16,7 +16,7 @@ var postsWereDeletedEventHandlerLoggerOutput bytes.Buffer
 var postsWereDeletedEventHandlerRepository *mock_post.MockRepository
 var postsWereDeletedEventHandler *post_handler.PostsWereDeletedEventHandler
 
-func setUppostsWereDeletedEventHandler(t *testing.T) {
+func setUpPostsWereDeletedEventHandler(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	postsWereDeletedEventHandlerRepository = mock_post.NewMockRepository(ctrl)
 	log.Logger = log.Output(&postsWereDeletedEventHandlerLoggerOutput)
@@ -24,19 +24,21 @@ func setUppostsWereDeletedEventHandler(t *testing.T) {
 }
 
 func TestHandlePostsWereDeletedEvent(t *testing.T) {
-	setUppostsWereDeletedEventHandler(t)
+	setUpPostsWereDeletedEventHandler(t)
+	username := "username1"
 	postIds := []string{"123456", "abcdef", "1a2b3e"}
 	data := &post_handler.PostsWereDeletedEvent{
-		PostIds: postIds,
+		Username: username,
+		PostIds:  postIds,
 	}
 	event, _ := json.Marshal(data)
-	postsWereDeletedEventHandlerRepository.EXPECT().RemovePostMetadata(postIds).Return(nil)
+	postsWereDeletedEventHandlerRepository.EXPECT().RemovePostMetadata(username, postIds).Return(nil)
 
 	postsWereDeletedEventHandler.Handle(event)
 }
 
 func TestHandlePostsWereDeletedEvent_ErrorInvalidData(t *testing.T) {
-	setUppostsWereDeletedEventHandler(t)
+	setUpPostsWereDeletedEventHandler(t)
 	invalidData := "invalid data"
 	event, _ := json.Marshal(invalidData)
 

@@ -72,7 +72,7 @@ func TestIncreaseFollowersFromRepository(t *testing.T) {
 	expectedUserProfileKey := &database.UserProfileKey{
 		Username: username,
 	}
-	client.EXPECT().IncrementCounter("UserProfile", expectedUserProfileKey, "Followers", 1)
+	client.EXPECT().IncrementCounter("UserProfile", expectedUserProfileKey, "FollowersAmount", 1)
 
 	userProfileRepository.IncreaseFollowers(username)
 }
@@ -83,7 +83,7 @@ func TestIncreaseFolloweesFromRepository(t *testing.T) {
 	expectedUserProfileKey := &database.UserProfileKey{
 		Username: username,
 	}
-	client.EXPECT().IncrementCounter("UserProfile", expectedUserProfileKey, "Followees", 1)
+	client.EXPECT().IncrementCounter("UserProfile", expectedUserProfileKey, "FolloweesAmount", 1)
 
 	userProfileRepository.IncreaseFollowees(username)
 }
@@ -94,7 +94,7 @@ func TestDecreaseFollowersFromRepository(t *testing.T) {
 	expectedUserProfileKey := &database.UserProfileKey{
 		Username: username,
 	}
-	client.EXPECT().IncrementCounter("UserProfile", expectedUserProfileKey, "Followers", -1)
+	client.EXPECT().IncrementCounter("UserProfile", expectedUserProfileKey, "FollowersAmount", -1)
 
 	userProfileRepository.DecreaseFollowers(username)
 }
@@ -105,7 +105,7 @@ func TestDecreaseFolloweesFromRepository(t *testing.T) {
 	expectedUserProfileKey := &database.UserProfileKey{
 		Username: username,
 	}
-	client.EXPECT().IncrementCounter("UserProfile", expectedUserProfileKey, "Followees", -1)
+	client.EXPECT().IncrementCounter("UserProfile", expectedUserProfileKey, "FolloweesAmount", -1)
 
 	userProfileRepository.DecreaseFollowees(username)
 }

@@ -32,7 +32,10 @@ func TestAddNewPostMetadataInRepository(t *testing.T) {
 		CreatedAt:   timeNow,
 		LastUpdated: timeNow,
 	}
-	client.EXPECT().InsertData("PostMetadata", data)
+	expectedUserporfileKey := &database.UserProfileKey{
+		Username: data.Username,
+	}
+	client.EXPECT().InsertDataAndIncreaseCounter("PostMetadata", data, "UserProfile", expectedUserporfileKey, "PostsAmount")
 
 	postRepository.AddNewPostMetadata(data)
 }
@@ -98,6 +101,7 @@ func TestGetPostMetadatasByUserInRepository(t *testing.T) {
 
 func TestRemovePostMetadataInRepository(t *testing.T) {
 	setUp(t)
+	username := "username1"
 	postIds := []string{"123456", "abcdef", "1a2b3e"}
 	expectedKeys := []any{
 		&database.PostMetadataKey{
@@ -110,7 +114,11 @@ func TestRemovePostMetadataInRepository(t *testing.T) {
 			PostId: "1a2b3e",
 		},
 	}
-	client.EXPECT().RemoveMultipleData("PostMetadata", expectedKeys)
+	expectedUserprofileKey := &database.UserProfileKey{
+		Username: username,
+	}
 
-	postRepository.RemovePostMetadata(postIds)
+	client.EXPECT().RemoveMultipleDataAndDecreaseCounter("PostMetadata", expectedKeys, "UserProfile", expectedUserprofileKey, "PostsAmount")
+
+	postRepository.RemovePostMetadata(username, postIds)
 }

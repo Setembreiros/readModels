@@ -33,6 +33,7 @@ type DatabaseClient interface {
 	UpdateData(tableName string, key any, updateAttributes map[string]any) error
 	IncrementCounter(tableName string, key any, counterFieldName string, incrementValue int) error
 	RemoveDataAndDecreaseCounter(tableName string, key any, counterTableName string, counterKey any, counterFieldName string) error
+	RemoveMultipleDataAndDecreaseCounter(tableName string, keys []any, counterTableName string, counterKey any, counterFieldName string) error
 	RemoveMultipleData(tableName string, keys []any) error
 }
 

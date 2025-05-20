@@ -239,6 +239,20 @@ func (mr *MockDatabaseClientMockRecorder) RemoveMultipleData(tableName, keys int
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveMultipleData", reflect.TypeOf((*MockDatabaseClient)(nil).RemoveMultipleData), tableName, keys)
 }
 
+// RemoveMultipleDataAndDecreaseCounter mocks base method.
+func (m *MockDatabaseClient) RemoveMultipleDataAndDecreaseCounter(tableName string, keys []any, counterTableName string, counterKey any, counterFieldName string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RemoveMultipleDataAndDecreaseCounter", tableName, keys, counterTableName, counterKey, counterFieldName)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RemoveMultipleDataAndDecreaseCounter indicates an expected call of RemoveMultipleDataAndDecreaseCounter.
+func (mr *MockDatabaseClientMockRecorder) RemoveMultipleDataAndDecreaseCounter(tableName, keys, counterTableName, counterKey, counterFieldName interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveMultipleDataAndDecreaseCounter", reflect.TypeOf((*MockDatabaseClient)(nil).RemoveMultipleDataAndDecreaseCounter), tableName, keys, counterTableName, counterKey, counterFieldName)
+}
+
 // TableExists mocks base method.
 func (m *MockDatabaseClient) TableExists(tableName string) bool {
 	m.ctrl.T.Helper()
