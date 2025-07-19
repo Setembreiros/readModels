@@ -5,6 +5,7 @@ import (
 	"readmodels/internal/model"
 	"readmodels/internal/reaction"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -74,6 +75,27 @@ func TestCreatePostSuperlikeInRepository(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+func TestCreateReviewInRepository(t *testing.T) {
+	setUpRepository(t)
+	timeNow := time.Now().UTC()
+	data := &model.Review{
+		ReviewId:  uint64(123456),
+		Username:  "user123",
+		PostId:    "post123",
+		Content:   "Exemplo de content",
+		Rating:    3,
+		CreatedAt: timeNow,
+	}
+	expectedPostKey := &database.PostMetadataKey{
+		PostId: data.PostId,
+	}
+	client.EXPECT().InsertDataAndIncreaseCounter("readmodels.reviews", data, "PostMetadata", expectedPostKey, "Reviews").Return(nil)
+
+	err := reactionRepository.CreateReview(data)
+
+	assert.Nil(t, err)
+}
+
 func TestGetPostLikesMetadataInRepository_WhenDatabaseReturnsSuccess(t *testing.T) {
 	setUpRepository(t)
 	postId := "post2"
@@ -96,7 +118,7 @@ func TestGetPostLikesMetadataInRepository_WhenDatabaseReturnsSuccess(t *testing.
 	expectedLastUsername := "username3"
 	client.EXPECT().GetPostLikesByIndexPostId(postId, lastUsername, limit).Return(expectedResult, expectedLastUsername, nil)
 
-	result, lastUsername, err := reactionRepository.GetPostLikesMetadata(postId, lastUsername, limit)
+	result, lastUsername, err := reactionRepository.GetLikesMetadataByPostId(postId, lastUsername, limit)
 
 	assert.Nil(t, err)
 	assert.Equal(t, expectedResult, result)
@@ -125,11 +147,79 @@ func TestGetPostSuperlikesMetadataInRepository_WhenDatabaseReturnsSuccess(t *tes
 	expectedLastUsername := "username3"
 	client.EXPECT().GetPostSuperlikesByIndexPostId(postId, lastUsername, limit).Return(expectedResult, expectedLastUsername, nil)
 
-	result, lastUsername, err := reactionRepository.GetPostSuperlikesMetadata(postId, lastUsername, limit)
+	result, lastUsername, err := reactionRepository.GetSuperlikesMetadataByPostId(postId, lastUsername, limit)
 
 	assert.Nil(t, err)
 	assert.Equal(t, expectedResult, result)
 	assert.Equal(t, expectedLastUsername, lastUsername)
+}
+
+func TestGetReviewsByPostIdInRepository_WhenDatabaseReturnsSuccess(t *testing.T) {
+	setUpRepository(t)
+	postId := "post2"
+	lastReviewId := uint64(7)
+	limit := 3
+	timeNow := time.Now().UTC()
+	data := []*model.Review{
+		{
+			ReviewId:  uint64(5),
+			Username:  "username1",
+			PostId:    postId,
+			Content:   "a miña review 1",
+			Rating:    4,
+			CreatedAt: timeNow,
+		},
+		{
+			ReviewId:  uint64(6),
+			Username:  "username2",
+			PostId:    postId,
+			Content:   "a miña review 2",
+			Rating:    4,
+			CreatedAt: timeNow,
+		},
+		{
+			ReviewId:  uint64(7),
+			Username:  "username1",
+			PostId:    postId,
+			Content:   "a miña review 3",
+			Rating:    4,
+			CreatedAt: timeNow,
+		},
+	}
+	expectedResult := []*model.Review{
+		{
+			ReviewId:  uint64(5),
+			Username:  "username1",
+			PostId:    postId,
+			Content:   "a miña review 1",
+			Rating:    4,
+			CreatedAt: timeNow,
+		},
+		{
+			ReviewId:  uint64(6),
+			Username:  "username2",
+			PostId:    postId,
+			Content:   "a miña review 2",
+			Rating:    4,
+			CreatedAt: timeNow,
+		},
+		{
+			ReviewId:  uint64(7),
+			Username:  "username1",
+			PostId:    postId,
+			Content:   "a miña review 3",
+			Rating:    4,
+			CreatedAt: timeNow,
+		},
+	}
+	expectedLastReviewId := uint64(7)
+	client.EXPECT().GetReviewsByIndexPostId(postId, lastReviewId, limit).Return(data, expectedLastReviewId, nil)
+
+	result, lastReviewId, err := reactionRepository.GetReviewsByPostId(postId, lastReviewId, limit)
+
+	assert.Nil(t, err)
+	assert.Equal(t, expectedResult, result)
+	assert.Equal(t, expectedLastReviewId, lastReviewId)
 }
 
 func TestDeletePostLikeInRepository(t *testing.T) {

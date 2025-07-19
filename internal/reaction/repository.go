@@ -51,7 +51,14 @@ func (r *ReactionRepository) CreatePostSuperlike(postSuperlike *model.PostSuperl
 	return r.database.Client.InsertDataAndIncreaseCounter("readmodels.postSuperlikes", postSuperlikeMetadata, "PostMetadata", postKey, "Superlikes")
 }
 
-func (r *ReactionRepository) GetPostLikesMetadata(postId string, lastUsername string, limit int) ([]*model.UserMetadata, string, error) {
+func (r ReactionRepository) CreateReview(data *model.Review) error {
+	postKey := &database.PostMetadataKey{
+		PostId: data.PostId,
+	}
+	return r.database.Client.InsertDataAndIncreaseCounter("readmodels.reviews", data, "PostMetadata", postKey, "Reviews")
+}
+
+func (r *ReactionRepository) GetLikesMetadataByPostId(postId string, lastUsername string, limit int) ([]*model.UserMetadata, string, error) {
 	likes, newLastUsername, err := r.database.Client.GetPostLikesByIndexPostId(postId, lastUsername, limit)
 	if err != nil {
 		return []*model.UserMetadata{}, "", err
@@ -60,13 +67,22 @@ func (r *ReactionRepository) GetPostLikesMetadata(postId string, lastUsername st
 	return likes, newLastUsername, nil
 }
 
-func (r *ReactionRepository) GetPostSuperlikesMetadata(postId string, lastUsername string, limit int) ([]*model.UserMetadata, string, error) {
+func (r *ReactionRepository) GetSuperlikesMetadataByPostId(postId string, lastUsername string, limit int) ([]*model.UserMetadata, string, error) {
 	superlikes, newLastUsername, err := r.database.Client.GetPostSuperlikesByIndexPostId(postId, lastUsername, limit)
 	if err != nil {
 		return []*model.UserMetadata{}, "", err
 	}
 
 	return superlikes, newLastUsername, nil
+}
+
+func (r ReactionRepository) GetReviewsByPostId(postId string, lastReviewId uint64, limit int) ([]*model.Review, uint64, error) {
+	reviews, newLastReviewId, err := r.database.Client.GetReviewsByIndexPostId(postId, lastReviewId, limit)
+	if err != nil {
+		return []*model.Review{}, uint64(0), err
+	}
+
+	return reviews, newLastReviewId, nil
 }
 
 func (r *ReactionRepository) DeletePostLike(postLike *model.PostLike) error {

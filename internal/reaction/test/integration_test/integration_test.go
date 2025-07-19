@@ -13,6 +13,7 @@ import (
 	"readmodels/test/test_common"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,6 +24,7 @@ var userLikedPostEventHandler *reaction_handler.UserLikedPostEventHandler
 var userSuperlikedPostEventHandler *reaction_handler.UserSuperlikedPostEventHandler
 var userUnlikedPostEventHandler *reaction_handler.UserUnlikedPostEventHandler
 var userUnsuperlikedPostEventHandler *reaction_handler.UserUnsuperlikedPostEventHandler
+var reviewWasCreatedEventHandler *reaction_handler.ReviewWasCreatedEventHandler
 var apiResponse *httptest.ResponseRecorder
 var ginContext *gin.Context
 
@@ -39,6 +41,7 @@ func setUp(t *testing.T) {
 	userSuperlikedPostEventHandler = reaction_handler.NewUserSuperlikedPostEventHandler(service)
 	userUnlikedPostEventHandler = reaction_handler.NewUserUnlikedPostEventHandler(service)
 	userUnsuperlikedPostEventHandler = reaction_handler.NewUserUnsuperlikedPostEventHandler(service)
+	reviewWasCreatedEventHandler = reaction_handler.NewReviewWasCreatedEventHandler(service)
 }
 
 func tearDown() {
@@ -111,6 +114,41 @@ func TestCreatePostSuperlike_WhenDatabaseReturnsSuccess(t *testing.T) {
 
 	integration_test_assert.AssertPostSuperlikeExists(t, db, expectedSuperlike)
 	integration_test_assert.AssertPostSuperlikesIncreased(t, db, existingPost.PostId)
+}
+
+func TestCreateNewReview_WhenDatabaseReturnsSuccess(t *testing.T) {
+	setUp(t)
+	defer tearDown()
+	existingPost := &database.PostMetadata{
+		PostId:   "post123",
+		Username: "username1",
+		Type:     "TEXT",
+	}
+	integration_test_arrange.AddPostToDatabase(t, db, existingPost)
+	timeNow := time.Now().UTC().Format(model.TimeLayout)
+	data := &reaction_handler.ReviewWasCreatedEvent{
+		ReviewId:  uint64(123456),
+		Username:  "user123",
+		PostId:    "post123",
+		Content:   "Exemplo de content",
+		Rating:    3,
+		CreatedAt: timeNow,
+	}
+	event, _ := test_common.SerializeData(data)
+	expectedTime, _ := time.Parse(model.TimeLayout, data.CreatedAt)
+	expectedReview := &model.Review{
+		ReviewId:  data.ReviewId,
+		Username:  data.Username,
+		PostId:    data.PostId,
+		Content:   data.Content,
+		Rating:    data.Rating,
+		CreatedAt: expectedTime,
+	}
+
+	reviewWasCreatedEventHandler.Handle(event)
+
+	integration_test_assert.AssertReviewExists(t, db, data.ReviewId, expectedReview)
+	integration_test_assert.AssertPostReviewsIncreased(t, db, existingPost.PostId)
 }
 
 func TestGetPostLikesMetadata_WhenDatabaseReturnsSuccess(t *testing.T) {
@@ -200,6 +238,73 @@ func TestGetPostSuperlikesMetadata_WhenDatabaseReturnsSuccess(t *testing.T) {
 
 	integration_test_assert.AssertSuccessResult(t, apiResponse, expectedBodyResponse)
 }
+
+func TestGetReviewsByPostId_WhenDatabaseReturnsSuccess(t *testing.T) {
+	setUp(t)
+	defer tearDown()
+	timeNowString := time.Now().UTC().Format(model.TimeLayout)
+	timeNow, _ := time.Parse(model.TimeLayout, timeNowString)
+	populateReviewsDb(t, timeNow)
+	postId := "post1"
+	lastReviewId := uint64(13)
+	limit := 4
+	ginContext.Request, _ = http.NewRequest("GET", "/reviews", nil)
+	ginContext.Params = []gin.Param{{Key: "postId", Value: postId}}
+	u := url.Values{}
+	u.Add("lastReviewId", strconv.FormatUint(lastReviewId, 10))
+	u.Add("limit", strconv.Itoa(limit))
+	ginContext.Request.URL.RawQuery = u.Encode()
+	expectedBodyResponse := `{
+		"error": false,
+		"message": "200 OK",
+		"content": {
+			"reviews":[	
+			{
+				"reviewId": 11,
+				"postId":    "post1",
+				"username":  "user123",
+				"content": 	 "a miña review 11",
+				"rating": 4,
+				"createdAt": "` + timeNowString + `",
+				"updatedAt": "` + timeNowString + `"
+			},	
+			{
+				"reviewId": 9,
+				"postId":    "post1",
+				"username":  "username1",
+				"content": 	 "a miña review 9",
+				"rating": 4,
+				"createdAt": "` + timeNowString + `",
+				"updatedAt": "` + timeNowString + `"
+			},	
+			{
+				"reviewId": 8,
+				"postId":    "post1",
+				"username":  "username3",
+				"content": 	 "a miña review 8",
+				"rating": 4,
+				"createdAt": "` + timeNowString + `",
+				"updatedAt": "` + timeNowString + `"
+			},
+			{
+				"reviewId": 6,
+				"postId":    "post1",
+				"username":  "username2",
+				"content": 	 "a miña review 6",
+				"rating": 4,
+				"createdAt": "` + timeNowString + `",
+				"updatedAt": "` + timeNowString + `"
+			}
+			],
+			"lastReviewId":6
+		}
+	}`
+
+	controller.GetReviewsByPostId(ginContext)
+
+	integration_test_assert.AssertSuccessResult(t, apiResponse, expectedBodyResponse)
+}
+
 func TestDeletePostLike_WhenDatabaseReturnsSuccess(t *testing.T) {
 	setUp(t)
 	defer tearDown()
@@ -391,5 +496,140 @@ func populatePostSuperlikesDb(t *testing.T) {
 
 	for _, existingPostSuperlike := range existingPostSuperlikes {
 		integration_test_arrange.AddPostSuperlikeToDatabase(t, db, existingPostSuperlike)
+	}
+}
+
+func populateReviewsDb(t *testing.T, time time.Time) {
+	existingReviews := []*model.Review{
+		{
+			ReviewId:  uint64(1),
+			Username:  "username1",
+			PostId:    "post1",
+			Content:   "a miña review 1",
+			Rating:    4,
+			CreatedAt: time,
+			UpdatedAt: time,
+		},
+		{
+			ReviewId:  uint64(2),
+			Username:  "username2",
+			PostId:    "post1",
+			Content:   "a miña review 2",
+			Rating:    4,
+			CreatedAt: time,
+			UpdatedAt: time,
+		},
+		{
+			ReviewId:  uint64(3),
+			Username:  "username1",
+			PostId:    "post1",
+			Content:   "a miña review 3",
+			Rating:    4,
+			CreatedAt: time,
+			UpdatedAt: time,
+		},
+		{
+			ReviewId:  uint64(4),
+			Username:  "user123",
+			PostId:    "post2",
+			Content:   "a miña review 4",
+			Rating:    4,
+			CreatedAt: time,
+			UpdatedAt: time,
+		},
+		{
+			ReviewId:  uint64(5),
+			Username:  "user123",
+			PostId:    "post2",
+			Content:   "a miña review 5",
+			Rating:    4,
+			CreatedAt: time,
+			UpdatedAt: time,
+		},
+		{
+			ReviewId:  uint64(6),
+			Username:  "username2",
+			PostId:    "post1",
+			Content:   "a miña review 6",
+			Rating:    4,
+			CreatedAt: time,
+			UpdatedAt: time,
+		},
+		{
+			ReviewId:  uint64(7),
+			Username:  "username1",
+			PostId:    "post2",
+			Content:   "a miña review 7",
+			Rating:    4,
+			CreatedAt: time,
+			UpdatedAt: time,
+		},
+		{
+			ReviewId:  uint64(8),
+			Username:  "username3",
+			PostId:    "post1",
+			Content:   "a miña review 8",
+			Rating:    4,
+			CreatedAt: time,
+			UpdatedAt: time,
+		},
+		{
+			ReviewId:  uint64(9),
+			Username:  "username1",
+			PostId:    "post1",
+			Content:   "a miña review 9",
+			Rating:    4,
+			CreatedAt: time,
+			UpdatedAt: time,
+		},
+		{
+			ReviewId:  uint64(10),
+			Username:  "user123",
+			PostId:    "post2",
+			Content:   "a miña review 10",
+			Rating:    4,
+			CreatedAt: time,
+			UpdatedAt: time,
+		},
+		{
+			ReviewId:  uint64(11),
+			Username:  "user123",
+			PostId:    "post1",
+			Content:   "a miña review 11",
+			Rating:    4,
+			CreatedAt: time,
+			UpdatedAt: time,
+		},
+		{
+			ReviewId:  uint64(12),
+			Username:  "user123",
+			PostId:    "post2",
+			Content:   "a miña review 12",
+			Rating:    4,
+			CreatedAt: time,
+			UpdatedAt: time,
+		},
+		{
+			ReviewId:  uint64(13),
+			Username:  "user123",
+			PostId:    "post1",
+			Content:   "a miña review 13",
+			Rating:    4,
+			CreatedAt: time,
+			UpdatedAt: time,
+		},
+		{
+			ReviewId:  uint64(14),
+			Username:  "user123",
+			PostId:    "post1",
+			Content:   "a miña review 14",
+			Rating:    4,
+			CreatedAt: time,
+			UpdatedAt: time,
+		},
+	}
+
+	for _, existingReview := range existingReviews {
+		integration_test_arrange.AddReviewToDatabase(t, db, existingReview)
 	}
 }

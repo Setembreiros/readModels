@@ -16,8 +16,9 @@ type ReactionController struct {
 }
 
 type ControllerService interface {
-	GetPostLikesMetadata(postId, lastUsername string, limit int) ([]*model.UserMetadata, string, error)
-	GetPostSuperlikesMetadata(postId, lastUsername string, limit int) ([]*model.UserMetadata, string, error)
+	GetLikesMetadataByPostId(postId, lastUsername string, limit int) ([]*model.UserMetadata, string, error)
+	GetSuperlikesMetadataByPostId(postId, lastUsername string, limit int) ([]*model.UserMetadata, string, error)
+	GetReviewsByPostId(postId string, lastReviewId uint64, limit int) ([]*model.Review, uint64, error)
 }
 
 type GetPostLikesMetadataResponse struct {
@@ -28,6 +29,11 @@ type GetPostLikesMetadataResponse struct {
 type GetPostSuperlikesMetadataResponse struct {
 	Users        []*model.UserMetadata `json:"postSuperlikes"`
 	LastUsername string                `json:"lastUsername"`
+}
+
+type GetReviewsResponse struct {
+	Reviews      []*model.Review `json:"reviews"`
+	LastReviewId uint64          `json:"lastReviewId"`
 }
 
 func NewReactionController(service ControllerService) *ReactionController {
@@ -54,7 +60,7 @@ func (controller *ReactionController) GetPostLikesMetadata(c *gin.Context) {
 		return
 	}
 
-	users, lastUsername, err := controller.service.GetPostLikesMetadata(postId, lastUsername, limit)
+	users, lastUsername, err := controller.service.GetLikesMetadataByPostId(postId, lastUsername, limit)
 	if err != nil {
 		api.SendInternalServerError(c, err.Error())
 		return
@@ -79,7 +85,7 @@ func (controller *ReactionController) GetPostSuperlikesMetadata(c *gin.Context) 
 		return
 	}
 
-	users, lastUsername, err := controller.service.GetPostSuperlikesMetadata(postId, lastUsername, limit)
+	users, lastUsername, err := controller.service.GetSuperlikesMetadataByPostId(postId, lastUsername, limit)
 	if err != nil {
 		api.SendInternalServerError(c, err.Error())
 		return
@@ -88,6 +94,37 @@ func (controller *ReactionController) GetPostSuperlikesMetadata(c *gin.Context) 
 	api.SendOKWithResult(c, &GetPostSuperlikesMetadataResponse{
 		Users:        users,
 		LastUsername: lastUsername,
+	})
+}
+
+func (controller *ReactionController) GetReviewsByPostId(c *gin.Context) {
+	log.Info().Msg("Handling Request GET Reviews")
+	postId := c.Param("postId")
+	if postId == "" {
+		api.SendBadRequest(c, "Missing parameter postId")
+		return
+	}
+
+	lastReviewId, err := strconv.ParseUint(c.DefaultQuery("lastReviewId", "0"), 10, 64)
+	if err != nil {
+		api.SendBadRequest(c, "Invalid pagination parameters, lastReviewId must be a positive number")
+		return
+	}
+	limit, err := strconv.Atoi(c.DefaultQuery("limit", "12"))
+	if err != nil || limit <= 0 {
+		api.SendBadRequest(c, "Invalid pagination parameters, limit must be greater than 0")
+		return
+	}
+
+	reviews, lastReviewId, err := controller.service.GetReviewsByPostId(postId, lastReviewId, limit)
+	if err != nil {
+		api.SendInternalServerError(c, err.Error())
+		return
+	}
+
+	api.SendOKWithResult(c, &GetReviewsResponse{
+		Reviews:      reviews,
+		LastReviewId: lastReviewId,
 	})
 }
 

@@ -64,6 +64,38 @@ func AddCommentToDatabase(t *testing.T, db *database.Database, data *model.Comme
 	assert.Equal(t, existingPost.Comments, 1)
 }
 
+func AddReviewToDatabase(t *testing.T, db *database.Database, data *model.Review) {
+	err := db.Client.InsertData("readmodels.reviews", data)
+	assert.Nil(t, err)
+	reviewKey := &database.ReviewKey{
+		ReviewId: data.ReviewId,
+	}
+	var review model.Review
+	err = db.Client.GetData("readmodels.reviews", reviewKey, &review)
+	assert.Nil(t, err)
+	assert.Equal(t, review.ReviewId, data.ReviewId)
+	assert.Equal(t, review.Username, data.Username)
+	assert.Equal(t, review.PostId, data.PostId)
+	assert.Equal(t, review.Content, data.Content)
+
+	post := &database.PostMetadata{
+		PostId:   data.PostId,
+		Username: data.Username,
+		Type:     "TEXT",
+		Reviews:  1,
+	}
+	err = db.Client.InsertData("PostMetadata", post)
+	assert.Nil(t, err)
+	var existingPost database.PostMetadata
+	postKey := &database.PostMetadataKey{
+		PostId: post.PostId,
+	}
+	err = db.Client.GetData("PostMetadata", postKey, &existingPost)
+	assert.Nil(t, err)
+	assert.Equal(t, existingPost.PostId, post.PostId)
+	assert.Equal(t, existingPost.Reviews, 1)
+}
+
 func AddPostToDatabase(t *testing.T, db *database.Database, data *database.PostMetadata) {
 	err := db.Client.InsertData("PostMetadata", data)
 	assert.Nil(t, err)

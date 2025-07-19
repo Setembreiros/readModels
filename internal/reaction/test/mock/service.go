@@ -62,6 +62,20 @@ func (mr *MockRepositoryMockRecorder) CreatePostSuperlike(data interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreatePostSuperlike", reflect.TypeOf((*MockRepository)(nil).CreatePostSuperlike), data)
 }
 
+// CreateReview mocks base method.
+func (m *MockRepository) CreateReview(data *model.Review) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateReview", data)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateReview indicates an expected call of CreateReview.
+func (mr *MockRepositoryMockRecorder) CreateReview(data interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateReview", reflect.TypeOf((*MockRepository)(nil).CreateReview), data)
+}
+
 // DeletePostLike mocks base method.
 func (m *MockRepository) DeletePostLike(data *model.PostLike) error {
 	m.ctrl.T.Helper()
@@ -90,34 +104,50 @@ func (mr *MockRepositoryMockRecorder) DeletePostSuperlike(data interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeletePostSuperlike", reflect.TypeOf((*MockRepository)(nil).DeletePostSuperlike), data)
 }
 
-// GetPostLikesMetadata mocks base method.
-func (m *MockRepository) GetPostLikesMetadata(postId, lastUsername string, limit int) ([]*model.UserMetadata, string, error) {
+// GetLikesMetadataByPostId mocks base method.
+func (m *MockRepository) GetLikesMetadataByPostId(postId, lastUsername string, limit int) ([]*model.UserMetadata, string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetPostLikesMetadata", postId, lastUsername, limit)
+	ret := m.ctrl.Call(m, "GetLikesMetadataByPostId", postId, lastUsername, limit)
 	ret0, _ := ret[0].([]*model.UserMetadata)
 	ret1, _ := ret[1].(string)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
 }
 
-// GetPostLikesMetadata indicates an expected call of GetPostLikesMetadata.
-func (mr *MockRepositoryMockRecorder) GetPostLikesMetadata(postId, lastUsername, limit interface{}) *gomock.Call {
+// GetLikesMetadataByPostId indicates an expected call of GetLikesMetadataByPostId.
+func (mr *MockRepositoryMockRecorder) GetLikesMetadataByPostId(postId, lastUsername, limit interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPostLikesMetadata", reflect.TypeOf((*MockRepository)(nil).GetPostLikesMetadata), postId, lastUsername, limit)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLikesMetadataByPostId", reflect.TypeOf((*MockRepository)(nil).GetLikesMetadataByPostId), postId, lastUsername, limit)
 }
 
-// GetPostSuperlikesMetadata mocks base method.
-func (m *MockRepository) GetPostSuperlikesMetadata(postId, lastUsername string, limit int) ([]*model.UserMetadata, string, error) {
+// GetReviewsByPostId mocks base method.
+func (m *MockRepository) GetReviewsByPostId(postId string, lastReviewId uint64, limit int) ([]*model.Review, uint64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetPostSuperlikesMetadata", postId, lastUsername, limit)
+	ret := m.ctrl.Call(m, "GetReviewsByPostId", postId, lastReviewId, limit)
+	ret0, _ := ret[0].([]*model.Review)
+	ret1, _ := ret[1].(uint64)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetReviewsByPostId indicates an expected call of GetReviewsByPostId.
+func (mr *MockRepositoryMockRecorder) GetReviewsByPostId(postId, lastReviewId, limit interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetReviewsByPostId", reflect.TypeOf((*MockRepository)(nil).GetReviewsByPostId), postId, lastReviewId, limit)
+}
+
+// GetSuperlikesMetadataByPostId mocks base method.
+func (m *MockRepository) GetSuperlikesMetadataByPostId(postId, lastUsername string, limit int) ([]*model.UserMetadata, string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetSuperlikesMetadataByPostId", postId, lastUsername, limit)
 	ret0, _ := ret[0].([]*model.UserMetadata)
 	ret1, _ := ret[1].(string)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
 }
 
-// GetPostSuperlikesMetadata indicates an expected call of GetPostSuperlikesMetadata.
-func (mr *MockRepositoryMockRecorder) GetPostSuperlikesMetadata(postId, lastUsername, limit interface{}) *gomock.Call {
+// GetSuperlikesMetadataByPostId indicates an expected call of GetSuperlikesMetadataByPostId.
+func (mr *MockRepositoryMockRecorder) GetSuperlikesMetadataByPostId(postId, lastUsername, limit interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPostSuperlikesMetadata", reflect.TypeOf((*MockRepository)(nil).GetPostSuperlikesMetadata), postId, lastUsername, limit)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSuperlikesMetadataByPostId", reflect.TypeOf((*MockRepository)(nil).GetSuperlikesMetadataByPostId), postId, lastUsername, limit)
 }

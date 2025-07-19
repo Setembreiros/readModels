@@ -169,6 +169,22 @@ func (mr *MockDatabaseClientMockRecorder) GetPostsByIndexUser(username, currentU
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPostsByIndexUser", reflect.TypeOf((*MockDatabaseClient)(nil).GetPostsByIndexUser), username, currentUsername, lastPostId, lastPostCreatedAt, limit)
 }
 
+// GetReviewsByIndexPostId mocks base method.
+func (m *MockDatabaseClient) GetReviewsByIndexPostId(postID string, lastReviewId uint64, limit int) ([]*model.Review, uint64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetReviewsByIndexPostId", postID, lastReviewId, limit)
+	ret0, _ := ret[0].([]*model.Review)
+	ret1, _ := ret[1].(uint64)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetReviewsByIndexPostId indicates an expected call of GetReviewsByIndexPostId.
+func (mr *MockDatabaseClientMockRecorder) GetReviewsByIndexPostId(postID, lastReviewId, limit interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetReviewsByIndexPostId", reflect.TypeOf((*MockDatabaseClient)(nil).GetReviewsByIndexPostId), postID, lastReviewId, limit)
+}
+
 // IncrementCounter mocks base method.
 func (m *MockDatabaseClient) IncrementCounter(tableName string, key any, counterFieldName string, incrementValue int) error {
 	m.ctrl.T.Helper()

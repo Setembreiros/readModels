@@ -11,8 +11,10 @@ import (
 type Repository interface {
 	CreatePostLike(data *model.PostLike) error
 	CreatePostSuperlike(data *model.PostSuperlike) error
-	GetPostLikesMetadata(postId, lastUsername string, limit int) ([]*model.UserMetadata, string, error)
-	GetPostSuperlikesMetadata(postId, lastUsername string, limit int) ([]*model.UserMetadata, string, error)
+	CreateReview(data *model.Review) error
+	GetLikesMetadataByPostId(postId, lastUsername string, limit int) ([]*model.UserMetadata, string, error)
+	GetSuperlikesMetadataByPostId(postId, lastUsername string, limit int) ([]*model.UserMetadata, string, error)
+	GetReviewsByPostId(postId string, lastReviewId uint64, limit int) ([]*model.Review, uint64, error)
 	DeletePostLike(data *model.PostLike) error
 	DeletePostSuperlike(data *model.PostSuperlike) error
 }
@@ -47,8 +49,18 @@ func (s *ReactionService) CreatePostSuperlike(data *model.PostSuperlike) {
 	log.Info().Msgf("PostSuperlike was created, username: %s -> postId: %s", data.User.Username, data.PostId)
 }
 
-func (s *ReactionService) GetPostLikesMetadata(postId, lastUsername string, limit int) ([]*model.UserMetadata, string, error) {
-	users, lastUsername, err := s.repository.GetPostLikesMetadata(postId, lastUsername, limit)
+func (s *ReactionService) CreateReview(data *model.Review) {
+	err := s.repository.CreateReview(data)
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Error creating review with id %d in post %s", data.ReviewId, data.PostId)
+		return
+	}
+
+	log.Info().Msgf("Review with id %d in post %s was created", data.ReviewId, data.PostId)
+}
+
+func (s *ReactionService) GetLikesMetadataByPostId(postId, lastUsername string, limit int) ([]*model.UserMetadata, string, error) {
+	users, lastUsername, err := s.repository.GetLikesMetadataByPostId(postId, lastUsername, limit)
 	if err != nil {
 		log.Error().Stack().Err(err).Msgf("Error getting post %s's likes", postId)
 		return users, lastUsername, err
@@ -57,14 +69,24 @@ func (s *ReactionService) GetPostLikesMetadata(postId, lastUsername string, limi
 	return users, lastUsername, nil
 }
 
-func (s *ReactionService) GetPostSuperlikesMetadata(postId, lastUsername string, limit int) ([]*model.UserMetadata, string, error) {
-	users, lastUsername, err := s.repository.GetPostSuperlikesMetadata(postId, lastUsername, limit)
+func (s *ReactionService) GetSuperlikesMetadataByPostId(postId, lastUsername string, limit int) ([]*model.UserMetadata, string, error) {
+	users, lastUsername, err := s.repository.GetSuperlikesMetadataByPostId(postId, lastUsername, limit)
 	if err != nil {
 		log.Error().Stack().Err(err).Msgf("Error getting post %s's superlikes", postId)
 		return users, lastUsername, err
 	}
 
 	return users, lastUsername, nil
+}
+
+func (s *ReactionService) GetReviewsByPostId(postId string, lastReviewId uint64, limit int) ([]*model.Review, uint64, error) {
+	reviews, lastReviewId, err := s.repository.GetReviewsByPostId(postId, lastReviewId, limit)
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Error getting  %s's reviews", postId)
+		return reviews, lastReviewId, err
+	}
+
+	return reviews, lastReviewId, nil
 }
 
 func (s *ReactionService) DeletePostLike(data *model.PostLike) {

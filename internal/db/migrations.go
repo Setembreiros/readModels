@@ -91,6 +91,34 @@ func (db *Database) ApplyMigrations(ctx context.Context) error {
 		}
 	}
 
+	if !db.Client.TableExists("readmodels.reviews") {
+		keys := []TableAttributes{
+			{
+				Name:          "ReviewId",
+				AttributeType: "number",
+			},
+		}
+		err := db.Client.CreateTable("readmodels.reviews", &keys, ctx)
+		if err != nil {
+			return err
+		}
+
+		indexes := []TableAttributes{
+			{
+				Name:          "PostId",
+				AttributeType: "string",
+			},
+			{
+				Name:          "ReviewId",
+				AttributeType: "number",
+			},
+		}
+		err = db.Client.CreateIndexesOnTable("readmodels.reviews", "PostIdIndex", &indexes, ctx)
+		if err != nil {
+			return err
+		}
+	}
+
 	if !db.Client.TableExists("readmodels.postLikes") {
 		keys := []TableAttributes{
 			{

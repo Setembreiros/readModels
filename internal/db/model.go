@@ -19,6 +19,7 @@ type PostMetadata struct {
 	Title                     string    `json:"title"`
 	Description               string    `json:"description"`
 	Comments                  int       `json:"comments"`
+	Reviews                   int       `json:"reviews"`
 	Likes                     int       `json:"likes"`
 	IsLikedByCurrentUser      bool      `json:"isLikedByCurrentUser"`
 	Superlikes                int       `json:"superlikes"`
@@ -29,6 +30,9 @@ type PostMetadata struct {
 
 type CommentKey struct {
 	CommentId uint64
+}
+type ReviewKey struct {
+	ReviewId uint64
 }
 
 type PostLikeKey struct {

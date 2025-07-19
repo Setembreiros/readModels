@@ -7,6 +7,7 @@ import (
 	"readmodels/internal/reaction"
 	mock_reaction "readmodels/internal/reaction/test/mock"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -80,6 +81,42 @@ func TestErrorOnCreatePostSuperlikeWithService(t *testing.T) {
 	assert.Contains(t, loggerOutput.String(), "Error creating postSuperlike, username: user123 -> postId: post123")
 }
 
+func TestCreateNewReviewWithService(t *testing.T) {
+	setUpService(t)
+	timeNow := time.Now().UTC()
+	data := &model.Review{
+		ReviewId:  uint64(123456),
+		Username:  "user123",
+		PostId:    "post123",
+		Content:   "Exemplo de content",
+		Rating:    3,
+		CreatedAt: timeNow,
+	}
+	repositoryService.EXPECT().CreateReview(data)
+
+	reactionService.CreateReview(data)
+
+	assert.Contains(t, loggerOutput.String(), "Review with id 123456 in post post123 was created")
+}
+
+func TestErrorOnCreateNewReviewWithService(t *testing.T) {
+	setUpService(t)
+	timeNow := time.Now().UTC()
+	data := &model.Review{
+		ReviewId:  uint64(123456),
+		Username:  "user123",
+		PostId:    "post123",
+		Content:   "Exemplo de content",
+		Rating:    3,
+		CreatedAt: timeNow,
+	}
+	repositoryService.EXPECT().CreateReview(data).Return(errors.New("some error"))
+
+	reactionService.CreateReview(data)
+
+	assert.Contains(t, loggerOutput.String(), "Error creating review with id 123456")
+}
+
 func TestGetPostLikesMetadataWithService(t *testing.T) {
 	setUpService(t)
 	postId := "post1"
@@ -98,9 +135,9 @@ func TestGetPostLikesMetadataWithService(t *testing.T) {
 		},
 	}
 	expectedLastUsername := "username3"
-	repositoryService.EXPECT().GetPostLikesMetadata(postId, "", 12).Return(expectedPostLikes, expectedLastUsername, nil)
+	repositoryService.EXPECT().GetLikesMetadataByPostId(postId, "", 12).Return(expectedPostLikes, expectedLastUsername, nil)
 
-	postLikes, lastUsername, err := reactionService.GetPostLikesMetadata(postId, "", 12)
+	postLikes, lastUsername, err := reactionService.GetLikesMetadataByPostId(postId, "", 12)
 	assert.Nil(t, err)
 	assert.ElementsMatch(t, expectedPostLikes, postLikes)
 	assert.Equal(t, expectedLastUsername, lastUsername)
@@ -111,9 +148,9 @@ func TestErrorOnGetPostLikesMetadataWithService(t *testing.T) {
 	postId := "post1"
 	expectedPostLikes := []*model.UserMetadata{}
 	expectedLastUsername := ""
-	repositoryService.EXPECT().GetPostLikesMetadata(postId, "", 12).Return(expectedPostLikes, expectedLastUsername, errors.New("some error"))
+	repositoryService.EXPECT().GetLikesMetadataByPostId(postId, "", 12).Return(expectedPostLikes, expectedLastUsername, errors.New("some error"))
 
-	postLikes, lastUsername, err := reactionService.GetPostLikesMetadata(postId, "", 12)
+	postLikes, lastUsername, err := reactionService.GetLikesMetadataByPostId(postId, "", 12)
 
 	assert.Contains(t, loggerOutput.String(), fmt.Sprintf(`Error getting post %s's likes`, postId))
 	assert.NotNil(t, err)
@@ -139,9 +176,9 @@ func TestGetPostSuperlikesMetadataWithService(t *testing.T) {
 		},
 	}
 	expectedLastUsername := "username3"
-	repositoryService.EXPECT().GetPostSuperlikesMetadata(postId, "", 12).Return(expectedPostSuperlikes, expectedLastUsername, nil)
+	repositoryService.EXPECT().GetSuperlikesMetadataByPostId(postId, "", 12).Return(expectedPostSuperlikes, expectedLastUsername, nil)
 
-	postSuperlikes, lastUsername, err := reactionService.GetPostSuperlikesMetadata(postId, "", 12)
+	postSuperlikes, lastUsername, err := reactionService.GetSuperlikesMetadataByPostId(postId, "", 12)
 	assert.Nil(t, err)
 	assert.ElementsMatch(t, expectedPostSuperlikes, postSuperlikes)
 	assert.Equal(t, expectedLastUsername, lastUsername)
@@ -152,14 +189,67 @@ func TestErrorOnGetPostSuperlikesMetadataWithService(t *testing.T) {
 	postId := "post1"
 	expectedPostSuperlikes := []*model.UserMetadata{}
 	expectedLastUsername := ""
-	repositoryService.EXPECT().GetPostSuperlikesMetadata(postId, "", 12).Return(expectedPostSuperlikes, expectedLastUsername, errors.New("some error"))
+	repositoryService.EXPECT().GetSuperlikesMetadataByPostId(postId, "", 12).Return(expectedPostSuperlikes, expectedLastUsername, errors.New("some error"))
 
-	postSuperlikes, lastUsername, err := reactionService.GetPostSuperlikesMetadata(postId, "", 12)
+	postSuperlikes, lastUsername, err := reactionService.GetSuperlikesMetadataByPostId(postId, "", 12)
 
 	assert.Contains(t, loggerOutput.String(), fmt.Sprintf(`Error getting post %s's superlikes`, postId))
 	assert.NotNil(t, err)
 	assert.ElementsMatch(t, expectedPostSuperlikes, postSuperlikes)
 	assert.Equal(t, expectedLastUsername, lastUsername)
+}
+
+func TestGetReviewsByPostIdWithService(t *testing.T) {
+	setUpService(t)
+	postId := "post1"
+	expectedReviews := []*model.Review{
+		{
+			ReviewId:  uint64(5),
+			Username:  "username1",
+			PostId:    "post1",
+			Content:   "a miña review 1",
+			Rating:    4,
+			CreatedAt: time.Now(),
+		},
+		{
+			ReviewId:  uint64(6),
+			Username:  "username2",
+			PostId:    "post1",
+			Content:   "a miña review 2",
+			Rating:    4,
+			CreatedAt: time.Now(),
+		},
+		{
+			ReviewId:  uint64(7),
+			Username:  "username1",
+			PostId:    "post1",
+			Content:   "a miña review 3",
+			Rating:    4,
+			CreatedAt: time.Now(),
+		},
+	}
+	expectedLastReviewId := uint64(7)
+	repositoryService.EXPECT().GetReviewsByPostId(postId, uint64(0), 12).Return(expectedReviews, expectedLastReviewId, nil)
+
+	commets, lastReviewId, err := reactionService.GetReviewsByPostId(postId, uint64(0), 12)
+	assert.Nil(t, err)
+	assert.ElementsMatch(t, expectedReviews, commets)
+	assert.Equal(t, expectedLastReviewId, lastReviewId)
+}
+
+func TestErrorOnGetReviewsByPostIdWithService(t *testing.T) {
+	setUpService(t)
+	postId := "post1"
+	expectedReviews := []*model.Review{}
+	expectedLastReviewId := uint64(0)
+	repositoryService.EXPECT().GetReviewsByPostId(postId, uint64(0), 12).Return(expectedReviews, uint64(0), errors.New("some error"))
+
+	commets, lastReviewId, err := reactionService.GetReviewsByPostId(postId, uint64(0), 12)
+
+	assert.Contains(t, loggerOutput.String(), fmt.Sprintf("Error getting  %s's reviews", postId))
+	assert.NotNil(t, err)
+	assert.ElementsMatch(t, expectedReviews, commets)
+	assert.Equal(t, expectedLastReviewId, lastReviewId)
 }
 
 func TestDeletePostLikeWithService(t *testing.T) {
