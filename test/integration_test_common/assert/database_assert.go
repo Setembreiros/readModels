@@ -52,6 +52,29 @@ func AssertPostCommentsDecreased(t *testing.T, db *database.Database, postId str
 	assert.Equal(t, 0, post.Comments)
 }
 
+func AssertReviewExists(t *testing.T, db *database.Database, expectedReviewId uint64, expectedReview *model.Review) {
+	reviewKey := &database.ReviewKey{
+		ReviewId: expectedReviewId,
+	}
+	var review model.Review
+	err := db.Client.GetData("readmodels.reviews", reviewKey, &review)
+	assert.Nil(t, err)
+	assert.Equal(t, expectedReviewId, review.ReviewId)
+	assert.Equal(t, expectedReview.PostId, review.PostId)
+	assert.Equal(t, expectedReview.Username, review.Username)
+	assert.Equal(t, expectedReview.Content, review.Content)
+}
+
+func AssertPostReviewsIncreased(t *testing.T, db *database.Database, postId string) {
+	postKey := &database.PostMetadataKey{
+		PostId: postId,
+	}
+	var post database.PostMetadata
+	err := db.Client.GetData("PostMetadata", postKey, &post)
+	assert.Nil(t, err)
+	assert.Equal(t, 1, post.Reviews)
+}
+
 func AssertPostLikeExists(t *testing.T, db *database.Database, expectedPostLike *model.PostLike) {
 	postLikeKey := &database.PostLikeKey{
 		PostId:   expectedPostLike.PostId,

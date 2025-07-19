@@ -11,6 +11,7 @@ import (
 type Repository interface {
 	CreatePostLike(data *model.PostLike) error
 	CreatePostSuperlike(data *model.PostSuperlike) error
+	CreateReview(data *model.Review) error
 	GetPostLikesMetadata(postId, lastUsername string, limit int) ([]*model.UserMetadata, string, error)
 	GetPostSuperlikesMetadata(postId, lastUsername string, limit int) ([]*model.UserMetadata, string, error)
 	DeletePostLike(data *model.PostLike) error
@@ -45,6 +46,16 @@ func (s *ReactionService) CreatePostSuperlike(data *model.PostSuperlike) {
 	}
 
 	log.Info().Msgf("PostSuperlike was created, username: %s -> postId: %s", data.User.Username, data.PostId)
+}
+
+func (s *ReactionService) CreateReview(data *model.Review) {
+	err := s.repository.CreateReview(data)
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Error creating review with id %d in post %s", data.ReviewId, data.PostId)
+		return
+	}
+
+	log.Info().Msgf("Review with id %d in post %s was created", data.ReviewId, data.PostId)
 }
 
 func (s *ReactionService) GetPostLikesMetadata(postId, lastUsername string, limit int) ([]*model.UserMetadata, string, error) {

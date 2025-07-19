@@ -7,6 +7,7 @@ import (
 	"readmodels/internal/reaction"
 	mock_reaction "readmodels/internal/reaction/test/mock"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -78,6 +79,42 @@ func TestErrorOnCreatePostSuperlikeWithService(t *testing.T) {
 	reactionService.CreatePostSuperlike(data)
 
 	assert.Contains(t, loggerOutput.String(), "Error creating postSuperlike, username: user123 -> postId: post123")
+}
+
+func TestCreateNewReviewWithService(t *testing.T) {
+	setUpService(t)
+	timeNow := time.Now().UTC()
+	data := &model.Review{
+		ReviewId:  uint64(123456),
+		Username:  "user123",
+		PostId:    "post123",
+		Content:   "Exemplo de content",
+		Rating:    3,
+		CreatedAt: timeNow,
+	}
+	repositoryService.EXPECT().CreateReview(data)
+
+	reactionService.CreateReview(data)
+
+	assert.Contains(t, loggerOutput.String(), "Review with id 123456 in post post123 was created")
+}
+
+func TestErrorOnCreateNewReviewWithService(t *testing.T) {
+	setUpService(t)
+	timeNow := time.Now().UTC()
+	data := &model.Review{
+		ReviewId:  uint64(123456),
+		Username:  "user123",
+		PostId:    "post123",
+		Content:   "Exemplo de content",
+		Rating:    3,
+		CreatedAt: timeNow,
+	}
+	repositoryService.EXPECT().CreateReview(data).Return(errors.New("some error"))
+
+	reactionService.CreateReview(data)
+
+	assert.Contains(t, loggerOutput.String(), "Error creating review with id 123456")
 }
 
 func TestGetPostLikesMetadataWithService(t *testing.T) {

@@ -13,6 +13,7 @@ import (
 	"readmodels/test/test_common"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,6 +24,7 @@ var userLikedPostEventHandler *reaction_handler.UserLikedPostEventHandler
 var userSuperlikedPostEventHandler *reaction_handler.UserSuperlikedPostEventHandler
 var userUnlikedPostEventHandler *reaction_handler.UserUnlikedPostEventHandler
 var userUnsuperlikedPostEventHandler *reaction_handler.UserUnsuperlikedPostEventHandler
+var reviewWasCreatedEventHandler *reaction_handler.ReviewWasCreatedEventHandler
 var apiResponse *httptest.ResponseRecorder
 var ginContext *gin.Context
 
@@ -39,6 +41,7 @@ func setUp(t *testing.T) {
 	userSuperlikedPostEventHandler = reaction_handler.NewUserSuperlikedPostEventHandler(service)
 	userUnlikedPostEventHandler = reaction_handler.NewUserUnlikedPostEventHandler(service)
 	userUnsuperlikedPostEventHandler = reaction_handler.NewUserUnsuperlikedPostEventHandler(service)
+	reviewWasCreatedEventHandler = reaction_handler.NewReviewWasCreatedEventHandler(service)
 }
 
 func tearDown() {
@@ -111,6 +114,41 @@ func TestCreatePostSuperlike_WhenDatabaseReturnsSuccess(t *testing.T) {
 
 	integration_test_assert.AssertPostSuperlikeExists(t, db, expectedSuperlike)
 	integration_test_assert.AssertPostSuperlikesIncreased(t, db, existingPost.PostId)
+}
+
+func TestCreateNewReview_WhenDatabaseReturnsSuccess(t *testing.T) {
+	setUp(t)
+	defer tearDown()
+	existingPost := &database.PostMetadata{
+		PostId:   "post123",
+		Username: "username1",
+		Type:     "TEXT",
+	}
+	integration_test_arrange.AddPostToDatabase(t, db, existingPost)
+	timeNow := time.Now().UTC().Format(model.TimeLayout)
+	data := &reaction_handler.ReviewWasCreatedEvent{
+		ReviewId:  uint64(123456),
+		Username:  "user123",
+		PostId:    "post123",
+		Content:   "Exemplo de content",
+		Rating:    3,
+		CreatedAt: timeNow,
+	}
+	event, _ := test_common.SerializeData(data)
+	expectedTime, _ := time.Parse(model.TimeLayout, data.CreatedAt)
+	expectedReview := &model.Review{
+		ReviewId:  data.ReviewId,
+		Username:  data.Username,
+		PostId:    data.PostId,
+		Content:   data.Content,
+		Rating:    data.Rating,
+		CreatedAt: expectedTime,
+	}
+
+	reviewWasCreatedEventHandler.Handle(event)
+
+	integration_test_assert.AssertReviewExists(t, db, data.ReviewId, expectedReview)
+	integration_test_assert.AssertPostReviewsIncreased(t, db, existingPost.PostId)
 }
 
 func TestGetPostLikesMetadata_WhenDatabaseReturnsSuccess(t *testing.T) {

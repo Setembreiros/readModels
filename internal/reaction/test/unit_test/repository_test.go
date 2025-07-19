@@ -5,6 +5,7 @@ import (
 	"readmodels/internal/model"
 	"readmodels/internal/reaction"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -70,6 +71,27 @@ func TestCreatePostSuperlikeInRepository(t *testing.T) {
 	client.EXPECT().InsertDataAndIncreaseCounter("readmodels.postSuperlikes", expectedData, "PostMetadata", expectedPostKey, "Superlikes").Return(nil)
 
 	err := reactionRepository.CreatePostSuperlike(data)
+
+	assert.Nil(t, err)
+}
+
+func TestCreateReviewInRepository(t *testing.T) {
+	setUpRepository(t)
+	timeNow := time.Now().UTC()
+	data := &model.Review{
+		ReviewId:  uint64(123456),
+		Username:  "user123",
+		PostId:    "post123",
+		Content:   "Exemplo de content",
+		Rating:    3,
+		CreatedAt: timeNow,
+	}
+	expectedPostKey := &database.PostMetadataKey{
+		PostId: data.PostId,
+	}
+	client.EXPECT().InsertDataAndIncreaseCounter("readmodels.reviews", data, "PostMetadata", expectedPostKey, "Reviews").Return(nil)
+
+	err := reactionRepository.CreateReview(data)
 
 	assert.Nil(t, err)
 }

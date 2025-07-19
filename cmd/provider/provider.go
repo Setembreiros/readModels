@@ -107,6 +107,10 @@ func (p *Provider) ProvideSubscriptions(database *database.Database) *[]bus.Even
 			EventType: "UserUnsuperlikedPostEvent",
 			Handler:   reaction_handler.NewUserUnsuperlikedPostEventHandler(reaction.NewReactionService(reaction.NewReactionRepository(database))),
 		},
+		{
+			EventType: "ReviewWasCreatedEvent",
+			Handler:   reaction_handler.NewReviewWasCreatedEventHandler(reaction.NewReactionService(reaction.NewReactionRepository(database))),
+		},
 	}
 }
 

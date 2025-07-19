@@ -62,6 +62,20 @@ func (mr *MockRepositoryMockRecorder) CreatePostSuperlike(data interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreatePostSuperlike", reflect.TypeOf((*MockRepository)(nil).CreatePostSuperlike), data)
 }
 
+// CreateReview mocks base method.
+func (m *MockRepository) CreateReview(data *model.Review) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateReview", data)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateReview indicates an expected call of CreateReview.
+func (mr *MockRepositoryMockRecorder) CreateReview(data interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateReview", reflect.TypeOf((*MockRepository)(nil).CreateReview), data)
+}
+
 // DeletePostLike mocks base method.
 func (m *MockRepository) DeletePostLike(data *model.PostLike) error {
 	m.ctrl.T.Helper()
