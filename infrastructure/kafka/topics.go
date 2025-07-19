@@ -15,5 +15,6 @@ func getTopics() []string {
 		"UserUnlikedPostEvent",
 		"UserSuperlikedPostEvent",
 		"UserUnsuperlikedPostEvent",
+		"ReviewWasCreatedEvent",
 	}
 }

@@ -1013,6 +1013,60 @@ func (dc *DynamoDBClient) GetPostSuperlikesByIndexPostId(postID string, lastUser
 	return results, nextLastUsername, nil
 }
 
+func (dc *DynamoDBClient) GetReviewsByIndexPostId(postID string, lastReviewId uint64, limit int) ([]*model.Review, uint64, error) {
+	input := &dynamodb.QueryInput{
+		TableName:              aws.String("readmodels.reviews"),
+		IndexName:              aws.String("PostIdIndex"),
+		KeyConditionExpression: aws.String("#postId = :postId"),
+		ExpressionAttributeNames: map[string]string{
+			"#postId": "PostId",
+		},
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":postId": &types.AttributeValueMemberS{Value: postID},
+		},
+		ScanIndexForward: aws.Bool(false), // Orde descendente (do máis novo ao máis antigo)
+		Limit:            aws.Int32(int32(limit)),
+	}
+
+	if lastReviewId != 0 {
+		input.ExclusiveStartKey = map[string]types.AttributeValue{
+			"PostId":   &types.AttributeValueMemberS{Value: postID},
+			"ReviewId": &types.AttributeValueMemberN{Value: strconv.FormatUint(lastReviewId, 10)},
+		}
+	}
+
+	response, err := dc.client.Query(context.TODO(), input)
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Couldn't get reviews for post %s", postID)
+		return nil, 0, err
+	}
+
+	var results []*model.Review
+	for _, item := range response.Items {
+		var result model.Review
+		err = attributevalue.UnmarshalMap(item, &result)
+		if err != nil {
+			log.Error().Stack().Err(err).Msg("Couldn't unmarshal review response")
+			return nil, 0, err
+		}
+		results = append(results, &result)
+	}
+
+	var nextLastReviewId uint64 = 0
+	if response.LastEvaluatedKey != nil {
+		if val, ok := response.LastEvaluatedKey["ReviewId"]; ok {
+			if reviewId, ok := val.(*types.AttributeValueMemberN); ok {
+				parsedId, parseErr := strconv.ParseUint(reviewId.Value, 10, 64)
+				if parseErr == nil {
+					nextLastReviewId = parsedId
+				}
+			}
+		}
+	}
+
+	return results, nextLastReviewId, nil
+}
+
 func mapTableKeys(keys *[]database.TableAttributes) (*[]types.KeySchemaElement, *[]types.AttributeDefinition, error) {
 	var keySchemas []types.KeySchemaElement
 	var attributeDefinitions []types.AttributeDefinition
