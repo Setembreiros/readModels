@@ -24,6 +24,7 @@ type PostMetadata struct {
 	Type                      string    `json:"type"`
 	Title                     string    `json:"title"`
 	Description               string    `json:"description"`
+	Reviews                   int       `json:"reviews"`
 	Comments                  int       `json:"comments"`
 	Likes                     int       `json:"likes"`
 	IsLikedByCurrentUser      bool      `json:"isLikedByCurrentUser"`

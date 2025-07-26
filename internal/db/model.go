@@ -18,8 +18,8 @@ type PostMetadata struct {
 	Type                      string    `json:"type"`
 	Title                     string    `json:"title"`
 	Description               string    `json:"description"`
-	Comments                  int       `json:"comments"`
 	Reviews                   int       `json:"reviews"`
+	Comments                  int       `json:"comments"`
 	Likes                     int       `json:"likes"`
 	IsLikedByCurrentUser      bool      `json:"isLikedByCurrentUser"`
 	Superlikes                int       `json:"superlikes"`
