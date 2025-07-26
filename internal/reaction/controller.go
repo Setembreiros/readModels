@@ -45,6 +45,7 @@ func NewReactionController(service ControllerService) *ReactionController {
 func (controller *ReactionController) Routes(routerGroup *gin.RouterGroup) {
 	routerGroup.GET("/postLikes/:postId", controller.GetPostLikesMetadata)
 	routerGroup.GET("/postSuperlikes/:postId", controller.GetPostSuperlikesMetadata)
+	routerGroup.GET("/reviews/:postId", controller.GetReviewsByPostId)
 }
 
 func (controller *ReactionController) GetPostLikesMetadata(c *gin.Context) {
