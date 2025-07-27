@@ -21,6 +21,7 @@ type DatabaseClient interface {
 	Truncate()
 	TableExists(tableName string) bool
 	CreateTable(tableName string, keys *[]TableAttributes, ctx context.Context) error
+	IndexExists(tableName string, indexName string) bool
 	CreateIndexesOnTable(tableName, indexName string, inndexes *[]TableAttributes, ctx context.Context) error
 	InsertData(tableName string, attributes any) error
 	InsertDataAndIncreaseCounter(tableName string, attributes any, counterTableName string, counterKey any, counterFieldName string) error

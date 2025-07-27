@@ -277,6 +277,51 @@ func (dc *DynamoDBClient) CreateTable(tableName string, keys *[]database.TableAt
 	return nil
 }
 
+func (dc *DynamoDBClient) IndexExists(tableName string, indexName string) bool {
+	exists := false
+
+	// Obter información da táboa
+	result, err := dc.client.DescribeTable(
+		context.TODO(), &dynamodb.DescribeTableInput{TableName: aws.String(tableName)},
+	)
+	if err != nil {
+		var notFoundEx *types.ResourceNotFoundException
+		if errors.As(err, &notFoundEx) {
+			log.Error().Msgf("Table %s not found when checking for index %s", tableName, indexName)
+		} else {
+			log.Error().Stack().Err(err).Msgf("Couldn't describe table %s when checking for index %s", tableName, indexName)
+		}
+		return false
+	}
+
+	// Comprobar se o índice existe na lista de Global Secondary Indexes
+	if result.Table.GlobalSecondaryIndexes != nil {
+		for _, gsi := range result.Table.GlobalSecondaryIndexes {
+			if gsi.IndexName != nil && *gsi.IndexName == indexName {
+				// Verificar que o índice estea activo
+				if gsi.IndexStatus == types.IndexStatusActive {
+					exists = true
+					break
+				} else {
+					log.Warn().Msgf("Index %s exists on table %s but is not active (status: %s)", indexName, tableName, string(gsi.IndexStatus))
+				}
+			}
+		}
+	}
+
+	// Se non se atopou nos GSI, comprobar nos Local Secondary Indexes
+	if !exists && result.Table.LocalSecondaryIndexes != nil {
+		for _, lsi := range result.Table.LocalSecondaryIndexes {
+			if lsi.IndexName != nil && *lsi.IndexName == indexName {
+				exists = true
+				break
+			}
+		}
+	}
+
+	return exists
+}
+
 func (dc *DynamoDBClient) CreateIndexesOnTable(tableName, indexName string, indexes *[]database.TableAttributes, ctx context.Context) error {
 	keySchemas, attributeDefinitions, err := mapTableKeys(indexes)
 	if err != nil {
@@ -827,7 +872,8 @@ func (dc *DynamoDBClient) GetPostsByIndexUser(username string, currentUsername s
 // CheckUserPostReviewExist verifica se un usuario específico fixo unha review do post
 func (dc DynamoDBClient) CheckUserPostReviewExist(postId string, username string) (bool, error) {
 	input := &dynamodb.QueryInput{
-		TableName:              aws.String("readmodels.postReviews"),
+		TableName:              aws.String("readmodels.reviews"),
+		IndexName:              aws.String("UsernamePostIndex"),
 		KeyConditionExpression: aws.String("PostId = :postId AND Username = :username"),
 		ExpressionAttributeValues: map[string]types.AttributeValue{
 			":postId":   &types.AttributeValueMemberS{Value: postId},

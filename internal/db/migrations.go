@@ -153,5 +153,29 @@ func (db *Database) ApplyMigrations(ctx context.Context) error {
 		}
 	}
 
+	if db.Client.TableExists("readmodels.reviews") {
+		// Comprobar se o índice xa existe antes de crealo
+		if !db.Client.IndexExists("readmodels.reviews", "UsernamePostIndex") {
+			usernamePostIndexes := []TableAttributes{
+				{
+					Name:          "Username",
+					AttributeType: "string",
+				},
+				{
+					Name:          "PostId",
+					AttributeType: "string",
+				},
+			}
+			err := db.Client.CreateIndexesOnTable("readmodels.reviews", "UsernamePostIndex", &usernamePostIndexes, ctx)
+			if err != nil {
+				log.Error().Err(err).Msg("Error creating UsernamePostIndex on readmodels.reviews")
+				return err
+			}
+			log.Info().Msg("Created UsernamePostIndex on readmodels.reviews table")
+		} else {
+			log.Info().Msg("UsernamePostIndex already exists on readmodels.reviews table")
+		}
+	}
+
 	return nil
 }
