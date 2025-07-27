@@ -783,6 +783,13 @@ func (dc *DynamoDBClient) GetPostsByIndexUser(username string, currentUsername s
 			return nil, "", "", err
 		}
 
+		isReviewed, err := dc.CheckUserPostReviewExist(result.PostId, currentUsername)
+		if err != nil {
+			log.Error().Stack().Err(err).Msgf("Error checking review status for post %s", result.PostId)
+			isReviewed = false
+		}
+		result.IsReviewedByCurrentUser = isReviewed
+
 		isLiked, err := dc.checkUserPostLikeExist(result.PostId, currentUsername)
 		if err != nil {
 			log.Error().Stack().Err(err).Msgf("Error checking like status for post %s", result.PostId)
@@ -815,6 +822,27 @@ func (dc *DynamoDBClient) GetPostsByIndexUser(username string, currentUsername s
 	}
 
 	return results, lastPostId, lastPostCreatedAt, nil
+}
+
+// CheckUserPostReviewExist verifica se un usuario específico fixo unha review do post
+func (dc DynamoDBClient) CheckUserPostReviewExist(postId string, username string) (bool, error) {
+	input := &dynamodb.QueryInput{
+		TableName:              aws.String("readmodels.postReviews"),
+		KeyConditionExpression: aws.String("PostId = :postId AND Username = :username"),
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":postId":   &types.AttributeValueMemberS{Value: postId},
+			":username": &types.AttributeValueMemberS{Value: username},
+		},
+		Limit: aws.Int32(1),
+	}
+
+	response, err := dc.client.Query(context.TODO(), input)
+	if err != nil {
+		log.Error().Stack().Err(err).Msgf("Error checking if user %s reviewed post %s", username, postId)
+		return false, err
+	}
+
+	return len(response.Items) > 0, nil
 }
 
 // CheckUserPostLikeExist verifica se un usuario específico deu like a un post
